@@ -1,5 +1,4 @@
-jointModelBayes <-
-function (lmeObject, survObject, timeVar,
+jointModelBayes <- function (lmeObject, survObject, timeVar,
                              param = c("td-value", "td-extra", "td-both", "shared-betasRE", "shared-RE"),
                              extraForm = NULL, baseHaz = c("P-splines", "regression-splines"), 
                              transFun = NULL, densLong = NULL, lag = 0, df.RE = NULL,

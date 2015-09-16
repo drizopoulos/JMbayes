@@ -1,5 +1,4 @@
-MCMCfit <-
-function (y, x, param, extraForm, baseHaz, estimateWeightFun, initials, priors, 
+MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initials, priors, 
                      scales, Funs, Covs, Data, control, df.RE) {
     # extract data longitudinal
     performHC <- control$performHC
