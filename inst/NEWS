@@ -1,0 +1,126 @@
+Changes in version: JMbayes_0.7-6
+
+  * resolve small bugs in summary.JMbayes().
+
+---------------------------------------
+
+Changes in version: JMbayes_0.7-5
+
+  * resolve imports from other packages in NAMESPACE.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.7-2
+
+  * jointModelBayes() can now accept Cox models with left-truncation.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.7-0
+
+  * New function rocJM() calculates dynamic sensitivity and specificity and the plot produce the ROC curve plot.
+  * The new function cvDCL() calculates an estimate of the dynamic cross-entropy.
+  * The new function dynInfo() calculates the dynamic Kullaback-Leibler information provided by an extra longitudinal measurement.
+  * Function jointModelBayes() can now handle survival submodels with exogenous time-varying covariates.
+  * The MCMC algorithm implements now hierarchical centering for the parameters of mixed effects model.
+  * Several improvements in the shiny web app for calculating dynamic predictions.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.6-1
+
+  * Impovements for estimating the weight function.
+  * Faster implementation of the MCMC.
+  * First internal implementation of optimal screening frequency.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.6-0
+
+  * Impovements in the shiny web interface.
+  * Added functionality for estimating the weight function of the cumulative effect parameterization.
+  * Small bug fixes.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.5-3
+
+  * Small bug fixes.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.5-2
+
+  * Updates for estimating the weight function.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.5-1
+
+  * A shiny web application has been added in the demo folder.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.5-0
+
+  * The MCMC is now implemented with efficient custom-made code and no longer relies on JAGS, WinBUGS or OpenBUGS.
+
+  * The user can specify her own density function for the longitudinal outcome (default is the normal). Among others, 
+    this allows fitting joint models with categorical or left-censored longitudinal responses.
+
+  * The baseline hazard is now only estimated with B-splines (regression or penalized).
+
+  * The user has now the option to define custom transformation functions for the longitudinal model terms that
+    enter into the linear predictor of the survival submodel.
+
+  * survfitJM.JMbayes() is faster.
+
+  * Backward-incompatible version; the aforementioned changes require refitting joint models that have been fitted
+    with previous versions.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.4-1
+
+  * new versions of functions ins() and ibs() with updated 'weight.fun' argument, and makepredictcall() methods.
+
+  * methods have been added for the fitted() and residuals() generics to calculate fitted values and residuals, 
+    respectively.
+
+  * a method has been added for the xtable() generic from package xtable for producing a LaTeX table with the
+    results of the joint model.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.4-0
+
+  * the new function bma.combine() combines predictions using Bayesian model averaging.
+
+  * logLik.JMbayes() can now calculate marginal log-likelihoods averaging over the random effects and the parameters.
+
+  * the new function marglogLik() calculates marginal likelihood contributions for individual subjects.
+
+  * the new generic function aucJM() calculates time-dependent AUCs for joint models.
+
+  * the new generic function dynCJM() calculates a dynamic discrimination index 
+    (weighted average of time-dependent AUCs) for joint models.
+
+  * the new generic function prederrJM() calculates prediction errors for joint models.
+
+  * jointModelBayes() can now fit robust joint models in which both the error terms for the longitudinal outcome
+    and the random effects are assumed to follow a Student's t distribution. This is controlled by the arguments
+    'robust' and 'df' for the error terms, and 'robust.b' and 'df.b' for the random effects.
+
+---------------------------------------
+
+Changes in version: JMbayes_0.2-0
+
+  * the new control argument 'ordSpline' sets the order of the spline for the B-spline basis (i.e.,
+    it is passed to the 'ord' argument of splineDesign()). By setting to 1 a piecewise-constant baseline
+    hazard is fitted.
+
+  * corrected some typos in .Rd files.
+   
+
+
+

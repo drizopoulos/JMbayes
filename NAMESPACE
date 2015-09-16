@@ -1,0 +1,60 @@
+# Exported functions
+export(anova.JMbayes, aucJM, bma.combine, cvDCL, dynCJM, dynInfo, dgt, marglogLik, coef.JMbayes, dbs, dns, fixef.JMbayes, jointModelBayes, 
+	ibs, ins, logLik.JMbayes, pgt, plot.JMbayes, plot.survfit.JMbayes, prederrJM, predict.JMbayes, ranef.JMbayes, rgt, rocJM, runDynPred,
+	survfitJM, qgt, xtable.JMbayes)
+
+# Imported functions
+importFrom("nlme", "fixed.effects", "fixef", "random.effects", "ranef",
+  "pdMatrix", "getVarCov")
+importFrom("survival", "survfit", "coxph", "survreg")
+importFrom("splines", "ns", "bs", "splineDesign")
+importFrom("MASS", "mvrnorm", "glmmPQL", "ginv")
+importFrom("grDevices", "dev.cur", "dev.size", "xy.coords")
+importFrom("graphics", "abline", "axis", "lines", "matlines", "matplot", 
+  "mtext", "par", "plot", "points", "polygon", "segments")
+importFrom("stats", "acf", "ar", "as.formula", "ave", "bw.SJ", "coef",
+  "cov2cor", "delete.response", "density", "dgamma", "dnorm", "drop.terms", 
+  "dt", "dunif", "fitted", "formula", "lag", "lm.fit", "logLik", "mad", 
+  "median", "model.frame", "model.frame.default", "model.matrix",
+  "model.matrix.default", "model.response", "optim", "pnorm", "pt", "qt", 
+  "quantile", "rWishart", "rchisq", "reformulate", "rexp", "rgamma", 
+  "rnorm", "rt", "runif", "sd", "terms", "var", "vcov", "makepredictcall")
+importFrom("utils", "as.relistable", "combn", "glob2rx", "head", "relist", 
+  "setTxtProgressBar", "tail", "txtProgressBar")
+
+
+# S3 methods
+S3method(anova, JMbayes)
+S3method(aucJM, JMbayes)
+S3method(aucJM, coxph)
+S3method(coef, JMbayes)
+S3method(coef, summary.JMbayes)
+S3method(confint, JMbayes)
+S3method(dynCJM, JMbayes)
+S3method(dynCJM, coxph)
+S3method(fixef, JMbayes)
+S3method(fitted, JMbayes)
+S3method(logLik, JMbayes)
+S3method(makepredictcall, dbs)
+S3method(makepredictcall, dns)
+S3method(makepredictcall, ibs)
+S3method(makepredictcall, ins)
+S3method(plot, JMbayes)
+S3method(plot, rocJM)
+S3method(plot, survfit.JMbayes)
+S3method(predict, JMbayes)
+S3method(print, aucJM)
+S3method(print, dynCJM)
+S3method(print, JMbayes)
+S3method(print, prederrJM)
+S3method(print, rocJM)
+S3method(print, summary.JMbayes)
+S3method(print, survfit.JMbayes)
+S3method(ranef, JMbayes)
+S3method(residuals, JMbayes)
+S3method(rocJM, JMbayes)
+S3method(summary, JMbayes)
+S3method(survfitJM, JMbayes)
+S3method(prederrJM, JMbayes)
+S3method(prederrJM, coxph)
+S3method(vcov, JMbayes)
