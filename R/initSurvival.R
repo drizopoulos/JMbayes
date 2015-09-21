@@ -1,5 +1,4 @@
-initSurvival <-
-function (Time, event, id, W2, W2s, P, wk, id.GK, times, b = NULL, betas = NULL, 
+initSurvival <- function (Time, event, id, W2, W2s, P, wk, id.GK, times, b = NULL, betas = NULL, 
                           indBetas = NULL, W = NULL, baseHaz = NULL, diff = NULL,
                           Data = NULL, param = NULL, long = NULL, long.extra = NULL, 
                           transFun.value = NULL, transFun.extra = NULL,
@@ -136,6 +135,14 @@ function (Time, event, id, W2, W2s, P, wk, id.GK, times, b = NULL, betas = NULL,
             V <- V[-iSRE, -iSRE, drop = FALSE]
         }
         out$cov.Bs.gammas <- V
+    }
+    if (!is.null(out$alphas) && is.na(out$alphas)) {
+        out$alphas <- rep(0, length(out$alphas))
+        out$cov.alphas <- diag(0.1, length(out$alphas))
+    }
+    if (!is.null(out$Dalphas) && is.na(out$Dalphas)) {
+        out$Dalphas <- rep(0, length(out$Dalphas))
+        out$cov.Dalphas <- diag(0.1, length(out$Dalphas))
     }
     out
 }
