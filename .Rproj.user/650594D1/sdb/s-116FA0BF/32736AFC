@@ -1,0 +1,18 @@
+{
+    "contents" : "library(\"data.table\")\n\ndForm <- list(fixed = ~ 1, indFixed = 2, \n              random = ~ 0 + I(rep(0, length(obstime))), indRandom = 1)\n\ntr.JMb.int.TREND <- jointModelBayes(tr.glmmFit.int, tr.Cox.id, timeVar=\"obstime\", \n                                    param = \"td-both\", extraForm = dForm, n.iter = 500)\n\niForm <- list(fixed = ~ 0 + obstime + I(obstime^2/2), indFixed = 1:2, \n              random = ~ 0 + obstime, indRandom = 1)\n\ntr.JMb.int.CUM <- jointModelBayes(tr.glmmFit.int, tr.Cox.id, timeVar = \"obstime\", \n                                  param = \"td-extra\", extraForm = iForm, n.iter = 3000)\n\n\nWF1 <- function (u, parms, t.max) {\n    dexp(x = u, rate = parms)\n}\n\ntr.JMb.int.WF1 <- jointModelBayes(tr.glmmFit.int, tr.Cox.id, timeVar = \"obstime\", \n                                  estimateWeightFun = TRUE, weightFun = WF1, \n                                  priorShapes = list(shape1 = dunif), \n                                  priors = list(priorshape1 = c(0, 10)), verbose2 = TRUE)\n\nWF2 <- function (u, parms, t.max) {\n    num <- dexp(x = u, rate = parms)\n    den <- pexp(q = c(0, t.max), rate = parms)\n    num / (den[2L] - den[1L])\n}\n\ntr.JMb.int.WF2 <- jointModelBayes(tr.glmmFit.int, tr.Cox.id, \n                                  timeVar=\"obstime\", \n                                  estimateWeightFun = TRUE,\n                                  weightFun = WF2,\n                                  priorShapes = list(shape1 = dunif),\n                                  priors = list(priorshape1 = c(0, 10)))\n\n\n",
+    "created" : 1442413492862.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "3941928225",
+    "id" : "32736AFC",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

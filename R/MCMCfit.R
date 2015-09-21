@@ -106,8 +106,11 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
         nbetas22 <- nbetas2 * nbetas2
         seqn <- seq_len(n)
         diagbetas2 <- diag(nbetas2)
-        if (!is.null(iF))
-            iF <- which(!indBetasL[iF])
+        if (!is.null(iF)) {
+            iii <- vector("logical", length(betas))
+            iii[iF] <- TRUE
+            iF <- which(iii[-flat_indBetas])
+        }
     } else {
         betas1 <- betas
         betas2 <- numeric(ncZ)
@@ -764,7 +767,6 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
             Xs.extrabetas <- drop(Xs.extra %*% betas1[iF])
             ex <- transFun.extra(Xtime.extrabetas + Ztime.extrab, data.id)
             exs <- transFun.extra(Xs.extrabetas + Zs.extrab, data.s)
-            
         } else {
             ex <- transFun.extra(Ztime.extrab, data.id)
             exs <- transFun.extra(Zs.extrab, data.s)
@@ -873,7 +875,7 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
             lP.betas <- logPost.betas1(new.betas1[ii, ])
             lP.new.betas <- lP.betas$log.post
             lRatio.betas <- lP.new.betas - lP.old.betas
-            if (lRatio.betas >= 0 || runif(1L) < exp(lRatio.betas)) {
+            if (is.finite(lRatio.betas) && (lRatio.betas >= 0 || runif(1L) < exp(lRatio.betas))) {
                 ar.betas[i] <- 1
                 betas1 <- new.betas1[ii, ]
                 Xbetas <- lP.betas$Xbetas
@@ -994,7 +996,7 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
             lP.gammas <- logPost.gammas(new.gammas[ii, ])
             lP.new.gammas <- lP.gammas$log.post
             lRatio.gammas <- lP.new.gammas - lP.old.gammas
-            if (lRatio.gammas >= 0 || runif(1L) < exp(lRatio.gammas)) {
+            if (is.finite(lRatio.gammas) && (lRatio.gammas >= 0 || runif(1L) < exp(lRatio.gammas))) {
                 ar.gammas[i] <- 1
                 gammas <- new.gammas[ii, ]
                 expWgammas <- lP.gammas$expWgammas
@@ -1011,7 +1013,7 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
         lP.Bs.gammas <- logPost.Bs.gammas(new.Bs.gammas[ii, ])
         lP.new.Bs.gammas <- lP.Bs.gammas$log.post
         lRatio.Bs.gammas <- lP.new.Bs.gammas - lP.old.Bs.gammas
-        if (lRatio.Bs.gammas >= 0 || runif(1L) < exp(lRatio.Bs.gammas)) {
+        if (is.finite(lRatio.Bs.gammas) && (lRatio.Bs.gammas >= 0 || runif(1L) < exp(lRatio.Bs.gammas))) {
             ar.Bs.gammas[i] <- 1
             Bs.gammas <- new.Bs.gammas[ii, ]
             log.h0s <- lP.Bs.gammas$log.h0s
@@ -1042,7 +1044,7 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
             lP.alphas <- logPost.alphas(new.alphas[ii, ])
             lP.new.alphas <- lP.alphas$log.post
             lRatio.alphas <- lP.new.alphas - lP.old.alphas
-            if (lRatio.alphas >= 0 || runif(1L) < exp(lRatio.alphas)) {
+            if (is.finite(lRatio.alphas) && (lRatio.alphas >= 0 || runif(1L) < exp(lRatio.alphas))) {
                 ar.alphas[i] <- 1
                 alphas <- new.alphas[ii, ]
                 log.Surv <- lP.alphas$log.Surv
@@ -1059,7 +1061,7 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
             lP.Dalphas <- logPost.Dalphas(new.Dalphas[ii, ])
             lP.new.Dalphas <- lP.Dalphas$log.post
             lRatio.Dalphas <- lP.new.Dalphas - lP.old.Dalphas
-            if (lRatio.Dalphas >= 0 || runif(1L) < exp(lRatio.Dalphas)) {
+            if (is.finite(lRatio.Dalphas) && (lRatio.Dalphas >= 0 || runif(1L) < exp(lRatio.Dalphas))) {
                 ar.Dalphas[i] <- 1
                 Dalphas <- new.Dalphas[ii, ]
                 Ms <- lP.Dalphas$Ms
