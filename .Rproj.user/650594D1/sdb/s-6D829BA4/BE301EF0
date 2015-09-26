@@ -1,0 +1,17 @@
+{
+    "contents" : "# JMbayes\n<p>This repository contains the source files for the R package <strong>JMbayes</strong>. \nThis package fits joint models for longitudinal and time-to-event data under a Bayesian \napproach using MCMC. These models are applicable in mainly two settings. First, when focus\nis on the survival outcome and we wish to account for the effect of an endogenous \n(aka internal) time-dependent covariates measured with error. Second, when focus is on the\nlongitudinal outcome and we wish to correct for nonrandom dropout.</p>\n\n<p>Some basic features of the package are:</p>\n<ul style=\"list-style-type:circle\">\n  <li>\n     The user can specify her own density function for the longitudinal responses using \n     argument <font face=\"Courier New\">densLong</font> (default is the normal pdf). Among others, this allows to fit \n     joint models with categorical and left-censored longitudinal responses and robust \n     joint models with Student's-t error terms. In addition, using the <font face=\"Courier New\">df.RE</font> argument, \n     the user can also change the distribution of the random effects from multivariate \n     normal to a multivariate Student's-t with prespecified degrees of freedom\n  </li>\n  <li>\n     The user has now the option to define custom transformation functions for the terms \n     of the longitudinal submodel that enter into the linear predictor of the survival \n     submodel (argument <font face=\"Courier New\">transFun</font>). For example, interactions terms, nonlinear terms \n     (polynomials, splines), etc. \n  </li>\n  <li>\n     The baseline hazard is estimated using B-splines (penalized (default) or regression). \n  </li>\n  <li>\n     Dynamic predictions\n     <ul style=\"list-style-type:square\">\n        <li>\n        function <font face=\"Courier New\">survfitJM.JMbayes()</font> computes dynamic survival probabilities.\n        </li>\n        <li>\n        function <font face=\"Courier New\">predict.JMbayes()</font> computes dynamic predictions for the longitudinal outcome.\n        </li>\n        <li>\n        function <font face=\"Courier New\">aucJM()</font> calculates time-dependent AUCs for joint models\n        function, function <font face=\"Courier New\">rocJM()</font> calculates the corresponding \n        time-dependent sensitivities and specifities.\n        </li>\n        <li>\n        function <font face=\"Courier New\">prederrJM()</font> calculates prediction errors for joint models.\n        </li>\n     </ul>\n  </li>\n</ul>\n",
+    "created" : 1443291900369.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "594494466",
+    "id" : "BE301EF0",
+    "lastKnownWriteTime" : 1443292757,
+    "path" : "C:/Users/Dimitris/Documents/PackagesGitHub/JMbayes/README.md",
+    "project_path" : "README.md",
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "markdown"
+}
