@@ -10,7 +10,7 @@ longitudinal outcome and we wish to correct for nonrandom dropout.</p>
 <ul style="list-style-type:circle">
   <li>
      The user can specify her own density function for the longitudinal responses using 
-     argument `r densLong` (default is the normal pdf). Among others, this allows to fit 
+     argument <font face="Courier New">densLong</font> (default is the normal pdf). Among others, this allows to fit 
      joint models with categorical and left-censored longitudinal responses and robust 
      joint models with Student's-t error terms. In addition, using the <font face="Courier New">df.RE</font> argument, 
      the user can also change the distribution of the random effects from multivariate 
