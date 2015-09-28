@@ -1,0 +1,17 @@
+{
+    "contents" : "ModelMats <- function (time, ii, timeL = NULL) {\n    GQsurv <- if (object$control$GQsurv == \"GaussKronrod\") gaussKronrod() else gaussLegendre(object$control$GQsurv.k)\n    wk <- GQsurv$wk\n    sk <- GQsurv$sk\n    id.GK <- rep(ii, each = length(sk))\n    if (!is.null(timeL)) {\n        P <- c(time - timeL) / 2\n        st <- P * sk +  c(time + timeL) / 2\n    } else {\n        P <- time / 2\n        st <- P * (sk + 1)\n    }\n    #data.id2 <- data.id[id.GK, ]\n    data.id2 <- newdata[id == ii, ]\n    data.id2 <- data.id2[findInterval(st, obs.times[[ii]]), , drop = FALSE]\n    data.id2[[timeVar]] <- pmax(st - lag, 0)\n    kn <- object$control$knots\n    W2s <- splineDesign(unlist(kn, use.names = FALSE), st, \n                        ord = object$control$ordSpline, outer.ok = TRUE)    \n    out <- list(st = st, wk = rep(wk, length(P)), P = P, W2s = W2s, kn = kn, \n                idT = rep(seq_along(P), each = length(sk)))\n    if (param %in% c(\"td-value\", \"td-both\")) {\n        mfX <- model.frame.default(delete.response(TermsX), data = data.id2)\n        mfZ <- model.frame.default(TermsZ, data = data.id2)\n        out$Xs <- model.matrix.default(formYx, mfX)\n        out$Zs <- model.matrix.default(formYz, mfZ)\n    }\n    if (param %in% c(\"td-extra\", \"td-both\")) {\n        mfX.extra <- model.frame.default(TermsX.extra, data = data.id2)\n        mfZ.extra <- model.frame.default(TermsZ.extra, data = data.id2)\n        out$Xs.extra <- model.matrix.default(extraForm$fixed, mfX.extra)\n        out$Zs.extra <- model.matrix.default(extraForm$random, mfZ.extra)\n    }\n    if (estimateWeightFun) {\n        P2 <- st / 2\n        st2 <- outer(P2, sk + 1)\n        id.GK2 <- rep(seq_len(nrow(data.id2)), each = length(sk))\n        data.id3 <- data.id2[id.GK2, ]\n        data.id3[[timeVar]] <- pmax(c(t(st2)) - lag, 0)\n        mfX <- model.frame.default(delete.response(TermsX), data = data.id3)\n        mfZ <- model.frame.default(TermsZ, data = data.id3)\n        out$Xu <- model.matrix.default(formYx, mfX)\n        out$Zu <- model.matrix.default(formYz, mfZ)\n        out$P2 <- P2\n        out$st2 <- st[id.GK2] - c(t(st2))\n        out$wk2 <- rep(wk, length(P2))\n        out$id.GK2 <- id.GK2\n    }\n    out\n}\n",
+    "created" : 1443426464185.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "354720307",
+    "id" : "24142639",
+    "lastKnownWriteTime" : 1443429587,
+    "path" : "C:/Users/Dimitris/Documents/PackagesGitHub/JMbayes/R/ModelMats.R",
+    "project_path" : "R/ModelMats.R",
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

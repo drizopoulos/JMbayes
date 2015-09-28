@@ -1,5 +1,4 @@
-survfitJM.JMbayes <-
-function (object, newdata, type = c("SurvProb", "Density"), 
+survfitJM.JMbayes <- function (object, newdata, type = c("SurvProb", "Density"), 
                                idVar = "id", simulate = TRUE, survTimes = NULL, 
                                last.time = NULL, LeftTrunc_var = NULL, M = 200L, 
                                CI.levels = c(0.025, 0.975), 
