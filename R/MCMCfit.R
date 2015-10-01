@@ -7,6 +7,7 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
     y.long <- dropAttr(y$y)
     X <- if (performHC) dropAttr(x$X, flat_indBetas) else dropAttr(x$X)
     Z <- dropAttr(x$Z)
+    offset <- y$offset
     # extract data survival
     Time <- dropAttr(y$Time)
     event <- dropAttr(y$event)
@@ -212,7 +213,8 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
     logPost.betas1 <- function (betas1) {
         Xbetas <- drop(X %*% betas1)
         eta.y <- Xbetas + Zb
-        log.pyb <- fastSumID2(densLong(y.long, eta.y, 1/sqrt(tau), log = TRUE, data), idFast)
+        eta.y.offset <- if (is.null(offset)) eta.y else eta.y + offset
+        log.pyb <- fastSumID2(densLong(y.long, eta.y.offset, 1/sqrt(tau), log = TRUE, data), idFast)
         log.prior <- log.prior.betas1(betas1)
         if (!paramRE) {
             Mtime <- numeric(n)
@@ -269,7 +271,8 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
         }
     }
     logPost.betas1Fast <- function () {
-        log.pyb <- fastSumID2(densLong(y.long, eta.y, 1/sqrt(tau), log = TRUE, data), idFast)
+        eta.y.offset <- if (is.null(offset)) eta.y else eta.y + offset
+        log.pyb <- fastSumID2(densLong(y.long, eta.y.offset, 1/sqrt(tau), log = TRUE, data), idFast)
         log.prior <- log.prior.betas1(betas1)
         if (!paramRE) {
             Mtime <- numeric(n)
@@ -291,14 +294,16 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
         }
     }
     logPost.tau <- function (tau) {
-        log.pyb <- densLong(y.long, eta.y, 1/sqrt(tau), log = TRUE, data)
+        eta.y.offset <- if (is.null(offset)) eta.y else eta.y + offset
+        log.pyb <- densLong(y.long, eta.y.offset, 1/sqrt(tau), log = TRUE, data)
         log.prior <- log.prior.tau(tau)
         sum(log.pyb, na.rm = TRUE) + log.prior
     }
     logPost.RE <- function (b) {
         Zb <- .rowSums(Z * b[id, , drop = FALSE], nrZ, ncZ)
         eta.y <- if (nbetas1) Xbetas + Zb else Zb
-        log.pyb <- fastSumID2(densLong(y.long, eta.y, 1/sqrt(tau), log = TRUE, data), idFast)
+        eta.y.offset <- if (is.null(offset)) eta.y else eta.y + offset
+        log.pyb <- fastSumID2(densLong(y.long, eta.y.offset, 1/sqrt(tau), log = TRUE, data), idFast)
         mu_b <- if (performHC) mean_b(indBetas) else betas2
         log.prior <- densRE(b, mu = mu_b, invD = invD, log = TRUE)
         if (!paramRE) {
@@ -387,7 +392,8 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
     }
     logPost.REFast <- function () {
         eta.y <- if (nbetas1) Xbetas + Zb else Zb
-        log.pyb <- fastSumID2(densLong(y.long, eta.y, 1/sqrt(tau), log = TRUE, data), idFast)
+        eta.y.offset <- if (is.null(offset)) eta.y else eta.y + offset
+        log.pyb <- fastSumID2(densLong(y.long, eta.y.offset, 1/sqrt(tau), log = TRUE, data), idFast)
         mu_b <- if (performHC) mean_b(indBetas) else betas2
         log.prior <- densRE(b, mu = mu_b, invD = invD, log = TRUE)
         if (!paramRE) {
@@ -1130,7 +1136,8 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
                 res.Dalphas[jj, ] <- Dalphas
             if (estimateWeightFun)
                 res.shapes[jj, ] <- shapes
-            log.pyb <- fastSumID2(densLong(y.long, eta.y, 1/sqrt(tau), log = TRUE, data), idFast)
+            eta.y.offset <- if (is.null(offset)) eta.y else eta.y + offset
+            log.pyb <- fastSumID2(densLong(y.long, eta.y.offset, 1/sqrt(tau), log = TRUE, data), idFast)
             log.h0s <- if (rescale_Bs.gammas) {
                 drop(W2s %*% (tchol_CovBs.gammas %*% Bs.gammas + init.Bs.gammas))
             } else drop(W2s %*% Bs.gammas)
@@ -1231,7 +1238,12 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
     sigma <- postMeans$sigma; b <- postMeans$b; D <- postMeans$D
     gammas <- postMeans$gammas; Bs.gammas <- postMeans$Bs.gammas; alphas <- postMeans$alphas
     Dalphas <- postMeans$Dalphas; shapes <- postMeans$shapes
-    log.pyb <- fastSumID2(densLong(y.long, drop(X %*% betas1 + rowSums(Z * b[id, , drop = FALSE])),
+    eta.y.offset <- if (is.null(offset)) {
+        drop(X %*% betas1 + rowSums(Z * b[id, , drop = FALSE])) 
+    } else {
+        drop(X %*% betas1 + rowSums(Z * b[id, , drop = FALSE])) + offset
+    }
+    log.pyb <- fastSumID2(densLong(y.long, eta.y.offset,
                                    sigma, log = TRUE, data), idFast)
     log.h0s <- drop(W2s %*% Bs.gammas)
     if (!paramRE) {
@@ -1333,6 +1345,7 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
         mcmcOut$b <- res.b - res.mean_b
         postMeans$b <- apply(mcmcOut$b, c(1L, 2L), mean)
     }
+    rm(list = ".Random.seed", envir = globalenv())
     list(mcmc = if (control$keepRE) mcmcOut else mcmcOut[indb], postMeans = postMeans,
          postModes = postModes,
          postVarsRE = postVarsRE,

@@ -1,5 +1,4 @@
-predict.JMbayes <-
-function (object, newdata, type = c("Marginal", "Subject"),
+predict.JMbayes <- function (object, newdata, type = c("Marginal", "Subject"),
     interval = c("none", "confidence", "prediction"), level = 0.95, idVar = "id", 
     FtTimes = NULL, last.time = NULL, LeftTrunc_var = NULL, M = 300, returnData = FALSE, 
     scale = 1.6, weight = rep(1, nrow(newdata)), invlink = NULL, seed = 1, ...) {
@@ -287,6 +286,7 @@ function (object, newdata, type = c("Marginal", "Subject"),
         } else
             attr(out, "time.to.pred") <- times.to.pred
     }
+    rm(list = ".Random.seed", envir = globalenv())
     class(out) <- c(class(out), "predict.JMbayes")
     out
 }

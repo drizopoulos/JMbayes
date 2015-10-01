@@ -1,5 +1,4 @@
-dynInfo <-
-function (object, newdata, Dt, K = 5, M = 500, idVar = "id", 
+dynInfo <- function (object, newdata, Dt, K = 5, M = 500, idVar = "id", 
                      simulateFun = function (eta, scale) rnorm(length(eta), eta, scale), 
                      seed = 1L) {
     if (!inherits(object, "JMbayes"))
@@ -263,5 +262,6 @@ function (object, newdata, Dt, K = 5, M = 500, idVar = "id",
     stars[which.max(infoSum)] <- "*"
     d <- data.frame(times = times, Info = infoSum, pi = sfit, 
                     " " = stars, check.names = FALSE)
+    rm(list = ".Random.seed", envir = globalenv())
     list(summary = d, full.results = info.times)
 }
