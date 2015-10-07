@@ -1,0 +1,17 @@
+{
+    "contents" : "summary.JMbayes <- function (object, include.baseHazCoefs = FALSE, ...) {\n    if (!inherits(object, \"JMbayes\"))\n        stop(\"Use only with 'JMbayes' objects.\\n\")\n    coefs <- object$postMeans\n    strs <- object$StErr\n    sds <- object$StDev\n    CIs <- object$CIs\n    Ps <- object$Pvalues\n    coefsY <- cbind(\"Value\" = coefs$betas, \"Std.Err\" = strs$betas,\n                    \"Std.Dev\" = sds$betas, \"2.5%\" = CIs$betas[1, ],\n                    \"97.5%\" = CIs$betas[2, ],\n                    \"P\" = Ps$betas)\n    gammas <- c(coefs$gammas, coefs$alphas, coefs$Dalphas, coefs$shapes, coefs$Bs.gammas, coefs$tauBs)\n    strs.gammas <- c(strs$gammas, strs$alphas, strs$Dalphas, strs$shapes, strs$Bs.gammas, strs$tauBs)\n    sds.gammas <- c(sds$gammas, sds$alphas, sds$Dalphas, sds$shapes, sds$Bs.gammas, sds$tauBs)\n    cis.gammas <- rbind(c(CIs$gammas[1, ], if (is.matrix(CIs$alphas)) CIs$alphas[1, ] else CIs$alphas[1],\n                          if (is.matrix(CIs$Dalphas)) CIs$Dalphas[1, ] else CIs$Dalphas[1], CIs$shapes[1, ],\n                          CIs$Bs.gammas[1, ],\n                          if (object$baseHaz == \"P-splines\") CIs$tauBs[1]),\n                        c(CIs$gammas[2, ], if (is.matrix(CIs$alphas)) CIs$alphas[2, ] else CIs$alphas[2],\n                          if (is.matrix(CIs$Dalphas)) CIs$Dalphas[2, ] else CIs$Dalphas[2], CIs$shapes[2, ], CIs$Bs.gammas[2, ],\n                          if (object$baseHaz == \"P-splines\") CIs$tauBs[2]))\n    p.gammas <- c(Ps$gammas, Ps$alphas, Ps$Dalphas, Ps$shapes, Ps$Bs.gammas, if (!is.null(Ps$tauBs)) NA else NULL)\n    coefsT <- cbind(\"Value\" = gammas, \"Std.Err\" = strs.gammas, \"Std.Dev\" = sds.gammas,\n                    \"2.5%\" = cis.gammas[1, ], \"97.5%\" = cis.gammas[2, ], \"P\" = p.gammas)\n    if (!include.baseHazCoefs) {\n        rnams <- rownames(coefsT)\n        coefsT <- coefsT[-grep(\"Bs.gammas\", rnams, fixed = TRUE), , drop = FALSE]\n    } \n    out <- list(\"CoefTable-Long\" = coefsY, \"CoefTable-Event\" = coefsT,\n                D = coefs$D, sigma = coefs$sigma)\n    out$N <- nrow(object$x$X)\n    out$n <- length(object$y$Time)\n    out$d <- object$y$event\n    out$id <- object$id\n    out$control <- object$control\n    out$time <- object$time\n    out$knots <- unique(object$knots)\n    out$baseHaz <- object$baseHaz\n    out$conv <- object$conv\n    out$param <- object$param\n    out$estimateWeightFun <- object$estimateWeightFun\n    out$df.RE <- object$df.RE\n    out$densLongCheck <- object$densLongCheck\n    out$DIC <- object$DIC\n    out$pD <- object$pD\n    out$LPML <- object$LPML\n    out$call <- object$call\n    class(out) <- \"summary.JMbayes\"\n    out\n}\n",
+    "created" : 1444226669082.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3751774990",
+    "id" : "63E3EFF8",
+    "lastKnownWriteTime" : 1444226951,
+    "path" : "C:/Users/Dimitris/Documents/PackagesGitHub/JMbayes/R/summary.JMbayes.R",
+    "project_path" : "R/summary.JMbayes.R",
+    "properties" : {
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

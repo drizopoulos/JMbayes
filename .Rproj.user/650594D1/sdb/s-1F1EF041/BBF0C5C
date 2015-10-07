@@ -1,0 +1,18 @@
+{
+    "contents" : "pbc2$albumin_t <- ifelse(pbc2$albumin < 3, 1, 0)\npbc2$albumin_d <- 0\n\nlmeFit.pbc <- lme(log(serBilir) ~ albumin_t + ns(year, 2),\n                  random = list(id = pdDiag(form = ~ ns(year, 2))), data = pbc2)\nsurvFit.pbc <- coxph(Surv(years, status2) ~ 1, data = pbc2.id, x = TRUE)\n\njointFit.pbc <- jointModelBayes(lmeFit.pbc, survFit.pbc, timeVar = \"year\", \n                                baseHaz = \"regression-splines\")\n\n\ndform_a = list(fixed = ~ 0 + dns(year, 2), random = ~ 0 + dns(year, 2),\n               indFixed = 3:4, indRandom = 2:3)\njointFit.pbc2a <- update(jointFit.pbc, param = \"td-both\", extraForm = dform_a,\n                         n.iter = 50000)\n\ndform_b = list(fixed = ~ 0 + albumin_d + dns(year, 2), random = ~ 0 + dns(year, 2),\n               indFixed = 2:4, indRandom = 2:3)\njointFit.pbc2b <- update(jointFit.pbc, param = \"td-both\", extraForm = dform_b,\n                         n.iter = 50000)\n#",
+    "created" : 1444226302412.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "603358641",
+    "id" : "BBF0C5C",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

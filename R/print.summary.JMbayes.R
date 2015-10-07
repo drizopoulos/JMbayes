@@ -1,5 +1,4 @@
-print.summary.JMbayes <-
-function (x, digits = max(4, getOption("digits") - 4),
+print.summary.JMbayes <- function (x, digits = max(4, getOption("digits") - 4),
                                    printKnots = FALSE, ...) {
     if (!inherits(x, "summary.JMbayes"))
         stop("Use only with 'summary.JMbayes' objects.\n")
@@ -37,11 +36,12 @@ function (x, digits = max(4, getOption("digits") - 4),
         }), sep = ": ", collapse = "\n\t\t")
     }
     ttE <- if (x$baseHaz == "P-splines") "penalized-spline-approximated" else "spline-approximated"
-    if (printKnots)
+    if (printKnots) {
         cat("Relative risk model with ", ttE, " baseline risk function (knots at: ", 
             xx, ")\n", sep = "")
-    else
+    } else {
         cat("Relative risk model with", ttE, "\n\t\tbaseline risk function\n")
+    }
     if (x$estimateWeightFun) {
         cat("Parameterization: weighted cumulative effect\n\n")
     } else {
