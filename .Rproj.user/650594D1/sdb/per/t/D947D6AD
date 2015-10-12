@@ -1,0 +1,17 @@
+{
+    "contents" : "log.posterior.b <- function (b, y, Mats, ii) {\n    id.i <- id %in% ii\n    idT.i <- idT %in% ii\n    ids.i <- ids %in% ii\n    X.i <- X[id.i, , drop = FALSE]\n    Z.i <- Z[id.i, , drop = FALSE]\n    mu.y <- as.vector(X.i %*% betas.new + Z.i %*% b)\n    logY <- densLong(y[id.i], mu.y, sigma.new, log = TRUE, data = newdata[id.i, ])\n    log.p.yb <- sum(logY)\n    log.p.b <- densRE(b, mu = rep(0, ncol(Z.i)), D = D.new, log = TRUE, prop = FALSE)\n    MM <- Mats[[ii]]\n    st <- MM$st\n    st2 <- MM$st2\n    wk <- MM$wk\n    wk2 <- MM$wk2\n    P <- MM$P\n    P2 <- MM$P2\n    W2s <- MM$W2s\n    Xs <- MM$Xs\n    Zs <- MM$Zs\n    Xs.extra <- MM$Xs.extra\n    Zs.extra <- MM$Zs.extra\n    Xu <- MM$Xu\n    Zu <- MM$Zu\n    ind <- MM$ind\n    idT <- MM$idT\n    id.GK2 <- MM$id.GK2\n    if (param %in% c(\"td-value\", \"td-both\"))\n        Ys <- transFun.value(c(Xs %*% betas.new + Zs %*% b), data.s[ids.i, ])\n    if (param %in% c(\"td-extra\", \"td-both\"))\n        Ys.extra <- transFun.extra(c(Xs.extra %*% betas.new[indFixed] + \n                                         Zs.extra %*% b[indRandom]), data.s[ids.i, ])\n    if (estimateWeightFun) {\n        wFun <- wk2 * weightFun(st2, shapes.new, max.time)\n        Yu <- transFun.value(P2 * fastSumID(wFun * c(Xu %*% betas.new + Zu %*% b), id.GK2), \n                             data.s[ids.i, ])\n    }\n    tt <- if (!estimateWeightFun) {\n        c(switch(param,\n                 \"td-value\" = as.matrix(Ys) %*% alphas.new, \n                 \"td-extra\" =  as.matrix(Ys.extra) %*% Dalphas.new,\n                 \"td-both\" = as.matrix(Ys) %*% alphas.new + \n                       as.matrix(Ys.extra) %*% Dalphas.new,\n                 \"shared-betasRE\" = rep(sum((betas[indBetas] + b) * alphas.new), length(st)),\n                 \"shared-RE\" = rep(sum(b * alphas.new), length(st))))\n    } else {\n        c(as.matrix(Yu) %*% alphas.new)\n    }\n    eta.tw <- if (!is.null(W)) {\n            as.vector(W[ii, , drop = FALSE] %*% gammas.new)\n    } else 0\n    Vi <- exp(c(W2s %*% Bs.gammas.new) + tt)\n    log.survival <- - sum(exp(eta.tw) * P * fastSumID(wk * Vi, idT))\n    if (all(st == 0))\n        log.survival <- 1\n    log.p.yb + log.survival + log.p.b\n}\n",
+    "created" : 1444646644784.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3387065271",
+    "id" : "D947D6AD",
+    "lastKnownWriteTime" : 1444646653,
+    "path" : "C:/Users/Dimitris/Documents/PackagesGitHub/JMbayes/R/log.posterior.b.R",
+    "project_path" : "R/log.posterior.b.R",
+    "properties" : {
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

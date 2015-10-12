@@ -1,5 +1,4 @@
-log.posterior.b <-
-function (b, y, Mats, ii) {
+log.posterior.b <- function (b, y, Mats, ii) {
     id.i <- id %in% ii
     idT.i <- idT %in% ii
     ids.i <- ids %in% ii

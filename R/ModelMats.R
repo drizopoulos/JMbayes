@@ -12,7 +12,9 @@ ModelMats <- function (time, ii, timeL = NULL) {
     }
     #data.id2 <- data.id[id.GK, ]
     data.id2 <- newdata[id == ii, ]
-    data.id2 <- data.id2[findInterval(st, obs.times[[ii]]), , drop = FALSE]
+    ind <- findInterval(st, obs.times[[ii]])
+    ind[ind < 1] <- 1
+    data.id2 <- data.id2[ind, , drop = FALSE]
     data.id2[[timeVar]] <- pmax(st - lag, 0)
     kn <- object$control$knots
     W2s <- splineDesign(unlist(kn, use.names = FALSE), st, 
