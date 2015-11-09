@@ -18,7 +18,8 @@ importFrom("stats", "acf", "ar", "as.formula", "ave", "bw.SJ", "coef",
   "median", "model.frame", "model.frame.default", "model.matrix",
   "model.matrix.default", "model.response", "optim", "pnorm", "pt", "qt", 
   "quantile", "rWishart", "rchisq", "reformulate", "rexp", "rgamma", 
-  "rnorm", "rt", "runif", "sd", "terms", "var", "vcov", "makepredictcall")
+  "rnorm", "rt", "runif", "sd", "terms", "var", "vcov", "makepredictcall",
+  "model.offset")
 importFrom("utils", "as.relistable", "combn", "glob2rx", "head", "relist", 
   "setTxtProgressBar", "tail", "txtProgressBar")
 
