@@ -1,5 +1,4 @@
-makepredictcall.dns <-
-function (var, call) {
+makepredictcall.dns <- function (var, call) {
     if (as.character(call)[1L] != "dns") 
         return(call)
     at <- attributes(var)[c("knots", "Boundary.knots", "intercept", "eps")]

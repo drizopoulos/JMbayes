@@ -1,0 +1,18 @@
+{
+    "contents" : "extract <- function (lis, name, ord, unlist = FALSE, cbind = FALSE, bdiag = FALSE) {\n    out <- lapply(lis, \"[[\", name)\n    if (bdiag) {\n        out <- if (!missing(ord)) bdiag(out)[ord, , drop = FALSE] else bdiag(out)\n    }\n    if (unlist && missing(ord))\n        out <- unlist(out, use.names = FALSE)\n    if (unlist && !missing(ord))\n        out <- unlist(out, use.names = FALSE)[ord]\n    if (cbind)\n        out <- if (any(sapply(out, is.matrix))) \n            do.call(\"cbind\", out) else do.call(\"c\", out)\n    out\n}\n\nframesLME <- function (object, timeVar = \"year\") {\n    b <- data.matrix(ranef(object))\n    dimnames(b) <- NULL\n    nY <- nrow(b)\n    formYx <- formula(object)\n    formYz <- formula(object$modelStruct$reStruct[[1]])\n    vars <- unique(c(all.vars(formYx), all.vars(formYz)))\n    data <- object$data\n    na.ind <- complete.cases(data[vars])\n    data <- data[na.ind, , drop = FALSE]\n    idVar <- names(object$groups)\n    idOrig <- object$groups[[1L]]\n    id <- as.vector(unclass(idOrig))\n    times <- data[[timeVar]]\n    mfX <- model.frame(terms(formYx), data = data)\n    TermsX <- attr(mfX, \"terms\")\n    X <- model.matrix(formYx, mfX)\n    mfZ <- model.frame(terms(formYz), data = data)\n    TermsZ <- attr(mfZ, \"terms\")\n    Z <- model.matrix(formYz, mfZ)\n    y.long <- model.response(mfX, \"numeric\")\n    betas <- fixef(object)\n    long <- c(X %*% betas) + rowSums(Z * b[id, ])\n    sigma <- object$sigma\n    sigma2 <- sigma^2\n    D <- lapply(pdMatrix(object$modelStruct$reStruct), \"*\", sigma^2)[[1]]\n    invD <- solve(D)\n    Cov.postRE <- vector(\"list\", nY)\n    for (i in seq_len(nY)) {\n        Z.i <- Z[id == i, , drop = FALSE]\n        Cov.postRE[[i]] <- solve(crossprod(Z.i) / sigma2 + invD)        \n    }\n    list(idOrig = idOrig, id = id, idVar = idVar, b = b, nY = nY, n = length(y.long), \n         data = data, times = times, formYx = formYx, TermsX = TermsX, X = X, \n         formYz = formYz, TermsZ = TermsZ, Z = Z,\n         y.long = y.long, long = long, betas = betas, D = D, invD = invD, \n         sigma = sigma, Cov.postRE = Cov.postRE, isGLMM = inherits(object, \"glmmPQL\"))\n}\n\nX_matrix <- function (components, data, formula = NULL) {\n    TermsX <- delete.response(components$TermsX)\n    mfX <- model.frame(TermsX, data = data)\n    if (is.null(formula))\n        formula <- reformulate(attr(TermsX, \"term.labels\"))\n    model.matrix(formula, mfX)\n}\n\nZ_matrix <- function (components, data, formula = NULL) {\n    mfZ <- model.frame(components$TermsZ, data = data)\n    if (is.null(formula))\n        formula <- components$formYz\n    model.matrix(formula, mfZ)\n}",
+    "created" : 1447617164444.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3496321854",
+    "id" : "2FF2F1E1",
+    "lastKnownWriteTime" : 1447617295,
+    "path" : "C:/Users/Dimitris/Documents/PackagesGitHub/TestFiles/JMbayes/MultMixedModels-Funs.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

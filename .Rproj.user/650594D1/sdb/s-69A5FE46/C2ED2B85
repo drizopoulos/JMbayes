@@ -1,0 +1,17 @@
+{
+    "contents" : "makepredictcall.dns <- function (var, call) {\n    if (as.character(call)[1L] != \"dns\") \n        return(call)\n    at <- attributes(var)[c(\"knots\", \"Boundary.knots\", \"intercept\", \"eps\")]\n    xxx <- call[1L:2L]\n    xxx[names(at)] <- at\n    xxx\n}\n",
+    "created" : 1452760163216.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2960315129",
+    "id" : "C2ED2B85",
+    "lastKnownWriteTime" : 1452760206,
+    "path" : "C:/Users/Dimitris/Documents/PackagesGitHub/JMbayes/R/makepredictcall.dns.R",
+    "project_path" : "R/makepredictcall.dns.R",
+    "properties" : {
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

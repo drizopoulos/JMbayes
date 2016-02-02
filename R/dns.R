@@ -1,5 +1,4 @@
-dns <-
-function (x, df = NULL, knots = NULL, intercept = FALSE, Boundary.knots = range(x), eps = 1e-03) {
+dns <- function (x, df = NULL, knots = NULL, intercept = FALSE, Boundary.knots = range(x), eps = 1e-03) {
     ns.x <- if (is.null(knots)) {
         ns(x, df = df, intercept = intercept, Boundary.knots = Boundary.knots)
     } else {
