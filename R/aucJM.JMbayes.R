@@ -1,5 +1,4 @@
-aucJM.JMbayes <-
-function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id", 
+aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id", 
         simulate = FALSE, M = 100, ...) {
     if (!inherits(object, "JMbayes"))
         stop("Use only with 'JMbayes' objects.\n")
@@ -15,23 +14,39 @@ function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id",
     id <- match(id, unique(id))
     TermsT <- object$Terms$termsT
     SurvT <- model.response(model.frame(TermsT, newdata)) 
-    Time <- SurvT[, 1]
+    is_counting <- attr(SurvT, "type") == "counting"
+    Time <- if (is_counting) {
+        ave(SurvT[, 2], id, FUN = function (x) tail(x, 1))
+    } else {
+        SurvT[, 1]
+    }
     timeVar <- object$timeVar
     ordTime <- order(Time)
     newdata2 <- newdata[ordTime, ]
     newdata2 <- newdata2[Time[ordTime] > Tstart, ]
     newdata2 <- newdata2[newdata2[[timeVar]] <= Tstart, ]
-    pi.u.t <- survfitJM(object, newdata = newdata2, idVar = idVar, survTimes = Thoriz, 
-                        simulate = simulate, M = M)
+    pi.u.t <- if (is_counting) {
+        survfitJM(object, newdata = newdata2, idVar = idVar, survTimes = Thoriz, 
+                  simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
+    } else {
+        survfitJM(object, newdata = newdata2, idVar = idVar, survTimes = Thoriz, 
+                  simulate = simulate, M = M)
+    }
     pi.u.t <- sapply(pi.u.t$summaries, "[", 1, 2)
     # find comparable subjects
     id <- newdata2[[idVar]]
     SurvT <- model.response(model.frame(TermsT, newdata2)) 
-    Time <- SurvT[!duplicated(id), 1]
-    event <- SurvT[!duplicated(id), 2]
+    if (is_counting) {
+        f <- factor(id, levels = unique(id))
+        Time <- tapply(SurvT[, 2], f, tail, 1)
+        event <- tapply(SurvT[, 3], f, tail, 1)
+    } else{
+        Time <- SurvT[!duplicated(id), 1]
+        event <- SurvT[!duplicated(id), 2]
+    }
     names(Time) <- names(event) <- as.character(unique(id))
     if (!all(names(pi.u.t) == names(Time)))
-        stop("...")
+        stop("mismatch between 'Time' variable names and survival probabilities names.")
     auc <- if (length(Time) > 1) {
         pairs <- combn(as.character(unique(id)), 2)
         Ti <- Time[pairs[1, ]]
@@ -46,9 +61,15 @@ function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id",
         ind <- ind1 | ind2 | ind3
         if (any(ind3)) {
             nams <- unique(names(ind3[ind3]))
-            pi2 <- survfitJM(object, newdata = newdata2[id %in% nams, ], idVar = idVar, 
+            pi2 <- if (is_counting) {
+                survfitJM(object, newdata = newdata2[id %in% nams, ], idVar = idVar, 
                              last.time = Time[nams], survTimes = Thoriz, 
-                             simulate = simulate, M = M)
+                             simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
+            } else {
+                survfitJM(object, newdata = newdata2[id %in% nams, ], idVar = idVar, 
+                          last.time = Time[nams], survTimes = Thoriz, 
+                          simulate = simulate, M = M)
+            }
             pi2 <- 1 - sapply(pi2$summaries, "[", 1, 2)
             nams2 <- names(ind3[ind3])
             ind[ind3] <- ind[ind3] * pi2[nams2]

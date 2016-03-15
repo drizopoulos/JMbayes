@@ -18,12 +18,24 @@ function (object, newdata, Tstart, Thoriz, lossFun = c("square", "absolute"),
     id <- match(id, unique(id))
     TermsT <- object$Terms$termsT
     SurvT <- model.response(model.frame(TermsT, newdata)) 
-    Time <- SurvT[, 1]
+    is_counting <- attr(SurvT, "type") == "counting"
+    Time <- if (is_counting) {
+        ave(SurvT[, 2], id, FUN = function (x) tail(x, 1))
+    } else {
+        SurvT[, 1]
+    }
     timeVar <- object$timeVar
     newdata2 <- newdata[Time > Tstart, ]
-    SurvT <- model.response(model.frame(TermsT, newdata2)) 
-    Time <- SurvT[, 1]
-    delta <- SurvT[, 2]
+    SurvT <- model.response(model.frame(TermsT, newdata2))
+    if (is_counting) {
+        id2 <- newdata2[[idVar]]
+        f <- factor(id2, levels = unique(id2))
+        Time <- ave(SurvT[, 2], f, FUN = function (x) tail(x, 1))
+        delta <- ave(SurvT[, 3], f, FUN = function (x) tail(x, 1))
+    } else {
+        Time <- SurvT[, 1]
+        delta <- SurvT[, 2]
+    }
     timesInd <- newdata2[[timeVar]] <= Tstart
     aliveThoriz <- newdata2[Time > Thoriz & timesInd, ]
     deadThoriz <- newdata2[Time <= Thoriz & delta == 1 & timesInd, ]
@@ -33,18 +45,43 @@ function (object, newdata, Tstart, Thoriz, lossFun = c("square", "absolute"),
     idalive <- unique(aliveThoriz[[idVar]])
     iddead <- unique(deadThoriz[[idVar]])
     idcens <- unique(censThoriz[[idVar]])
-    Surv.aliveThoriz <- survfitJM(object, newdata = aliveThoriz, idVar = idVar, simulate = simulate, M = M,
-                                  survTimes = Thoriz, last.time = rep(Tstart, length(idalive)))
-    Surv.deadThoriz <- survfitJM(object, newdata = deadThoriz, idVar = idVar, simulate = simulate,
-                                 survTimes = Thoriz, last.time = rep(Tstart, length(iddead)))
+    Surv.aliveThoriz <- if (is_counting) {
+        survfitJM(object, newdata = aliveThoriz, idVar = idVar, simulate = simulate, M = M,
+                  survTimes = Thoriz, last.time = rep(Tstart, length(idalive)),
+                  LeftTrunc_var = all.vars(TermsT)[1L])
+    } else {
+        survfitJM(object, newdata = aliveThoriz, idVar = idVar, simulate = simulate, M = M,
+                  survTimes = Thoriz, last.time = rep(Tstart, length(idalive)))
+        
+    }
+    Surv.deadThoriz <- if (is_counting) {
+        survfitJM(object, newdata = deadThoriz, idVar = idVar, simulate = simulate,
+                  survTimes = Thoriz, last.time = rep(Tstart, length(iddead)),
+                  LeftTrunc_var = all.vars(TermsT)[1L])
+    } else {
+        survfitJM(object, newdata = deadThoriz, idVar = idVar, simulate = simulate,
+                  survTimes = Thoriz, last.time = rep(Tstart, length(iddead)))
+    }
     Surv.aliveThoriz <- sapply(Surv.aliveThoriz$summaries, "[", 2)
     Surv.deadThoriz <- sapply(Surv.deadThoriz$summaries, "[", 2)
     if (nrow(censThoriz)) {
-        Surv.censThoriz <- survfitJM(object, newdata = censThoriz, idVar = idVar, simulate = simulate, M = M,
-                                 survTimes = Thoriz, last.time = rep(Tstart, length(idcens)))
+        Surv.censThoriz <- if (is_counting) {
+            survfitJM(object, newdata = censThoriz, idVar = idVar, simulate = simulate, M = M,
+                      survTimes = Thoriz, last.time = rep(Tstart, length(idcens)),
+                      LeftTrunc_var = all.vars(TermsT)[1L])
+        } else {
+            survfitJM(object, newdata = censThoriz, idVar = idVar, simulate = simulate, M = M,
+                      survTimes = Thoriz, last.time = rep(Tstart, length(idcens)))
+        }
         tt <- Time[indCens]
-        weights <- survfitJM(object, newdata = censThoriz, idVar = idVar, simulate = simulate, M = M,
-                         survTimes = Thoriz, last.time = tt[!duplicated(censThoriz[[idVar]])])
+        weights <- if (is_counting) {
+            survfitJM(object, newdata = censThoriz, idVar = idVar, simulate = simulate, M = M,
+                      survTimes = Thoriz, last.time = tt[!duplicated(censThoriz[[idVar]])],
+                      LeftTrunc_var = all.vars(TermsT)[1L])
+        } else {
+            survfitJM(object, newdata = censThoriz, idVar = idVar, simulate = simulate, M = M,
+                      survTimes = Thoriz, last.time = tt[!duplicated(censThoriz[[idVar]])])
+        }
         Surv.censThoriz <- sapply(Surv.censThoriz$summaries, "[", 2)
         weights <- sapply(weights$summaries, "[", 2)
     } else {
@@ -69,8 +106,9 @@ function (object, newdata, Tstart, Thoriz, lossFun = c("square", "absolute"),
         den <- sum(w * k, na.rm = TRUE)
         num / den
     }
-    out <- list(prederr = prederr, nr = nr, Tstart = Tstart, Thoriz = Thoriz, interval = interval,
-                classObject = class(object), nameObject = deparse(substitute(object)), lossFun = lf)
+    out <- list(prederr = prederr, nr = nr, Tstart = Tstart, Thoriz = Thoriz, 
+                interval = interval, classObject = class(object), 
+                nameObject = deparse(substitute(object)), lossFun = lf)
     class(out) <- "prederrJM"
     out
 }
