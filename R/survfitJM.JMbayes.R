@@ -271,7 +271,7 @@ survfitJM.JMbayes <- function (object, newdata, type = c("SurvProb", "Density"),
         res$full.results <- out
         res$success.rate <- success.rate
     }
-    rm(list = ".Random.seed", envir = globalenv())
+    if (simulate) rm(list = ".Random.seed", envir = globalenv())
     class(res) <- "survfit.JMbayes"
     res
 }

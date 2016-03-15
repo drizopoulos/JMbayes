@@ -1,3 +1,9 @@
+Changes in version: JMbayes_0.7-9
+
+  * aucJM() and prederrJM() now work with left truncated data.
+
+---------------------------------------
+
 Changes in version: JMbayes_0.7-8
 
   * support the use of offset().
