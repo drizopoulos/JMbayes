@@ -15,18 +15,34 @@ function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id",
     id <- match(id, unique(id))
     TermsT <- object$Terms$termsT
     SurvT <- model.response(model.frame(TermsT, newdata)) 
-    Time <- SurvT[, 1]
+    is_counting <- attr(SurvT, "type") == "counting"
+    Time <- if (is_counting) {
+        ave(SurvT[, 2], id, FUN = function (x) tail(x, 1))
+    } else {
+        SurvT[, 1]
+    }
     timeVar <- object$timeVar
     newdata2 <- newdata[Time > Tstart, ]
     newdata2 <- newdata2[newdata2[[timeVar]] <= Tstart, ]    
-    pi.u.t <- survfitJM(object, newdata = newdata2, idVar = idVar, survTimes = Thoriz, 
-                        simulate = simulate, M = M)
+    pi.u.t <- if (is_counting) {
+        survfitJM(object, newdata = newdata2, idVar = idVar, survTimes = Thoriz, 
+                  simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
+    } else {
+        survfitJM(object, newdata = newdata2, idVar = idVar, survTimes = Thoriz, 
+                  simulate = simulate, M = M)
+    }
     pi.u.t <- sapply(pi.u.t$summaries, "[", 1, 2)
     # extract event process information
     id <- newdata2[[idVar]]
     SurvT <- model.response(model.frame(TermsT, newdata2)) 
-    Time <- SurvT[!duplicated(id), 1]
-    event <- SurvT[!duplicated(id), 2]
+    if (is_counting) {
+        f <- factor(id, levels = unique(id))
+        Time <- tapply(SurvT[, 2], f, tail, 1)
+        event <- tapply(SurvT[, 3], f, tail, 1)
+    } else{
+        Time <- SurvT[!duplicated(id), 1]
+        event <- SurvT[!duplicated(id), 2]
+    }
     names(Time) <- names(event) <- as.character(unique(id))
     # subjects who died before Thoriz
     ind1 <- Time <= Thoriz & event == 1
@@ -35,9 +51,15 @@ function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id",
     ind <- ind1 | ind2
     if (any(ind2)) {
         nams <- unique(names(ind2[ind2]))
-        pi2 <- survfitJM(object, newdata = newdata2[id %in% nams, ], idVar = idVar, 
-                         last.time = Time[nams], survTimes = Thoriz, 
-                         simulate = simulate, M = M)
+        pi2 <- if (is_counting) {
+            survfitJM(object, newdata = newdata2[id %in% nams, ], idVar = idVar, 
+                      last.time = Time[nams], survTimes = Thoriz, 
+                      simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
+        } else {
+            survfitJM(object, newdata = newdata2[id %in% nams, ], idVar = idVar, 
+                      last.time = Time[nams], survTimes = Thoriz, 
+                      simulate = simulate, M = M)
+        }
         pi2 <- 1 - sapply(pi2$summaries, "[", 1, 2)
         nams2 <- names(ind2[ind2])
         ind[ind2] <- ind[ind2] * pi2[nams2]
