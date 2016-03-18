@@ -66,8 +66,8 @@ function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id",
     }
     # calculate sensitivity and specificity
     thrs <- seq(0, 1, length = 101)
-    TP <- colSums(outer(pi.u.t, thrs, "<") * ind) / sum(ind)
-    FP <- colSums(outer(pi.u.t, thrs, "<") * (1 - ind)) / sum(1 - ind)
+    TP <- colSums(outer(pi.u.t, thrs, "<") * c(ind)) / sum(ind)
+    FP <- colSums(outer(pi.u.t, thrs, "<") * c(1 - ind)) / sum(1 - ind)
     Q <- colMeans(outer(pi.u.t, thrs, "<"))
     Q. <- 1 - Q
     k.1.0 <- (TP - Q) / Q.

@@ -1,0 +1,18 @@
+{
+    "contents" : "dLongPois <- function (y, eta.y, scale, log = FALSE, data) {\n    dpois(x = y, lambda = exp(eta.y), log = log)}\n\nJM.Pois.CURRENT <- jointModelBayes(glmmFit.Pois, PH.id, timeVar = \"obstime\", \n                                   densLong = dLongPois, \n                                   control = list(n.burnin = 5000, n.adapt = 5000, \n                                                  n.iter = 50000, priorVar = 10000))\n\n\nroc.JM.Pois.CURRENT  <- rocJM(JM.Pois.CURRENT, newdata = tr.j, Tstart = 5, Dt = 7)\nplot(roc.JM.Pois.CURRENT)\n\nauc.JM.Pois.CURRENT <- aucJM(JM.Pois.CURRENT, newdata = tr.j, Tstart = 4, Dt = 1)\nauc.JM.Pois.CURRENT\n",
+    "created" : 1458330987900.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "2200862376",
+    "id" : "BB55AF6F",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

@@ -74,7 +74,7 @@ aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
             nams2 <- names(ind3[ind3])
             ind[ind3] <- ind[ind3] * pi2[nams2]
         }
-        sum((pi.u.t.i < pi.u.t.j) * ind, na.rm = TRUE) / sum(ind, na.rm = TRUE)
+        sum((pi.u.t.i < pi.u.t.j) * c(ind), na.rm = TRUE) / sum(ind, na.rm = TRUE)
     } else {
         NA
     }
