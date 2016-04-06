@@ -1,10 +1,10 @@
 {
-    "contents" : "dLongPois <- function (y, eta.y, scale, log = FALSE, data) {\n    dpois(x = y, lambda = exp(eta.y), log = log)}\n\nJM.Pois.CURRENT <- jointModelBayes(glmmFit.Pois, PH.id, timeVar = \"obstime\", \n                                   densLong = dLongPois, \n                                   control = list(n.burnin = 5000, n.adapt = 5000, \n                                                  n.iter = 50000, priorVar = 10000))\n\n\nroc.JM.Pois.CURRENT  <- rocJM(JM.Pois.CURRENT, newdata = tr.j, Tstart = 5, Dt = 7)\nplot(roc.JM.Pois.CURRENT)\n\nauc.JM.Pois.CURRENT <- aucJM(JM.Pois.CURRENT, newdata = tr.j, Tstart = 4, Dt = 1)\nauc.JM.Pois.CURRENT\n",
+    "contents" : "dLongPois <- function (y, eta.y, scale, log = FALSE, data) {\n    dpois(x = y, lambda = exp(eta.y), log = log)}\n\nJM.Pois.CURRENT <- jointModelBayes(glmmFit.Pois, PH.id, timeVar = \"obstime\", \n                                   densLong = dLongPois, \n                                   control = list(n.burnin = 5000, n.adapt = 5000, \n                                                  n.iter = 50000, priorVar = 10000))\n\n\nroc.JM.Pois.CURRENT  <- rocJM(JM.Pois.CURRENT, newdata = tr.j, Tstart = 20, Dt = 5)\nplot(roc.JM.Pois.CURRENT)\n\nauc.JM.Pois.CURRENT <- aucJM(JM.Pois.CURRENT, newdata = tr.j, Tstart = 20, Dt = 5)\nauc.JM.Pois.CURRENT\n\nobject = JM.Pois.CURRENT\nnewdata = choice\nThoriz = NULL\nTstart = 20\nDt = 0.5\nidVar = \"id\"\nsimulate = FALSE\nM = 100\n\nset.seed(100)\nchoice <- tot_2006[tot_2006$id %in% sample(unique(tot_2006$id), size = 2000), ]\n\n\nroc.JM.Pois.CURRENT  <- rocJM(JM.Pois.CURRENT, newdata = choice, Tstart = 20, Dt = 0.5)\nplot(roc.JM.Pois.CURRENT)\n\nauc.JM.Pois.CURRENT <- aucJM(JM.Pois.CURRENT, newdata = choice, Tstart = 20, Dt = 0.5)\nauc.JM.Pois.CURRENT\n",
     "created" : 1458330987900.000,
     "dirty" : true,
     "encoding" : "",
     "folds" : "",
-    "hash" : "2200862376",
+    "hash" : "1756802428",
     "id" : "BB55AF6F",
     "lastKnownWriteTime" : 7011605692497750387,
     "path" : null,

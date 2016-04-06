@@ -1,5 +1,4 @@
-rocJM.JMbayes <-
-function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id", 
+rocJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id", 
                            simulate = FALSE, M = 100, ...) {
     if (!inherits(object, "JMbayes"))
         stop("Use only with 'JMbayes' objects.\n")
@@ -45,9 +44,9 @@ function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id",
     }
     names(Time) <- names(event) <- as.character(unique(id))
     # subjects who died before Thoriz
-    ind1 <- Time <= Thoriz & event == 1
+    ind1 <- Time < Thoriz & event == 1
     # subjects who were censored in the interval (Tstart, Thoriz)
-    ind2 <- Time <= Thoriz & event == 0
+    ind2 <- Time < Thoriz & event == 0
     ind <- ind1 | ind2
     if (any(ind2)) {
         nams <- unique(names(ind2[ind2]))

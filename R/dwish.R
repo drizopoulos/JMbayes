@@ -1,5 +1,4 @@
-dwish <-
-function (W, S, v, log = FALSE) {
+dwish <- function (W, S, v, log = FALSE) {
     if (!is.matrix(S)) 
         S <- matrix(S)
     if (!is.matrix(W)) 

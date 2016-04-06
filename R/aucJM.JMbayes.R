@@ -55,9 +55,9 @@ aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
         dj <- event[pairs[2, ]]
         pi.u.t.i <- pi.u.t[pairs[1, ]]
         pi.u.t.j <- pi.u.t[pairs[2, ]]
-        ind1 <- (Ti <= Thoriz & di == 1) & Tj > Thoriz
+        ind1 <- (Ti < Thoriz & di == 1) & Tj > Thoriz
         ind2 <- (Ti <  Thoriz & di == 1) & (Tj == Thoriz & dj == 0)
-        ind3 <- (Ti <= Thoriz & di == 0) & Tj > Thoriz
+        ind3 <- (Ti < Thoriz & di == 0) & Tj > Thoriz
         ind <- ind1 | ind2 | ind3
         if (any(ind3)) {
             nams <- unique(names(ind3[ind3]))

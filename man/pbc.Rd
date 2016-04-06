@@ -42,10 +42,6 @@ Followup of 312 randomised patients with primary biliary cirrhosis, a rare autoi
   }
 }
 
-\source{
-\url{http://lib.stat.cmu.edu/datasets/pbcseq}
-}
-
 \references{
 Fleming, T. and Harrington, D. (1991) \emph{Counting Processes and Survival Analysis}. Wiley, New York.
 
