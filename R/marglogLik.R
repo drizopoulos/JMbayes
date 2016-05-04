@@ -1,5 +1,4 @@
-marglogLik <-
-function (object, newdata, idVar = "id", method = "BFGS", control = NULL) {
+marglogLik <- function (object, newdata, idVar = "id", method = "BFGS", control = NULL) {
     if (!inherits(object, "JMbayes"))
         stop("Use only with 'JMbayes' objects.\n")
     if (!is.data.frame(newdata) || nrow(newdata) == 0)
@@ -77,6 +76,7 @@ function (object, newdata, idVar = "id", method = "BFGS", control = NULL) {
     thetas.b <- unlist(as.relistable(list.thetas))
     # construct model matrices to calculate the log.posterior
     environment(ModelMats) <- environment()
+    obs.times <- split(newdata[[timeVar]][na.ind], id)
     survMats.last <- vector("list", n.tp)
     for (i in seq_along(last.time)) {
         survMats.last[[i]] <- ModelMats(last.time[i], ii = i)

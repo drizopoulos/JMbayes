@@ -87,7 +87,8 @@ dynInfo <- function (object, newdata, Dt, K = 5, M = 500, idVar = "id",
     thetas <- unlist(as.relistable(list.thetas))
     ########
     environment(log.posterior.b) <- environment(S.b) <- environment(logh.b) <- environment()
-    environment(hMats) <- environment(ModelMats) <- environment()    
+    environment(hMats) <- environment(ModelMats) <- environment()
+    obs.times <- split(newdata[[timeVar]][na.ind], id)
     survMats <- lapply(c(max_time, times), ModelMats, ii = 1)
     u_times <- lapply(lapply(times, seq, to = maxTime * 1.1, length.out = 31), tail, n = -1)
     #hh <- function (t) lapply(t, ModelMats, ii = 1)
