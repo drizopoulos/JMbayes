@@ -137,7 +137,7 @@ dynInfo <- function (object, newdata, Dt, K = 5, M = 500, idVar = "id",
         log.h_Tj + log.S_Tj - log.S_ti
     }
     sfit <- survfitJM(object, newdata = newdata, M = M, init.b = rbind(modes.b),
-                      survTimes = times)
+                      survTimes = times, idVar = idVar)
     sfit <- 1 - as.vector(sfit$summaries[[1]][, "Mean"])
     info.times <- matrix(0, M, ntimes)
     for (ti in seq_len(ntimes)) {

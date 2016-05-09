@@ -1,4 +1,5 @@
 {
+    "collab_server" : "",
     "contents" : "pbc2$status2 <- as.numeric(pbc2$status != \"alive\")\npbc2.id$status2 <- as.numeric(pbc2.id$status != \"alive\")\n\npbc.na <- with(pbc2, pbc2[complete.cases(year, status2, serChol, years, drug, age), ])\npbc.na$id <- factor(pbc.na$id)\npbc.id.na <- pbc.na[!duplicated(pbc.na$id), ]\npbc.id.na$agenew <- pbc.id.na$age - mean(pbc.id.na$age)\n\n\n# CURRENT VALUE MODEL\n\nlmeFit.chol <- lme(sqrt(serChol) ~ year, data = pbc.na,\n                   random = ~ year | id)\n\ncoxFit.chol <- coxph(Surv(years, status2) ~ drug + agenew, data = pbc.id.na, \n                     x = TRUE)\n\n\njointFit.chol <- jointModelBayes(lmeFit.chol, coxFit.chol, timeVar = \"year\",\n                                 baseHaz = \"regression-splines\")\n\nsummary(jointFit.chol)\n#plot(jointFit.chol)\n\n\n# CUMULATIVE (UN-WEIGHTED)\niForm <- list(fixed = ~ 0 + year + I(year^2/2), random = ~ 0 + year + I(year^2/2),\n              indFixed = 1:2, indRandom = 1:2)\n\njointFit.chol_cum <- update(jointFit.chol, param = \"td-extra\", extraForm = iForm)\n\nsummary(jointFit.chol_cum)\n#plot(jointFit.chol_cum)\n\n# WEIGHTED CUMULATIVE \n\nwf <- function (u, parms, t.max) {\n    num <- dnorm(x = u, sd = parms)\n    den <- pnorm(q = c(0, t.max), sd = parms)\n    num / (den[2L] - den[1L])\n}\n\njointFit.chol_wcum <- update(jointFit.chol, estimateWeightFun = TRUE,\n                         weightFun = wf,\n                         priorShapes = list(shape1 = dunif),\n                         priors = list(priorshape1 = c(0, 4.5)))\n\nsummary(jointFit.chol_wcum)\nplot(jointFit.chol_wcum)\nplot(jointFit.chol_wcum, which = \"weightFun\", max.t = max(pbc.id.na$years))\n",
     "created" : 1461954167750.000,
     "dirty" : true,
@@ -7,6 +8,7 @@
     "hash" : "1212580084",
     "id" : "4E97A121",
     "lastKnownWriteTime" : 7011605692497750387,
+    "last_content_update" : 0,
     "path" : null,
     "project_path" : null,
     "properties" : {
@@ -14,5 +16,6 @@
     },
     "relative_order" : 10,
     "source_on_save" : false,
+    "source_window" : "",
     "type" : "r_source"
 }
