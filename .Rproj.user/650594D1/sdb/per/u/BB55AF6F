@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "library(\"JMbayes\")\n\n\nlmeFit <- lme(log(serBilir) ~ ns(year, 2), data = pbc2,\n              random = ~ ns(year, 2) | id)\nsurvFit <- coxph(Surv(years, status2) ~ drug, data = pbc2.id, x = TRUE)\n\njointFit <- jointModelBayes(lmeFit, survFit, timeVar = \"year\")\n\n# we compute marginal log-likelihood contribution for Subject 2\nND <- pbc2[pbc2$id == 2, ] # the data of Subject 2\nmarglogLik(jointFit, newdata = ND)\n\n\nsfun <- function (eta, scale) {x <- rnorm(length(eta), eta, scale); exp(x)}\n# loop over the visits of Patient 2\n\nnn <- nrow(ND)\nres2 <- vector(\"list\", nn)\ntup <- numeric(nn)\n\nfor (i in (seq_len(nn))) {\n    # data up to visit i\n    ND.i <- ND[1:i, ]\n    # conditional survival probabilities\n    sfit <- survfitJM(jointFit, newdata = ND.i)$summaries[[1]]\n    # upper limit of the time interval to search for the optimal time\n    tup[i] <- min(1, max(sfit[sfit[, \"Mean\"] > 0.8, \"times\"] - max(ND.i$years)))\n    # find the optimal time\n    v <- dynInfo(jointFit, newdata = ND.i, Dt = 2, simulateFun = sfun)\n    res2[[i]] <- v$summary\n}\nres2\n\n\n##########################################################################################\n\nsummary(jointFit.strw)\n\n# current value only\nsummary(jointFit.pbc3n)\n\n# subject secific predictions for longit\npbc2$agenew <-pbc2$age-mean(pbc2.id$age)\nlibrary(latticeExtra)\n\nND <- subset_long[subset_long$patientnr == 50166, ]\nPs.ss <- predict(jointFit.rootREML, ND, type = \"Subject\",\n                 interval = \"confidence\", return = TRUE, idVar = \"patientnr\")\nxyplot(pred + low + upp ~ fu_years | patientnr, data = Ps.ss[!duplicated(Ps.ss$ fu_years), ],\n       type = \"l\", col = c(2,1,1), lty = c(1,2,2), lwd = 2,\n       ylab = \"Average sqrt HbA1c\")\n\nbasic <- xyplot(sqrt(hba1c_nw) ~ fu_years, data = Ps.ss,    \n                type = c(\"p\"), lwd = 2,\n                ylab = \"sqrt HbA1c\", scales=list(\n                    x=list(tick.number = 10),y=list(tick.number = 9)))\nbasic +as.layer(xyplot(pred ~ fu_years | patientnr, data = Ps.ss,\n                       type = \"l\", col = c(2), lty = c(1), lwd = 2),\n                scales=list(\n                    x=list(tick.number = 15),y=list(tick.number = 9)))\n\n\nobject = jointFit.rootREML\nnewdata = ND\ntype = \"Subject\"; interval = \"confidence\"; idVar = \"patientnr\"\nlevel = 0.95\nFtTimes = NULL; last.time = NULL; LeftTrunc_var = NULL; M = 300; returnData = TRUE \nscale = 1.6; weight = rep(1, nrow(newdata)); invlink = NULL; seed = 1\n\n\n\n\n",
+    "created" : 1458330987900.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "1046714854",
+    "id" : "BB55AF6F",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "last_content_update" : 1463649595014,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

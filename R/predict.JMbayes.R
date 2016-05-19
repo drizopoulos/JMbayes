@@ -156,7 +156,7 @@ predict.JMbayes <- function (object, newdata, type = c("Marginal", "Subject"),
         for (i in seq_len(n.tp)) {
             survMats.last[[i]] <- ModelMats(last.time[i], ii = i)
         }
-        data.id2 <- newdata[!duplicated(id), ]
+        data.id2 <- newdata[tapply(row.names(newdata), id, tail, n = 1L), ]
         data.id2 <- data.id2[rep(1:nrow(data.id2), 
             sapply(times.to.pred, length)), ]
         data.id2[[timeVar]] <- unlist(times.to.pred)
