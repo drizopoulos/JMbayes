@@ -57,11 +57,10 @@ shinyServer(function(input, output) {
                 namsFactors <- names(d[indF])
                 levelsF <- lapply(d[indF], levels) 
                 tt <- try(inData <- read.csv(input$patientFile$datapath, sep = input$sep, 
-                                             quote=input$quote, colClasses = sapply(d, class),
-                                             dec = input$dec), TRUE)
+                                             quote=input$quote, dec = input$dec), TRUE)
                 if (!inherits(tt, "try-error")) {
                     inData <- cbind(inData, id = rep(1, nrow(inData)))
-                    f <- function (f, l) {levels(f) <- l; f}
+                    f <- function (f, l) factor(f, levels = l)
                     inData[namsFactors] <- mapply(f, inData[namsFactors], 
                                                   levelsF[namsFactors], SIMPLIFY = FALSE)
                     inData
