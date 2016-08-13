@@ -39,8 +39,21 @@ function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
         pi.u.t.j <- pi.u.t[pairs[2, ]]
         ind1 <- (Ti <= Thoriz & di == 1) & Tj > Thoriz
         ind2 <- (Ti < Thoriz & di == 1) & (Tj == Thoriz & dj == 0)
-        ind <- ind1 | ind2
-        sum((pi.u.t.i < pi.u.t.j) & ind, na.rm = TRUE) / sum(ind, na.rm = TRUE)
+        ind3 <- (Ti < Thoriz & di == 0) & Tj > Thoriz
+        ind <- ind1 | ind2 | ind3
+        if (any(ind3)) {
+            nams <- unique(names(ind3[ind3]))
+            newdata3 <- newdata2[id %in% nams, ]
+            tt <- model.response(model.frame(TermsT, newdata3))[, 1]
+            pi2 <- numeric(nrow(newdata3))
+            for (l in seq_along(pi2)) {
+                pi2[l] <- c(summary(survfit(object, newdata = newdata3[l, ]), times = Thoriz)$surv) /
+                    c(summary(survfit(object, newdata = newdata3[l, ]), times = tt[l])$surv)
+            }
+            pi2 <- 1 - pi2
+            ind[ind3] <- ind[ind3] * pi2
+        }
+        sum((pi.u.t.i < pi.u.t.j) * c(ind), na.rm = TRUE) / sum(ind, na.rm = TRUE)
     } else {
         NA
     }    
