@@ -27,12 +27,9 @@ IndvPred_lme(lmeObject, newdata, timeVar, times = NULL, M = 200L,
         from the smallest to the largest follow-up time of all subjects.}
   \item{M}{numeric scalar denoting the number of Monte Carlo samples. 
         See \bold{Details}.}
-  \item{returnData}{logical; if \code{TRUE} the data frame supplied in
+  \item{return_data}{logical; if \code{TRUE} the data frame supplied in
         \code{newdata} is returned augmented with the outputs of the function.}
   \item{seed}{numeric scalar, the random seed used to produce the results.}
-}
-
-\details{
 }
 
 \value{
@@ -66,5 +63,5 @@ xyplot(pred + low + upp ~ year | id, data = DF,
     type = "l", col = c(2,1,1), lty = c(1,2,2), lwd = 2,
     ylab = "Average log serum Bilirubin")
 }
-
+}
 \keyword{methods}
