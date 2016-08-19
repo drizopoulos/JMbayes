@@ -1,7 +1,9 @@
 # Exported functions
-export(anova.JMbayes, aucJM, bma.combine, cvDCL, dynCJM, dynInfo, dgt, marglogLik, coef.JMbayes, dbs, dns, fixef.JMbayes, jointModelBayes, 
-	ibs, ins, logLik.JMbayes, pgt, plot.JMbayes, plot.survfit.JMbayes, prederrJM, predict.JMbayes, ranef.JMbayes, rgt, rocJM, runDynPred,
-	survfitJM, qgt, xtable.JMbayes)
+export(anova.JMbayes, aucJM, bma.combine, cvDCL, dynCJM, dynInfo, dgt, marglogLik, 
+       coef.JMbayes, dbs, dns, fixef.JMbayes, jointModelBayes, ibs, ins, IndvPred_lme,
+       logLik.JMbayes, pgt, plot.JMbayes, plot.survfit.JMbayes, prederrJM, 
+       predict.JMbayes, ranef.JMbayes, rgt, rocJM, runDynPred, survfitJM, qgt, 
+       xtable.JMbayes)
 
 # Imported functions
 importFrom("nlme", "fixed.effects", "fixef", "random.effects", "ranef",
