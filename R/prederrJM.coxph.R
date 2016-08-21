@@ -21,17 +21,18 @@ prederrJM.coxph <- function (object, newdata, Tstart, Thoriz, lossFun = c("absol
     TermsT <- object$terms
     SurvT <- model.response(model.frame(TermsT, newdata)) 
     Time <- SurvT[, 1]
-    prederr <- if (length(unique(Time)) > 5) {
-        newdata2 <- dataLM(newdata, Tstart, idVar, respVar, timeVar, evTimeVar, summary, 
-                           tranfFun)
-        SurvT <- model.response(model.frame(TermsT, newdata2)) 
-        Time <- SurvT[, 1]
-        delta <- SurvT[, 2]
-        indCens <- Time < Thoriz & delta == 0
-        nr <- nrow(newdata2)
-        aliveThoriz.id <- newdata2[Time > Thoriz, ]
+    newdata2 <- dataLM(newdata, Tstart, idVar, respVar, timeVar, evTimeVar, summary, 
+                       tranfFun)
+    SurvT <- model.response(model.frame(TermsT, newdata2)) 
+    Time <- SurvT[, 1]
+    delta <- SurvT[, 2]
+    indCens <- Time < Thoriz & delta == 0
+    nr <- nrow(newdata2)
+    aliveThoriz.id <- newdata2[Time > Thoriz, ]
+    deadThoriz.id <- newdata2[Time <= Thoriz & delta == 1, ]
+    prederr <- if (length(unique(Time)) > 5 && nrow(aliveThoriz.id) > 5 &&
+                   nrow(deadThoriz.id) > 5) {
         Surv.aliveThoriz <- c(summary(survfit(object, newdata = aliveThoriz.id), times = Thoriz)$surv)
-        deadThoriz.id <- newdata2[Time <= Thoriz & delta == 1, ]
         Surv.deadThoriz <- c(summary(survfit(object, newdata = deadThoriz.id), times = Thoriz)$surv)
         if (sum(indCens) > 1) {
             censThoriz.id <- newdata2[indCens, ]
