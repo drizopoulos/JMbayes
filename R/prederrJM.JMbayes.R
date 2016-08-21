@@ -44,7 +44,8 @@ prederrJM.JMbayes <- function (object, newdata, Tstart, Thoriz, lossFun = c("squ
     idalive <- unique(aliveThoriz[[idVar]])
     iddead <- unique(deadThoriz[[idVar]])
     idcens <- unique(censThoriz[[idVar]])
-    prederr <- if (length(unique(Time)) > 5) {
+    prederr <- if (length(unique(Time)) > 5 && nrow(aliveThoriz) > 5 &&
+                   nrow(deadThoriz) > 5) {
         Surv.aliveThoriz <- if (is_counting) {
             survfitJM(object, newdata = aliveThoriz, idVar = idVar, simulate = simulate, M = M,
                       survTimes = Thoriz, last.time = rep(Tstart, length(idalive)),
