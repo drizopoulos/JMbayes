@@ -30,8 +30,8 @@ prederrJM.coxph <- function (object, newdata, Tstart, Thoriz, lossFun = c("absol
     nr <- nrow(newdata2)
     aliveThoriz.id <- newdata2[Time > Thoriz, ]
     deadThoriz.id <- newdata2[Time <= Thoriz & delta == 1, ]
-    prederr <- if (length(unique(Time)) > 5 && nrow(aliveThoriz.id) > 5 &&
-                   nrow(deadThoriz.id) > 5) {
+    prederr <- if (length(unique(Time)) > 1 && nrow(aliveThoriz.id) > 1 &&
+                   nrow(deadThoriz.id) > 1) {
         Surv.aliveThoriz <- c(summary(survfit(object, newdata = aliveThoriz.id), times = Thoriz)$surv)
         Surv.deadThoriz <- c(summary(survfit(object, newdata = deadThoriz.id), times = Thoriz)$surv)
         if (sum(indCens) > 1) {
