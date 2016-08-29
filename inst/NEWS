@@ -1,3 +1,9 @@
+Changes in version: JMbayes_0.8-0
+
+  * package version for JSS paper v72i07.
+
+---------------------------------------
+
 Changes in version: JMbayes_0.7-9
 
   * aucJM() and prederrJM() now work with left truncated data.

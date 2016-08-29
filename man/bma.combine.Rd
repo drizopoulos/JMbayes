@@ -25,6 +25,10 @@ bma.combine(\dots, JMlis = NULL, weights = NULL)
 \author{Dimitris Rizopoulos \email{d.rizopoulos@erasmusmc.nl}}
 
 \references{
+Rizopoulos, D. (2016). The R package JMbayes for fitting joint models for longitudinal and
+time-to-event data using MCMC. \emph{Journal of Statistical Software} \bold{72(7)}, 1--45.
+doi:10.18637/jss.v072.i07.
+
 Rizopoulos, D., Hatfield, L., Carlin, B. and Takkenberg, J. (2014). Combining dynamic predictions from joint models for longitudinal and time-to-event data using Bayesian model averaging. \emph{Journal of the American Statistical Association} 
 \bold{109}, 1385--1397.
 }

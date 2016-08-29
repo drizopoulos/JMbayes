@@ -1,0 +1,20 @@
+bibentry(bibtype = "Article",
+  title        = "The {R} Package {JMbayes} for Fitting Joint Models for Longitudinal and Time-to-Event Data Using MCMC",
+  author       = person(given = "Dimitris",
+                        family = "Rizopoulos",
+                        email = "d.rizopoulos@erasmusmc.nl"),
+  journal      = "Journal of Statistical Software",
+  year         = "2016",
+  volume       = "72",
+  number       = "7",
+  pages        = "1--45",
+  doi          = "10.18637/jss.v072.i07",
+
+  header       = "To cite JMbayes in publications use:",
+  textVersion  =
+  paste("Dimitris Rizopoulos (2016).",
+        "The R Package JMbayes for Fitting Joint Models for Longitudinal and Time-to-Event Data Using MCMC.",
+        "Journal of Statistical Software, 72(7), 1-45.",
+        "doi:10.18637/jss.v072.i07")
+)
+

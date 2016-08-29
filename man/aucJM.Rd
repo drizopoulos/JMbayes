@@ -81,15 +81,15 @@ developing models, evaluating assumptions and adequacy, and measuring and reduci
 Heagerty, P. and Zheng, Y. (2005). Survival model predictive accuracy and ROC curves. 
 \emph{Biometrics} \bold{61}, 92--105.
 
+Rizopoulos, D. (2016). The R package JMbayes for fitting joint models for longitudinal and
+time-to-event data using MCMC. \emph{Journal of Statistical Software} \bold{72(7)}, 1--45.
+doi:10.18637/jss.v072.i07.
+
 Rizopoulos, D. (2012) \emph{Joint Models for Longitudinal and Time-to-Event Data: with 
 Applications in R}. Boca Raton: Chapman and Hall/CRC.
 
 Rizopoulos, D. (2011). Dynamic predictions and prospective accuracy in joint models for 
 longitudinal and time-to-event data. \emph{Biometrics} \bold{67}, 819--829.
-
-Rizopoulos, D., Murawska, M., Andrinopoulou, E.-R., Lesaffre, E. and Takkenberg, J. (2013). 
-Dynamic predictions with time-dependent covariates in survival analysis: A comparison between 
-joint modeling and landmarking. \emph{under preparation}.
 }
 
 \author{Dimitris Rizopoulos \email{d.rizopoulos@erasmusmc.nl}}

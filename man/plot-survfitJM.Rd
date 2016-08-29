@@ -52,6 +52,10 @@
 }
 
 \references{
+Rizopoulos, D. (2016). The R package JMbayes for fitting joint models for longitudinal and
+time-to-event data using MCMC. \emph{Journal of Statistical Software} \bold{72(7)}, 1--45.
+doi:10.18637/jss.v072.i07.
+
 Rizopoulos, D. (2012) \emph{Joint Models for Longitudinal and Time-to-Event Data: with 
 Applications in R}. Boca Raton: Chapman and Hall/CRC.
 

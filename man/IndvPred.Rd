@@ -52,10 +52,10 @@ IndvPred_lme(lmeObject, newdata, timeVar, times = NULL, M = 200L,
 \examples{
 \dontrun{
 # linear mixed model fit
-fitLME <- lme(log(serBilir) ~ drug * ns(year, 2), data = pbc2, 
+fitLME <- lme(log(serBilir) ~ drug * ns(year, 2), data = subset(pbc2, id != 2), 
         random = ~ ns(year, 2) | id)
         
-DF <- IndvPred_lme(fitLME, newdata = subset(pbc2, id %in% c(2, 25)), timeVar = "year", 
+DF <- IndvPred_lme(fitLME, newdata = subset(pbc2, id == 2), timeVar = "year", 
     M = 500, return_data = TRUE)
     
 require(lattice)
