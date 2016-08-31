@@ -1,7 +1,7 @@
 aucJM.coxph <-
-function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, 
-                         idVar = "id", respVar = "y", timeVar = "time", evTimeVar = "Time",
-                         summary = c("value", "slope", "area"), tranfFun = function (x) x, ...) {
+function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
+          idVar = "id", respVar = "y", timeVar = "time", evTimeVar = "Time",
+          summary = c("value", "slope", "area"), tranfFun = function (x) x, ...) {
     if (!inherits(object, "coxph"))
         stop("Use only with 'coxph' objects.\n")
     if (!is.data.frame(newdata) || nrow(newdata) == 0)

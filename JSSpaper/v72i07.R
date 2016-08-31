@@ -1,12 +1,3 @@
-#########################################################################################
-# Description: R script replicating the results in the mansuscript entitled 'The R      #
-#              Package JMbayes for Fitting Joint Models for Longitudinal and            #
-#              Time-to-Event Data using MCMC'                                           #
-# Author: Dimitris Rizopoulos                                                           #
-# Last update: 2015-07-29                                                               #
-#########################################################################################
-
-
 ###############
 # Section 4.1 #
 ###############
@@ -16,6 +7,18 @@ library("lattice")
 pbc2$status2 <- as.numeric(pbc2$status != "alive")
 pbc2.id$status2 <- as.numeric(pbc2.id$status != "alive")
 
+sfit <- survfit(Surv(years, status2) ~ drug, data = pbc2.id)
+plot(sfit, lty = 1:2, lwd = 2, col = 1:2, mark.time = FALSE, 
+   xlab = "Time (years)", ylab = "Transplantation-free Survival")
+legend("topright", levels(pbc2.id$drug), lty = 1:2, col = 1:2, lwd = 2, 
+   cex = 1.3, bty = "n")
+pbc2$status2f <- factor(pbc2$status2, levels = 0:1, 
+   labels = c("alive", "transplanted/dead"))
+xyplot(log(serBilir) ~ year | status2f, group = id, data = pbc2,
+   panel = function(x, y, ...) {
+     panel.xyplot(x, y, type = "l", col = 1, ...)
+     panel.loess(x, y, col = 2, lwd = 2)
+   }, xlab = "Time (years)", ylab = "log(serum Bilirubin)")
 
 lmeFit.pbc1 <- lme(log(serBilir) ~ ns(year, 2), data = pbc2,
                    random = ~ ns(year, 2) | id)
@@ -87,6 +90,7 @@ jointFit.pbc13w <- update(jointFit.pbc1, estimateWeightFun = TRUE,
                           weightFun = wf, priorShapes = list(shape1 = dunif),
                           priors = list(priorshape1 = c(0, 10)))
 
+plot(jointFit.pbc13w, which = "weightFun", max.t = 0.5)
 
 # a joint model with the shared random effects parameterization
 jointFit.pbc14 <- update(jointFit.pbc1, param = "shared-RE", n.iter = 50000)
@@ -128,7 +132,7 @@ xyplot(pred + low + upp ~ year, data = Ps.pbc15, type = "l",
 
 
 # Web interface with shiny
-runDynPred()
+ runDynPred()
 
 
 ###############
@@ -141,6 +145,9 @@ Models <- list(jointFit.pbc1, jointFit.pbc12, jointFit.pbc13,
 
 log.p.Mk <- log(rep(1/5, 5))
 log.p.Dn.Mk <- sapply(Models, logLik, marginal.thetas = TRUE)
+
+## Added obs.times here!
+obs.times <- with(pbc2, split(year, id))
 log.p.Dj.Mk <- sapply(Models, marglogLik, newdata = ND[1:5, ])
 
 weightsBMA <- log.p.Dj.Mk + log.p.Dn.Mk + log.p.Mk
@@ -157,11 +164,16 @@ survPreds.BMA
 # Section 5.3 #
 ###############
 
+roc.pbc15 <- rocJM(jointFit.pbc15, pbc2, Tstart = 5, Dt = 2)
+plot(roc.pbc15)
+
 # Discrimination & Calibration
 auc.pbc15 <- aucJM(jointFit.pbc15, pbc2, Tstart = 5, Dt = 2)
-roc.pbc15 <- rocJM(jointFit.pbc15, pbc2, Tstart = 5, Dt = 2)
+auc.pbc15
 dynC.pbc15 <- dynCJM(jointFit.pbc15, pbc2, Dt = 2)
+dynC.pbc15
 pe.pbc15 <- prederrJM(jointFit.pbc15, pbc2, Tstart = 5, Thoriz = 7)
+pe.pbc15
 ipe.pbc15 <- prederrJM(jointFit.pbc15, pbc2, Tstart = 5, Thoriz = 9, interval = TRUE)
 
 # Validation using 10-fold CV
@@ -204,8 +216,8 @@ stopCluster(cl)
 
 
 # cross-validation estimates of the prediction error and the AUC
-mean(sapply(res, function (x) x$pe$prederr))
 mean(sapply(res, function (x) x$auc$auc))
+mean(sapply(res, function (x) x$pe$prederr))
 
 
 ##############
@@ -215,9 +227,24 @@ mean(sapply(res, function (x) x$auc$auc))
 jointFit.pbc1.10knots <- update(jointFit.pbc1, lng.in.kn = 10L)
 jointFit.pbc1.20knots <- update(jointFit.pbc1, lng.in.kn = 20L)
 
+cbind("10 knots" = fixef(jointFit.pbc1.10knots),
+  "15 knots" = fixef(jointFit.pbc1), 
+  "20 knots" = fixef(jointFit.pbc1.20knots))
+
 jointFit.pbc15.10knots <- update(jointFit.pbc15, lng.in.kn = 10L)
 jointFit.pbc15.20knots <- update(jointFit.pbc15, lng.in.kn = 20L)
 
+cbind("10 knots" = fixef(jointFit.pbc1.10knots, process = "Event"), 
+  "15 knots" = fixef(jointFit.pbc1, process = "Event"), 
+  "20 knots" = fixef(jointFit.pbc1.20knots, process = "Event"))
+
+##############
+# Appendix B #
+##############
+
+plot(jointFit.pbc1, param = c("betas", "sigma", "alphas", "gammas"))
+plot(jointFit.pbc1, which = "density", 
+  param = c("betas", "sigma", "alphas", "gammas"))
 
 ##############
 # Appendix C #
@@ -244,7 +271,3 @@ jointFit.pbc <- jointModelBayes(lmeFit.pbc, tdCox.pbc, timeVar = "year")
 
 summary(jointFit.pbc)
 
-###################################################################################
-###################################################################################
-
-save.image(file = "C:/Users/dimitris/Documents/Papers/Paper18/Results/Application/AnalysesPaper.RData")
