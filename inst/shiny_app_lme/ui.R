@@ -30,8 +30,8 @@ shinyUI(fluidPage(
     
     mainPanel(
         tabsetPanel(
-          tabPanel("Data", dataTableOutput('data')),
-          tabPanel("Plot", plotOutput('plot'))
+          tabPanel("Data", dataTableOutput('data'), uiOutput("message")),
+          tabPanel("Plot", htmlOutput('ws'), plotOutput('plot'))
         )
     )
 ))

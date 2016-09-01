@@ -1,3 +1,9 @@
+Changes in version: JMbayes_0.8-1
+
+  * shiny app for dynamic predictions from mixed models.
+
+---------------------------------------
+
 Changes in version: JMbayes_0.8-0
 
   * package version for JSS paper v72i07.

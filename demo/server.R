@@ -96,7 +96,7 @@ shinyServer(function(input, output) {
             cat("<br /><h3> <span style='color:black'> Welcome to the web interface",
                   "for producing dynamic predictions from joint models using package",
                   "<a href='http://cran.r-project.org/package=JMbayes'",
-                  "style='text-decoration:none;' target='_blank'><b>JMbayes</b></a></h3>",
+                  "style='text-decoration:none;' target='_blank'><b>JMbayes</b></a></span></h3>",
                 "<br /><br /><h4>Use the menus on the left to load the R workspace containing the fitted joint model",
                 "to continue ... (for further details & instructions check the 'Help' tab above)</h4>")
         } else {

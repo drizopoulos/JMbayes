@@ -33,7 +33,7 @@ shinyServer(function(input, output) {
             if (!is.null(nr) && nr > 1) {
                 sliderInput("obs", "Number of observations to use in prediction:", 
                             min = 1, max = nr, value = 1, step = 1,
-                            animate = animationOptions(loop = TRUE))
+                            animate = animationOptions(loop = TRUE, interval = 1500))
             }
         }
     })
@@ -47,7 +47,9 @@ shinyServer(function(input, output) {
     })
     
     output$data <- renderDataTable({
-        loadPatient()
+        if (!is.null(input$patientFile) && input$timeVar != "<select>") {
+            loadPatient()
+        }
     })
     
     calculate_preds <- reactive({
@@ -75,8 +77,7 @@ shinyServer(function(input, output) {
     })
     
     output$plot <- renderPlot({
-        if (!is.null(input$patientFile) && !is.null(input$timeVar) 
-            && input$timeVar != "<select>") {
+        if (!is.null(input$patientFile) && input$timeVar != "<select>") {
             DFs <- calculate_preds()
             times <- DFs[[input$obs]][[input$timeVar]]
             na_ind <- is.na(DFs[[input$obs]][["low"]])
@@ -84,11 +85,13 @@ shinyServer(function(input, output) {
             active_DF <- DFs[[input$obs]]
             nd <- DFs[["nd"]]
             nd_active <- nd[seq_len(input$obs), ]
+            form <- as.formula(paste(DFs$respVar, "~", input$timeVar))
+            y <- model.response(model.frame(form, nd))
             matplot(active_DF[[input$timeVar]], active_DF[c("pred", "low", "upp")], 
                     type = "l", col = c(2, 1, 1), lty = c(1, 2, 2), lwd = 2,
-                    xlab = input$timeVar, ylab = DFs$respVar)
+                    xlab = input$timeVar, ylab = DFs$respVar,
+                    ylim = range(y, active_DF[["low"]], active_DF[["upp"]], na.rm = TRUE))
             abline(v = last_time, lty = 2)
-            form <- as.formula(paste(DFs$respVar, "~", input$timeVar))
             points(form, data = nd_active, pch = 8, col = 4)
             if (input$marginal) {
                 form <- as.formula(paste("marginal ~", input$timeVar))
@@ -96,4 +99,30 @@ shinyServer(function(input, output) {
             }
         }
     })
+    
+    output$message <- renderPrint({
+        if (is.null(input$RDfile)) {
+            cat("<br /><h3> <span style='color:black'> Welcome to the web interface",
+                "for producing dynamic predictions from linear mixed models using package",
+                "<a href='http://cran.r-project.org/package=JMbayes'",
+                "style='text-decoration:none;' target='_blank'><b>JMbayes</b></a></span></h3>",
+                "<br /><br /><h4>Use the menus on the left to load the R workspace containing", 
+                "the fitted joint model to continue ... </h4>")
+        } else if (!is.null(input$RDfile) && is.null(input$patientFile)) {
+            cat("<br /><h4><span style='color:black'>Load a comma seperated file with the",
+                "subject data.</span></h4>")
+        } else if (!is.null(input$RDfile) && !is.null(input$patientFile) && 
+                   input$timeVar == "<select>") {
+            cat("<br /><h4><span style='color:black'>Select the variable of the mixed model",
+                "that represents time.</span></h4>")
+        }
+    })
+    
+    output$ws <- renderPrint({
+        if(!is.null(input$patientFile) && input$timeVar != "<select>") {
+            cat("<br /> <br /> <br /> <br />")
+        }
+    })
 })
+
+
