@@ -1,22 +1,63 @@
-IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
-                          interval = c("confidence", "prediction"),
-                          level = 0.95, return_data = FALSE, seed = 1L) {
-    if (!inherits(lmeObject, "lme"))
-        stop("Use only with 'lme' objects.\n")
-    interval <- match.arg(interval)
+extract_lmeComponents <- function (lmeObject, timeVar) {
     data <- lmeObject$data
     formYx <- formula(lmeObject)
     mfX <- model.frame(terms(formYx), data = data)
     TermsX <- attr(mfX, "terms")
-    mfX_new <- model.frame(TermsX, data = newdata)
-    X_new <- model.matrix(formYx, mfX_new)
     formYz <- formula(lmeObject$modelStruct$reStruct[[1]])
     mfZ <- model.frame(terms(formYz), data = data)
     TermsZ <- attr(mfZ, "terms")
+    idVar <- names(lmeObject$modelStruct$reStruct)
+    betas <- fixef(lmeObject)
+    sigma <- lmeObject$sigma
+    D <- lapply(pdMatrix(lmeObject$modelStruct$reStruct), "*", sigma^2)[[1]]
+    V <- vcov(lmeObject)
+    times_orig <- data[[timeVar]]
+    times_orig <- times_orig[!is.na(times_orig)]
+    out <- list(formYx = formYx, TermsX = TermsX, formYz = formYz, TermsZ = TermsZ, 
+                idVar = idVar, betas = betas, sigma = sigma, D = D, V = V,
+                times_orig = times_orig)
+    class(out) <- "lmeComponents"
+    out
+}
+
+IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
+                          interval = c("confidence", "prediction"),
+                          level = 0.95, return_data = FALSE, seed = 1L) {
+    if (!inherits(lmeObject, "lme") && !inherits(lmeObject, "lmeComponents"))
+        stop("Use only with 'lme' or 'lmeComponents' objects.\n")
+    interval <- match.arg(interval)
+    if (inherits(lmeObject, "lme")) {
+        data <- lmeObject$data
+        formYx <- formula(lmeObject)
+        mfX <- model.frame(terms(formYx), data = data)
+        TermsX <- attr(mfX, "terms")
+        formYz <- formula(lmeObject$modelStruct$reStruct[[1]])
+        mfZ <- model.frame(terms(formYz), data = data)
+        TermsZ <- attr(mfZ, "terms")
+        idVar <- names(lmeObject$modelStruct$reStruct)
+        betas <- fixef(lmeObject)
+        sigma <- lmeObject$sigma
+        D <- lapply(pdMatrix(lmeObject$modelStruct$reStruct), "*", sigma^2)[[1]]
+        V <- vcov(lmeObject)
+        times_orig <- data[[timeVar]]
+        times_orig <- times_orig[!is.na(times_orig)]
+    } else {
+        formYx <- lmeObject$formYx
+        TermsX <- lmeObject$TermsX
+        formYz <- lmeObject$formYz
+        TermsZ <- lmeObject$TermsZ 
+        idVar <- lmeObject$idVar
+        betas <- lmeObject$betas
+        sigma <- lmeObject$sigma
+        D <- lmeObject$D
+        V <- lmeObject$V
+        times_orig <- lmeObject$times_orig
+    }
+    mfX_new <- model.frame(TermsX, data = newdata)
+    X_new <- model.matrix(formYx, mfX_new)
     mfZ_new <- model.frame(TermsZ, data = newdata)
     Z_new <- model.matrix(formYz, mfZ_new)
     y_new <- model.response(mfX_new, "numeric")
-    idVar <- names(lmeObject$modelStruct$reStruct)
     if (length(idVar) > 1)
         stop("the current version of the function only works with a single grouping variable.\n")
     if (is.null(newdata[[idVar]]))
@@ -24,18 +65,13 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
     id <- match(newdata[[idVar]], unique(newdata[[idVar]]))
     n <- length(unique(id))
     ######################################################################################
-    betas <- fixef(lmeObject)
-    D <- lapply(pdMatrix(lmeObject$modelStruct$reStruct), "*",
-                lmeObject$sigma^2)[[1]]
-    V <- vcov(lmeObject)
     modes <- matrix(0.0, n, ncol(Z_new))
     post_vars <- DZtVinv <- vector("list", n)
     for (i in seq_len(n)) {
         id_i <- id == i
         X_new_id <- X_new[id_i, , drop = FALSE]
         Z_new_id <- Z_new[id_i, , drop = FALSE]
-        Vi_inv <- solve(Z_new_id %*% tcrossprod(D, Z_new_id) + 
-                            lmeObject$sigma^2 * diag(sum(id_i)))
+        Vi_inv <- solve(Z_new_id %*% tcrossprod(D, Z_new_id) + sigma^2 * diag(sum(id_i)))
         DZtVinv[[i]] <- tcrossprod(D, Z_new_id) %*% Vi_inv
         modes[i, ] <- c(DZtVinv[[i]] %*% (y_new[id_i] - X_new_id %*% betas))
         t1 <- DZtVinv[[i]] %*% Z_new_id %*% D
@@ -46,8 +82,7 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
     fitted_y <- c(X_new %*% betas) + rowSums(Z_new * modes[id, , drop = FALSE])
     ######################################################################################
     if (is.null(times) || !is.numeric(times)) {
-        times <- seq(min(data[[timeVar]], na.rm = TRUE), max(data[[timeVar]], na.rm = TRUE),
-                     length.out = 100)
+        times <- seq(min(times_orig), max(times_orig), length.out = 100)
     }
     newdata_pred <- newdata[tapply(row.names(newdata), id, tail, n = 1), ]
     last_time <- newdata_pred[[timeVar]]
