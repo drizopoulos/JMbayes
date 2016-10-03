@@ -15,7 +15,7 @@ joint model for longitudinal and time-to-event data. Objects of this class have 
   The following components must be included in a legitimate \code{JMbayes} object.
   \item{mcmc}{a list with the MCMC samples for each parameter (except from the random effects if control argument \code{keepRE} is \code{FALSE}).}
   \item{postMeans}{a list with posterior means.}
-  \item{postMeans}{a list with posterior modes calculated using kernel desnisty estimation.}
+  \item{postModes}{a list with posterior modes calculated using kernel desnisty estimation.}
   \item{postVarsRE}{a list with the posterior variance-covariance matrix for the random effects of each subject.}
   \item{StErr}{a list with posterior standard errors.}
   \item{EffectiveSize}{a list with effective sample sizes.}

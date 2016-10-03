@@ -1,6 +1,7 @@
 \name{IndvPred_lme}
 
 \alias{IndvPred_lme}
+\alias{extract_lmeComponents}
 
 \title{Individualized Predictions from Linear Mixed Models}
 

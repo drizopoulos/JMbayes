@@ -97,7 +97,7 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
     predicted_y <- c(X_new_pred %*% betas) + 
         rowSums(Z_new_pred * modes[id_pred, , drop = FALSE])
     set.seed(seed)
-    betas_M <- mvrnorm(M, betas, V)
+    betas_M <- MASS::mvrnorm(M, betas, V)
     modes_fun <- function (betas) {
         t(mapply("%*%", DZtVinv, split(y_new - X_new %*% betas, id)))
     }

@@ -1,7 +1,8 @@
 # Exported functions
 export(anova.JMbayes, aucJM, bma.combine, cvDCL, dynCJM, dynInfo, dgt, 
-       extract_lmeComponents, marglogLik, coef.JMbayes, dbs, dns, fixef.JMbayes, 
-       jointModelBayes, ibs, ins, IndvPred_lme, logLik.JMbayes, pgt, plot.JMbayes, 
+       extract_lmeComponents, marglogLik, mvglmer, mvJointModelBayes, coef.JMbayes, 
+       dbs, dns, fixef.JMbayes, jointModelBayes, ibs, ins, IndvPred_lme, 
+       logLik.JMbayes, pgt, plot.JMbayes, 
        plot.survfit.JMbayes, prederrJM, predict.JMbayes, ranef.JMbayes, rgt, rocJM, 
        runDynPred, survfitJM, qgt, xtable.JMbayes)
 
@@ -10,7 +11,7 @@ importFrom("nlme", "fixed.effects", "fixef", "random.effects", "ranef",
   "pdMatrix", "getVarCov")
 importFrom("survival", "survfit", "coxph", "survreg")
 importFrom("splines", "ns", "bs", "splineDesign")
-importFrom("MASS", "mvrnorm", "glmmPQL", "ginv")
+importFrom("MASS", "mvrnorm")
 importFrom("grDevices", "dev.cur", "dev.size", "xy.coords")
 importFrom("graphics", "abline", "axis", "lines", "matlines", "matplot", 
   "mtext", "par", "plot", "points", "polygon", "segments")
@@ -21,9 +22,17 @@ importFrom("stats", "acf", "ar", "as.formula", "ave", "bw.SJ", "coef",
   "model.matrix.default", "model.response", "optim", "pnorm", "pt", "qt", 
   "quantile", "rWishart", "rchisq", "reformulate", "rexp", "rgamma", 
   "rnorm", "rt", "runif", "sd", "terms", "var", "vcov", "makepredictcall",
-  "model.offset")
+  "model.offset", "complete.cases", ".getXlevels")
 importFrom("utils", "as.relistable", "combn", "glob2rx", "head", "relist", 
-  "setTxtProgressBar", "tail", "txtProgressBar")
+  "setTxtProgressBar", "tail", "txtProgressBar", "object.size")
+importFrom("Rcpp", "evalCpp")
+importFrom("jagsUI", "jags")
+importFrom("parallel", "makePSOCKcluster", "stopCluster", "detectCores")
+importFrom("doParallel", "registerDoParallel")
+importFrom("xtable", "xtable")
+importFrom("foreach", "foreach", "%dopar%")
+
+useDynLib(JMbayes)
 
 
 # S3 methods
@@ -43,6 +52,8 @@ S3method(makepredictcall, dns)
 S3method(makepredictcall, ibs)
 S3method(makepredictcall, ins)
 S3method(plot, JMbayes)
+S3method(plot, mvJMbayes)
+S3method(plot, mvglmer)
 S3method(plot, rocJM)
 S3method(plot, survfit.JMbayes)
 S3method(predict, JMbayes)
@@ -52,11 +63,15 @@ S3method(print, JMbayes)
 S3method(print, prederrJM)
 S3method(print, rocJM)
 S3method(print, summary.JMbayes)
+S3method(print, summary.mvJMbayes)
+S3method(print, summary.mvglmer)
 S3method(print, survfit.JMbayes)
 S3method(ranef, JMbayes)
 S3method(residuals, JMbayes)
 S3method(rocJM, JMbayes)
 S3method(summary, JMbayes)
+S3method(summary, mvglmer)
+S3method(summary, mvJMbayes)
 S3method(survfitJM, JMbayes)
 S3method(prederrJM, JMbayes)
 S3method(prederrJM, coxph)

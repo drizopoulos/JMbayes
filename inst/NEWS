@@ -1,3 +1,10 @@
+Changes in version: JMbayes_0.8-3
+
+  * added function mvglmer() for fitting multivariate mixed models using JAGS.
+  * added function mvJointModelBayes() for fitting multivariate joint models.
+
+---------------------------------------
+
 Changes in version: JMbayes_0.8-1
 
   * shiny app for dynamic predictions from mixed models.

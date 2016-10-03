@@ -33,7 +33,7 @@ function (object, process = c("Longitudinal", "longitudinal", "Event", "event"),
         sk <- GQsurv$sk
         K <- length(sk)
         anyLeftTrunc <- object$y$anyLeftTrunc
-        if (anyLeftTrunc) {
+        if (length(anyLeftTrunc)) {
             ni <- tapply(object$y$id, object$y$id, length)
             TimeL <- rep(object$y$TimeL, ni)
             P <- (times - TimeL) / 2

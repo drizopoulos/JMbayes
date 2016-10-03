@@ -283,10 +283,11 @@ predict.JMbayes <- function (object, newdata, type = c("Marginal", "Subject"),
             } else {
                 rbind(newdata, cbind(data.id2, pred = out))
             }
-        } else
+        } else {
             attr(out, "time.to.pred") <- times.to.pred
+        }
+        rm(list = ".Random.seed", envir = globalenv())
     }
-    rm(list = ".Random.seed", envir = globalenv())
     class(out) <- c(class(out), "predict.JMbayes")
     out
 }

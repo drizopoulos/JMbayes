@@ -11,9 +11,13 @@
 }
 
 \usage{
-runDynPred()
+runDynPred(type = c("JM", "lme"))
 } 
 
+\arguments{
+    \item{type}{character string indicating whether dynamic predictions are based on 
+        joint models or mixed models alone.}
+}
 
 \value{
 No value returned.

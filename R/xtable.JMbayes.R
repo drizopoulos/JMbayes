@@ -65,7 +65,7 @@ function (x, caption = NULL, label = NULL, align = NULL, digits = NULL,
     }  
     if (!requireNamespace("xtable", quietly = TRUE)) 
         stop("'xtable' is required.\n")
-    print(xtable(Dat, caption = caption, label = label, 
+    xtable::print.xtable(xtable::xtable(Dat, caption = caption, label = label, 
         align = align, digits = digits, display = display), 
         sanitize.text.function = function (x) x, include.rownames = FALSE, ...)
 }
