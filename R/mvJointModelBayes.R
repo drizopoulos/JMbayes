@@ -497,9 +497,9 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                         length.out = length(blocks[[1L]])))
     blocks <- blocks[-1L]
     elapsed_time <- system.time({
-        cluster <- makePSOCKcluster(con$n_cores)
+        cluster <- makeCluster(con$n_cores)
         registerDoParallel(cluster)
-        out1 <- foreach(i = block1, .packages = c("Rcpp", "JMbayes"), .combine = c) %dopar% {
+        out1 <- foreach(i = block1, .packages = "JMbayes", .combine = c) %dopar% {
             runParallel(i, betas, b, sigmas, inv.D, inits, Data, prs, scales, Cvs, con)
         }
         stopCluster(cluster)
