@@ -52,6 +52,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// lap_rwm_C_woRE
+List lap_rwm_C_woRE(List initials, List Data, List priors, List scales, List Covs, List control);
+RcppExport SEXP JMbayes_lap_rwm_C_woRE(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type initials(initialsSEXP);
+    Rcpp::traits::input_parameter< List >::type Data(DataSEXP);
+    Rcpp::traits::input_parameter< List >::type priors(priorsSEXP);
+    Rcpp::traits::input_parameter< List >::type scales(scalesSEXP);
+    Rcpp::traits::input_parameter< List >::type Covs(CovsSEXP);
+    Rcpp::traits::input_parameter< List >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(lap_rwm_C_woRE(initials, Data, priors, scales, Covs, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lap_rwm_C_woRE_nogammas
+List lap_rwm_C_woRE_nogammas(List initials, List Data, List priors, List scales, List Covs, List control);
+RcppExport SEXP JMbayes_lap_rwm_C_woRE_nogammas(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type initials(initialsSEXP);
+    Rcpp::traits::input_parameter< List >::type Data(DataSEXP);
+    Rcpp::traits::input_parameter< List >::type priors(priorsSEXP);
+    Rcpp::traits::input_parameter< List >::type scales(scalesSEXP);
+    Rcpp::traits::input_parameter< List >::type Covs(CovsSEXP);
+    Rcpp::traits::input_parameter< List >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(lap_rwm_C_woRE_nogammas(initials, Data, priors, scales, Covs, control));
+    return rcpp_result_gen;
+END_RCPP
+}
 // logPosterior
 double logPosterior(double temp, arma::vec event, arma::uvec idGK_fast, arma::mat W1, arma::mat W1s, arma::vec Bs_gammas, arma::mat W2, arma::mat W2s, arma::vec gammas, arma::mat Wlong, arma::mat Wlongs, arma::vec alphas, arma::vec Pw, arma::vec mean_Bs_gammas, arma::mat Tau_Bs_gammas, arma::vec mean_gammas, arma::mat Tau_gammas, arma::vec mean_alphas, arma::mat Tau_alphas, double tauBs, double A_tauBs, double B_tauBs);
 RcppExport SEXP JMbayes_logPosterior(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP W1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP W2SEXP, SEXP W2sSEXP, SEXP gammasSEXP, SEXP WlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_gammasSEXP, SEXP Tau_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {

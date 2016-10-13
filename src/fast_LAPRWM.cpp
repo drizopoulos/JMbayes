@@ -366,7 +366,6 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     vec Bs_gammas = as<vec>(initials["Bs_gammas"]);
     vec gammas = as<vec>(initials["gammas"]);
     vec alphas = as<vec>(initials["alphas"]);
-    vec phi_Bs_gammas = as<vec>(initials["phi_Bs_gammas"]);
     vec phi_gammas = as<vec>(initials["phi_gammas"]);
     vec phi_alphas = as<vec>(initials["phi_alphas"]);
     double tau_Bs_gammas = as<double>(initials["tau_Bs_gammas"]);
@@ -439,7 +438,6 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     vec out_tau_Bs_gammas(n_out, fill::zeros);
     vec out_tau_gammas(n_out, fill::zeros);
     vec out_tau_alphas(n_out, fill::zeros);
-    mat out_phi_Bs_gammas(n_Bs_gammas, n_out, fill::zeros);
     mat out_phi_gammas(n_gammas, n_out, fill::zeros);
     mat out_phi_alphas(n_alphas, n_out, fill::zeros);
     vec out_logWeights(n_out, fill::zeros);
@@ -547,7 +545,6 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                 out_Bs_gammas.col(keep_iterator) = Bs_gammas;
                 out_gammas.col(keep_iterator) = gammas;
                 out_alphas.col(keep_iterator) = alphas;
-                out_phi_Bs_gammas.col(keep_iterator) = phi_Bs_gammas;
                 out_phi_gammas.col(keep_iterator) = phi_gammas;
                 out_phi_alphas.col(keep_iterator) = phi_alphas;
                 out_tau_Bs_gammas.at(keep_iterator) = tau_Bs_gammas;
@@ -581,7 +578,6 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
         Named("Bs_gammas") = out_Bs_gammas,
         Named("gammas") = out_gammas,
         Named("alphas") = out_alphas,
-        Named("phi_Bs_gammas") = out_phi_Bs_gammas,
         Named("phi_gammas") = out_phi_gammas,
         Named("phi_alphas") = out_phi_alphas,
         Named("tau_Bs_gammas") = out_tau_Bs_gammas,
@@ -655,7 +651,6 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
     mat b = as<mat>(initials["b"]);
     vec Bs_gammas = as<vec>(initials["Bs_gammas"]);
     vec alphas = as<vec>(initials["alphas"]);
-    vec phi_Bs_gammas = as<vec>(initials["phi_Bs_gammas"]);
     vec phi_alphas = as<vec>(initials["phi_alphas"]);
     double tau_Bs_gammas = as<double>(initials["tau_Bs_gammas"]);
     double tau_alphas = as<double>(initials["tau_alphas"]);
@@ -711,7 +706,6 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
     mat out_alphas(n_alphas, n_out, fill::zeros);
     vec out_tau_Bs_gammas(n_out, fill::zeros);
     vec out_tau_alphas(n_out, fill::zeros);
-    mat out_phi_Bs_gammas(n_Bs_gammas, n_out, fill::zeros);
     mat out_phi_alphas(n_alphas, n_out, fill::zeros);
     vec out_logWeights(n_out, fill::zeros);
     RNGScope scope;
@@ -797,7 +791,6 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
                 out_b.slice(keep_iterator) = b;
                 out_Bs_gammas.col(keep_iterator) = Bs_gammas;
                 out_alphas.col(keep_iterator) = alphas;
-                out_phi_Bs_gammas.col(keep_iterator) = phi_Bs_gammas;
                 out_phi_alphas.col(keep_iterator) = phi_alphas;
                 out_tau_Bs_gammas.at(keep_iterator) = tau_Bs_gammas;
                 out_tau_alphas.at(keep_iterator) = tau_alphas;
@@ -826,7 +819,6 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
         Named("b") = out_b,
         Named("Bs_gammas") = out_Bs_gammas,
         Named("alphas") = out_alphas,
-        Named("phi_Bs_gammas") = out_phi_Bs_gammas,
         Named("phi_alphas") = out_phi_alphas,
         Named("tau_Bs_gammas") = out_tau_Bs_gammas,
         Named("tau_alphas") = out_tau_alphas
@@ -843,4 +835,405 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
             Named("alphas") = Sigma_alphas
         )
     ));
+}
+
+double logPosterior_woRE (const vec& event,
+                          const mat& W1, const mat& W1s, const vec& Bs_gammas,
+                          const mat& W2, const mat& W2s, const vec& gammas,
+                          const mat& Wlong, const mat& Wlongs, const vec& alphas,
+                          const vec& Pw,
+                          const vec& mean_Bs_gammas, const mat& Tau_Bs_gammas, double tau_Bs_gammas,
+                          const vec& mean_gammas, const mat& Tau_gammas, double tau_gammas,
+                          const vec& mean_alphas, const mat& Tau_alphas, double tau_alphas) {
+    // log-likelihood
+    vec log_h = W1 * Bs_gammas + W2 * gammas + Wlong * alphas;
+    vec H = Pw % exp(W1s * Bs_gammas + W2s * gammas + Wlongs * alphas);
+    //
+    double out = sum(event % log_h) - sum(H) +
+        logPrior(Bs_gammas, mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas) +
+        logPrior(gammas, mean_gammas, Tau_gammas, tau_gammas) +
+        logPrior(alphas, mean_alphas, Tau_alphas, tau_alphas);
+    return(out);
+}
+
+double logPosterior_woRE_nogammas (const vec& event,
+                                   const mat& W1, const mat& W1s, const vec& Bs_gammas,
+                                   const mat& Wlong, const mat& Wlongs, const vec& alphas,
+                                   const vec& Pw,
+                                   const vec& mean_Bs_gammas, const mat& Tau_Bs_gammas, double tau_Bs_gammas,
+                                   const vec& mean_alphas, const mat& Tau_alphas, double tau_alphas) {
+    // log-likelihood
+    vec log_h = W1 * Bs_gammas + Wlong * alphas;
+    vec H = Pw % exp(W1s * Bs_gammas + Wlongs * alphas);
+    //
+    double out = sum(event % log_h) - sum(H) +
+        logPrior(Bs_gammas, mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas) +
+        logPrior(alphas, mean_alphas, Tau_alphas, tau_alphas);
+    return(out);
+}
+
+// [[Rcpp::export]]
+List lap_rwm_C_woRE (List initials, List Data, List priors, List scales, List Covs, 
+                     List control) {
+    // Data
+    vec event = as<vec>(Data["event"]);
+    uvec idGK_fast = as<uvec>(Data["idGK_fast"]);
+    mat W1 = as<mat>(Data["W1"]);
+    mat W1s = as<mat>(Data["W1s"]);
+    mat W2 = as<mat>(Data["W2"]);
+    mat W2s = as<mat>(Data["W2s"]);
+    mat Wlong = as<mat>(Data["Wlong"]);
+    mat Wlongs = as<mat>(Data["Wlongs"]);
+    vec Pw = as<vec>(Data["Pw"]);
+    // Initials
+    vec Bs_gammas = as<vec>(initials["Bs_gammas"]);
+    vec gammas = as<vec>(initials["gammas"]);
+    vec alphas = as<vec>(initials["alphas"]);
+    vec phi_gammas = as<vec>(initials["phi_gammas"]);
+    vec phi_alphas = as<vec>(initials["phi_alphas"]);
+    double tau_Bs_gammas = as<double>(initials["tau_Bs_gammas"]);
+    double tau_gammas = as<double>(initials["tau_gammas"]);
+    double tau_alphas = as<double>(initials["tau_alphas"]);
+    // Priors
+    vec mean_Bs_gammas = as<vec>(priors["mean_Bs_gammas"]);
+    mat Tau_Bs_gammas = as<mat>(priors["Tau_Bs_gammas"]);
+    vec mean_gammas = as<vec>(priors["mean_gammas"]);
+    mat Tau_gammas = as<mat>(priors["Tau_gammas"]);
+    vec mean_alphas = as<vec>(priors["mean_alphas"]);
+    mat Tau_alphas = as<mat>(priors["Tau_alphas"]);
+    double A_tau_Bs_gammas = as<double>(priors["A_tau_Bs_gammas"]);
+    double B_tau_Bs_gammas = as<double>(priors["B_tau_Bs_gammas"]);
+    double Apost_tau_Bs_gammas = A_tau_Bs_gammas + 0.5 * as<double>(priors["rank_Tau_Bs_gammas"]);
+    //
+    bool shrink_gammas = as<bool>(priors["shrink_gammas"]);
+    double A_tau_gammas = as<double>(priors["A_tau_gammas"]);
+    double B_tau_gammas = as<double>(priors["B_tau_gammas"]);
+    double Apost_tau_gammas = A_tau_gammas + 0.5 * as<double>(priors["rank_Tau_gammas"]);
+    double A_phi_gammas = as<double>(priors["A_phi_gammas"]);
+    double B_phi_gammas = as<double>(priors["B_phi_gammas"]);
+    double Apost_phi_gammas = A_phi_gammas + 0.5;
+    //
+    bool shrink_alphas = as<bool>(priors["shrink_alphas"]);
+    double A_tau_alphas = as<double>(priors["A_tau_alphas"]);
+    double B_tau_alphas = as<double>(priors["B_tau_alphas"]);
+    double Apost_tau_alphas = A_tau_alphas + 0.5 * as<double>(priors["rank_Tau_alphas"]);
+    double A_phi_alphas = as<double>(priors["A_phi_alphas"]);
+    double B_phi_alphas = as<double>(priors["B_phi_alphas"]);
+    double Apost_phi_alphas = A_phi_alphas + 0.5;
+    // Control parameters
+    int n_iter = as<int>(control["n_iter"]);
+    int n_burnin = as<int>(control["n_burnin"]);
+    int n_block = as<int>(control["n_block"]);
+    int n_thin = as<int>(control["n_thin"]);
+    double target_acc = as<double>(control["target_acc"]);
+    double eps1 = as<double>(control["eps1"]);
+    double eps2 = as<double>(control["eps2"]);
+    double eps3 = as<double>(control["eps3"]);
+    double c0 = as<double>(control["c0"]);
+    double mc1 = - as<double>(control["c1"]);
+    bool adaptCov = as<bool>(control["adaptCov"]);
+    // derived from control
+    int total_it = n_iter + n_burnin;
+    int its = ceil(total_it / n_block);
+    int n_out = floor(n_iter / n_thin);
+    int start_cov_update = floor(n_burnin / n_block) - 1;
+    uvec keep = seqC(n_burnin + 1, total_it, n_thin);
+    // initial
+    int n_Bs_gammas = Bs_gammas.n_rows;
+    int n_gammas = gammas.n_rows;
+    int n_alphas = alphas.n_rows;
+    double sigma_Bs_gammas = as<double>(scales["Bs_gammas"]);
+    double sigma_gammas = as<double>(scales["gammas"]);
+    double sigma_alphas = as<double>(scales["alphas"]);
+    mat Sigma_Bs_gammas = as<mat>(Covs["Bs_gammas"]);
+    mat Sigma_gammas = as<mat>(Covs["gammas"]);
+    mat Sigma_alphas = as<mat>(Covs["alphas"]);
+    // store results
+    mat out_Bs_gammas(n_Bs_gammas, n_out, fill::zeros);
+    mat out_gammas(n_gammas, n_out, fill::zeros);
+    mat out_alphas(n_alphas, n_out, fill::zeros);
+    vec out_tau_Bs_gammas(n_out, fill::zeros);
+    vec out_tau_gammas(n_out, fill::zeros);
+    vec out_tau_alphas(n_out, fill::zeros);
+    mat out_phi_gammas(n_gammas, n_out, fill::zeros);
+    mat out_phi_alphas(n_alphas, n_out, fill::zeros);
+    vec out_logPost(n_out, fill::zeros);
+    RNGScope scope;
+    int keep_iterator = 0;
+    int check_iterator = 0;
+    vec log_us = log(randu<vec>(its * n_block));
+    double current_logpost = logPosterior_woRE(event, W1, W1s, Bs_gammas,
+                                               W2, W2s, gammas, Wlong, Wlongs, alphas, Pw,
+                                               mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
+                                               mean_gammas, Tau_gammas, tau_gammas,
+                                               mean_alphas, Tau_alphas, tau_alphas);
+    for (int it = 0; it < its; ++it) {
+        vec accept = vec(n_block, fill::zeros);
+        mat block_Bs_gammas = mat(n_Bs_gammas, n_block, fill::zeros);
+        mat block_gammas = mat(n_gammas, n_block, fill::zeros);
+        mat block_alphas = mat(n_alphas, n_block, fill::zeros);
+        mat rand_Bs_gammas = mvrnorm(n_block, sigma_Bs_gammas * Sigma_Bs_gammas);
+        mat rand_gammas = mvrnorm(n_block, sigma_gammas * Sigma_gammas);
+        mat rand_alphas = mvrnorm(n_block, sigma_alphas * Sigma_alphas);
+        vec new_Bs_gammas = vec(n_Bs_gammas, fill::zeros);
+        vec new_gammas = vec(n_gammas, fill::zeros);
+        vec new_alphas = vec(n_alphas, fill::zeros);
+        for (int i = 0; i < n_block; ++i) {
+            new_Bs_gammas = Bs_gammas + rand_Bs_gammas.col(i);
+            new_gammas = gammas + rand_gammas.col(i);
+            new_alphas = alphas + rand_alphas.col(i);
+            double new_logpost = logPosterior_woRE(event, W1, W1s, new_Bs_gammas,
+                                                   W2, W2s, new_gammas, Wlong, Wlongs, 
+                                                   new_alphas, Pw,
+                                                   mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
+                                                   mean_gammas, Tau_gammas, tau_gammas,
+                                                   mean_alphas, Tau_alphas, tau_alphas);
+            double lRatio = new_logpost - current_logpost;
+            int iter = it * n_block + i;
+            if (log_us.at(iter) < lRatio) {
+                accept.at(i) = 1;
+                Bs_gammas = new_Bs_gammas;
+                gammas = new_gammas;
+                alphas = new_alphas;
+                current_logpost = new_logpost;
+            }
+            block_Bs_gammas.col(i) = Bs_gammas;
+            block_gammas.col(i) = gammas;
+            block_alphas.col(i) = alphas;
+            // sample scales
+            double Bpost_tau_Bs_gammas = B_tau_Bs_gammas + 0.5 * as_scalar(Bs_gammas.t() * Tau_Bs_gammas * Bs_gammas);
+            tau_Bs_gammas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_Bs_gammas, 1.0 / Bpost_tau_Bs_gammas)));
+            if (shrink_gammas) {
+                for (int k1 = 0; k1 < n_gammas; ++k1) {
+                    double Bpost_phi_gammas = B_phi_gammas + 0.5 * tau_gammas * pow(gammas.at(k1), 2);
+                    phi_gammas.at(k1) = std::min(eps3,
+                                  std::max(eps2, ::Rf_rgamma(Apost_phi_gammas, 1.0 / Bpost_phi_gammas)));
+                }
+                Tau_gammas.diag() = phi_gammas;
+                double Bpost_tau_gammas = B_tau_gammas + 0.5 * as_scalar(gammas.t() * Tau_gammas * gammas);
+                tau_gammas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_gammas, 1.0 / Bpost_tau_gammas)));
+            }
+            if (shrink_alphas) {
+                for (int k2 = 0; k2 < n_alphas; ++k2) {
+                    double Bpost_phi_alphas = B_phi_alphas + 0.5 * tau_alphas * pow(alphas.at(k2), 2);
+                    phi_alphas.at(k2) = std::min(eps3,
+                                  std::max(eps2, ::Rf_rgamma(Apost_phi_alphas, 1.0 / Bpost_phi_alphas)));
+                }
+                Tau_alphas.diag() = phi_alphas;
+                double Bpost_tau_alphas = B_tau_alphas + 0.5 * as_scalar(alphas.t() * Tau_alphas * alphas);
+                tau_alphas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_alphas, 1.0 / Bpost_tau_alphas)));
+            }
+            // store results
+            if ((unsigned)iter == keep[check_iterator]) {
+                out_Bs_gammas.col(keep_iterator) = Bs_gammas;
+                out_gammas.col(keep_iterator) = gammas;
+                out_alphas.col(keep_iterator) = alphas;
+                out_phi_gammas.col(keep_iterator) = phi_gammas;
+                out_phi_alphas.col(keep_iterator) = phi_alphas;
+                out_tau_Bs_gammas.at(keep_iterator) = tau_Bs_gammas;
+                out_tau_gammas.at(keep_iterator) = tau_gammas;
+                out_tau_alphas.at(keep_iterator) = tau_alphas;
+                out_logPost.at(keep_iterator) = current_logpost;
+                keep_iterator += 1;
+                check_iterator += 1;
+            }
+        }
+        double rate = mean(accept);
+        double g1 = pow(it + 1, mc1);
+        double g2 = c0 * g1;
+        sigma_Bs_gammas = bounds_sigma(exp(log(sigma_Bs_gammas) + g2 * (rate - target_acc)), eps1, eps3);
+        sigma_gammas = bounds_sigma(exp(log(sigma_gammas) + g2 * (rate - target_acc)), eps1, eps3);
+        sigma_alphas = bounds_sigma(exp(log(sigma_alphas) + g2 * (rate - target_acc)), eps1, eps3);
+        if (adaptCov && it > start_cov_update) {
+            Sigma_Bs_gammas = bounds_Cov(Sigma_Bs_gammas + g1 * (cov(block_Bs_gammas.t()) - Sigma_Bs_gammas), eps2, eps3);
+            Sigma_gammas = bounds_Cov(Sigma_gammas + g1 * (cov(block_gammas.t()) - Sigma_gammas), eps2, eps3);
+            Sigma_alphas = bounds_Cov(Sigma_alphas + g1 * (cov(block_alphas.t()) - Sigma_alphas), eps2, eps3);
+        }
+    }
+    // export
+    return List::create(
+        Named("mcmc") = List::create(
+            Named("Bs_gammas") = out_Bs_gammas,
+            Named("gammas") = out_gammas,
+            Named("alphas") = out_alphas,
+            Named("phi_gammas") = out_phi_gammas,
+            Named("phi_alphas") = out_phi_alphas,
+            Named("tau_Bs_gammas") = out_tau_Bs_gammas,
+            Named("tau_gammas") = out_tau_gammas,
+            Named("tau_alphas") = out_tau_alphas
+        ),
+        
+        Named("logPost") = out_logPost,
+        
+        Named("scales") = List::create(
+            Named("sigma") = List::create(
+                Named("Bs_gammas") = sigma_Bs_gammas,
+                Named("gammas") = sigma_gammas,
+                Named("alphas") = sigma_alphas
+            ),
+            Named("Sigma") = List::create(
+                Named("Bs_gammas") = Sigma_Bs_gammas,
+                Named("gammas") = Sigma_gammas,
+                Named("alphas") = Sigma_alphas
+            )
+        )
+    );
+}
+
+// [[Rcpp::export]]
+List lap_rwm_C_woRE_nogammas (List initials, List Data, List priors, List scales, 
+                              List Covs, List control) {
+    // Data
+    vec event = as<vec>(Data["event"]);
+    uvec idGK_fast = as<uvec>(Data["idGK_fast"]);
+    mat W1 = as<mat>(Data["W1"]);
+    mat W1s = as<mat>(Data["W1s"]);
+    mat Wlong = as<mat>(Data["Wlong"]);
+    mat Wlongs = as<mat>(Data["Wlongs"]);
+    vec Pw = as<vec>(Data["Pw"]);
+    // Initials
+    vec Bs_gammas = as<vec>(initials["Bs_gammas"]);
+    vec alphas = as<vec>(initials["alphas"]);
+    vec phi_alphas = as<vec>(initials["phi_alphas"]);
+    double tau_Bs_gammas = as<double>(initials["tau_Bs_gammas"]);
+    double tau_alphas = as<double>(initials["tau_alphas"]);
+    // Priors
+    vec mean_Bs_gammas = as<vec>(priors["mean_Bs_gammas"]);
+    mat Tau_Bs_gammas = as<mat>(priors["Tau_Bs_gammas"]);
+    vec mean_alphas = as<vec>(priors["mean_alphas"]);
+    mat Tau_alphas = as<mat>(priors["Tau_alphas"]);
+    double A_tau_Bs_gammas = as<double>(priors["A_tau_Bs_gammas"]);
+    double B_tau_Bs_gammas = as<double>(priors["B_tau_Bs_gammas"]);
+    double Apost_tau_Bs_gammas = A_tau_Bs_gammas + 0.5 * as<double>(priors["rank_Tau_Bs_gammas"]);
+    //
+    bool shrink_alphas = as<bool>(priors["shrink_alphas"]);
+    double A_tau_alphas = as<double>(priors["A_tau_alphas"]);
+    double B_tau_alphas = as<double>(priors["B_tau_alphas"]);
+    double Apost_tau_alphas = A_tau_alphas + 0.5 * as<double>(priors["rank_Tau_alphas"]);
+    double A_phi_alphas = as<double>(priors["A_phi_alphas"]);
+    double B_phi_alphas = as<double>(priors["B_phi_alphas"]);
+    double Apost_phi_alphas = A_phi_alphas + 0.5;
+    // Control parameters
+    int n_iter = as<int>(control["n_iter"]);
+    int n_burnin = as<int>(control["n_burnin"]);
+    int n_block = as<int>(control["n_block"]);
+    int n_thin = as<int>(control["n_thin"]);
+    double target_acc = as<double>(control["target_acc"]);
+    double eps1 = as<double>(control["eps1"]);
+    double eps2 = as<double>(control["eps2"]);
+    double eps3 = as<double>(control["eps3"]);
+    double c0 = as<double>(control["c0"]);
+    double mc1 = - as<double>(control["c1"]);
+    bool adaptCov = as<bool>(control["adaptCov"]);
+    // derived from control
+    int total_it = n_iter + n_burnin;
+    int its = ceil(total_it / n_block);
+    int n_out = floor(n_iter / n_thin);
+    int start_cov_update = floor(n_burnin / n_block) - 1;
+    uvec keep = seqC(n_burnin + 1, total_it, n_thin);
+    // initial
+    int n_Bs_gammas = Bs_gammas.n_rows;
+    int n_alphas = alphas.n_rows;
+    double sigma_Bs_gammas = as<double>(scales["Bs_gammas"]);
+    double sigma_alphas = as<double>(scales["alphas"]);
+    mat Sigma_Bs_gammas = as<mat>(Covs["Bs_gammas"]);
+    mat Sigma_alphas = as<mat>(Covs["alphas"]);
+    // store results
+    mat out_Bs_gammas(n_Bs_gammas, n_out, fill::zeros);
+    mat out_alphas(n_alphas, n_out, fill::zeros);
+    vec out_tau_Bs_gammas(n_out, fill::zeros);
+    vec out_tau_alphas(n_out, fill::zeros);
+    mat out_phi_alphas(n_alphas, n_out, fill::zeros);
+    vec out_logPost(n_out, fill::zeros);
+    RNGScope scope;
+    int keep_iterator = 0;
+    int check_iterator = 0;
+    vec log_us = log(randu<vec>(its * n_block));
+    double current_logpost = logPosterior_woRE_nogammas(event, W1, W1s, Bs_gammas,
+                                               Wlong, Wlongs, alphas, Pw,
+                                               mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
+                                               mean_alphas, Tau_alphas, tau_alphas);
+    for (int it = 0; it < its; ++it) {
+        vec accept = vec(n_block, fill::zeros);
+        mat block_Bs_gammas = mat(n_Bs_gammas, n_block, fill::zeros);
+        mat block_alphas = mat(n_alphas, n_block, fill::zeros);
+        mat rand_Bs_gammas = mvrnorm(n_block, sigma_Bs_gammas * Sigma_Bs_gammas);
+        mat rand_alphas = mvrnorm(n_block, sigma_alphas * Sigma_alphas);
+        vec new_Bs_gammas = vec(n_Bs_gammas, fill::zeros);
+        vec new_alphas = vec(n_alphas, fill::zeros);
+        for (int i = 0; i < n_block; ++i) {
+            new_Bs_gammas = Bs_gammas + rand_Bs_gammas.col(i);
+            new_alphas = alphas + rand_alphas.col(i);
+            double new_logpost = logPosterior_woRE_nogammas(event, W1, W1s, new_Bs_gammas,
+                                                   Wlong, Wlongs, new_alphas, Pw,
+                                                   mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
+                                                   mean_alphas, Tau_alphas, tau_alphas);
+            double lRatio = new_logpost - current_logpost;
+            int iter = it * n_block + i;
+            if (log_us.at(iter) < lRatio) {
+                accept.at(i) = 1;
+                Bs_gammas = new_Bs_gammas;
+                alphas = new_alphas;
+                current_logpost = new_logpost;
+            }
+            block_Bs_gammas.col(i) = Bs_gammas;
+            block_alphas.col(i) = alphas;
+            // sample scales
+            double Bpost_tau_Bs_gammas = B_tau_Bs_gammas + 0.5 * as_scalar(Bs_gammas.t() * Tau_Bs_gammas * Bs_gammas);
+            tau_Bs_gammas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_Bs_gammas, 1.0 / Bpost_tau_Bs_gammas)));
+            if (shrink_alphas) {
+                for (int k2 = 0; k2 < n_alphas; ++k2) {
+                    double Bpost_phi_alphas = B_phi_alphas + 0.5 * tau_alphas * pow(alphas.at(k2), 2);
+                    phi_alphas.at(k2) = std::min(eps3,
+                                  std::max(eps2, ::Rf_rgamma(Apost_phi_alphas, 1.0 / Bpost_phi_alphas)));
+                }
+                Tau_alphas.diag() = phi_alphas;
+                double Bpost_tau_alphas = B_tau_alphas + 0.5 * as_scalar(alphas.t() * Tau_alphas * alphas);
+                tau_alphas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_alphas, 1.0 / Bpost_tau_alphas)));
+            }
+            // store results
+            if ((unsigned)iter == keep[check_iterator]) {
+                out_Bs_gammas.col(keep_iterator) = Bs_gammas;
+                out_alphas.col(keep_iterator) = alphas;
+                out_phi_alphas.col(keep_iterator) = phi_alphas;
+                out_tau_Bs_gammas.at(keep_iterator) = tau_Bs_gammas;
+                out_tau_alphas.at(keep_iterator) = tau_alphas;
+                out_logPost.at(keep_iterator) = current_logpost;
+                keep_iterator += 1;
+                check_iterator += 1;
+            }
+        }
+        double rate = mean(accept);
+        double g1 = pow(it + 1, mc1);
+        double g2 = c0 * g1;
+        sigma_Bs_gammas = bounds_sigma(exp(log(sigma_Bs_gammas) + g2 * (rate - target_acc)), eps1, eps3);
+        sigma_alphas = bounds_sigma(exp(log(sigma_alphas) + g2 * (rate - target_acc)), eps1, eps3);
+        if (adaptCov && it > start_cov_update) {
+            Sigma_Bs_gammas = bounds_Cov(Sigma_Bs_gammas + g1 * (cov(block_Bs_gammas.t()) - Sigma_Bs_gammas), eps2, eps3);
+            Sigma_alphas = bounds_Cov(Sigma_alphas + g1 * (cov(block_alphas.t()) - Sigma_alphas), eps2, eps3);
+        }
+    }
+    // export
+    return List::create(
+        Named("mcmc") = List::create(
+            Named("Bs_gammas") = out_Bs_gammas,
+            Named("alphas") = out_alphas,
+            Named("phi_alphas") = out_phi_alphas,
+            Named("tau_Bs_gammas") = out_tau_Bs_gammas,
+            Named("tau_alphas") = out_tau_alphas
+        ),
+        
+        Named("logPost") = out_logPost,
+        
+        Named("scales") = List::create(
+            Named("sigma") = List::create(
+                Named("Bs_gammas") = sigma_Bs_gammas,
+                Named("alphas") = sigma_alphas
+            ),
+            Named("Sigma") = List::create(
+                Named("Bs_gammas") = Sigma_Bs_gammas,
+                Named("alphas") = Sigma_alphas
+            )
+        )
+    );
 }

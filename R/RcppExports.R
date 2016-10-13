@@ -13,6 +13,14 @@ lap_rwm_C_nogammas <- function(initials, Data, priors, scales, Covs, control) {
     .Call('JMbayes_lap_rwm_C_nogammas', PACKAGE = 'JMbayes', initials, Data, priors, scales, Covs, control)
 }
 
+lap_rwm_C_woRE <- function(initials, Data, priors, scales, Covs, control) {
+    .Call('JMbayes_lap_rwm_C_woRE', PACKAGE = 'JMbayes', initials, Data, priors, scales, Covs, control)
+}
+
+lap_rwm_C_woRE_nogammas <- function(initials, Data, priors, scales, Covs, control) {
+    .Call('JMbayes_lap_rwm_C_woRE_nogammas', PACKAGE = 'JMbayes', initials, Data, priors, scales, Covs, control)
+}
+
 logPosterior <- function(temp, event, idGK_fast, W1, W1s, Bs_gammas, W2, W2s, gammas, Wlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_gammas, Tau_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs) {
     .Call('JMbayes_logPosterior', PACKAGE = 'JMbayes', temp, event, idGK_fast, W1, W1s, Bs_gammas, W2, W2s, gammas, Wlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_gammas, Tau_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
 }

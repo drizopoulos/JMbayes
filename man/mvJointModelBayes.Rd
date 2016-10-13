@@ -241,7 +241,7 @@ plot(JMFit2)
 # we specify the 'Formulas' argument. This is specified in a similar manner as the
 # 'derivForms' argument of jointModelBayes(). In particular, it should be a list of lists.
 # Each component of the outer list should have as name the name of the corresponding
-# outcome variable. Then in the inner list we need specify four components, namely,
+# outcome variable. Then in the inner list we need to specify four components, namely,
 # 'fixed' & 'random' R formulas specifying the fixed and random effects part of the term
 # to be included, and 'indFixed' & 'indRandom' integer indicices specifying which of the
 # original fixed and random effects are involved in the claculation of the new term. In

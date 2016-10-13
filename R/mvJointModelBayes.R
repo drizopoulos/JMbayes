@@ -380,7 +380,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
         LogLiks <- numeric(M)
         out <- vector("list", M)
         new_scales <- vector("list", M)
-        inits_Laplace <- inits
+        inits_Laplace <- inits[c("Bs_gammas", "gammas", "alphas", "tau_Bs_gammas")]
         inits_Laplace[["tau_Bs_gammas"]] <- log(inits_Laplace[["tau_Bs_gammas"]])
         inits_Laplace[["b"]] <- NULL
         any_gammas <- as.logical(length(priors[["mean_gammas"]]))
@@ -418,18 +418,18 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                 indFixed <- data$indFixed
                 indRandom <- data$indRandom
                 data$Wlong <- designMatLong(data$XX, betas., data$ZZ, b., data$idT,
-                                            outcome, indFixed, indRandom)
+                                            outcome, indFixed, indRandom, data$U)
                 data$Wlongs <- designMatLong(data$XXs, betas., data$ZZs, b., data$idTs,
-                                             outcome, indFixed, indRandom)
+                                             outcome, indFixed, indRandom, data$Us)
                 data$event_colSumsWlong <- colSums(data$event * data$Wlong)
                 LogLiks[i] <- marglogLik2(inits_Laplace, data, priors)
-                out[[i]] <- if (any_gammas) {
-                    stop("not implemented yet.")
-                    #lap_rwm_C_woRE(inits, data, priors, Covs, control)$mcmc
+                oo <- if (any_gammas) {
+                    lap_rwm_C_woRE(inits, data, priors, scales, Covs, control)
                 } else {
-                    stop("not implemented yet.")
-                    #lap_rwm_C_woRE_nogammas(inits, data, priors, Covs, control)$mcmc
+                    lap_rwm_C_woRE_nogammas(inits, data, priors, scales, Covs, control)
                 }
+                out[[i]] <- oo$mcmc
+                new_scales[[i]] <- oo$scales$sigma
             }
         }
         out <- lapply(unlist(out, recursive = FALSE), drop)
@@ -511,12 +511,12 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
             }
         }
         new_scales <- lapply(out1, "[[", "scales")
-        new_scales <- list("b" = calc_new_scales("b"),
+        new_scales <- list("b" = if (con$update_RE) calc_new_scales("b"),
                            "Bs_gammas" = calc_new_scales("Bs_gammas"),
                            "gammas" = if (any_gammas) calc_new_scales("gammas"),
                            "alphas" = calc_new_scales("alphas"))
         con$n_burnin <- ceiling(0.5 * con$n_burnin / con$n_block) * con$n_block
-        cluster <- makePSOCKcluster(con$n_cores)
+        cluster <- makeCluster(con$n_cores)
         registerDoParallel(cluster)
         out <- foreach(i = blocks, .packages = c("Rcpp", "JMbayes"), .combine = c) %dopar% {
             runParallel(i, betas, b, sigmas, inv.D, inits, Data, prs, new_scales, Cvs, con)

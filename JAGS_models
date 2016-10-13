@@ -1,0 +1,67 @@
+model {
+
+for (i in 1:N) {
+    
+# Longitudinal part
+# -----------------
+for (j in offset[i]:(offset[i + 1] - 1)) {
+log.serbil[j] ~ dnorm(mu[j], tau.c)
+mu[j] <- inprod(betas[1:ncX], X[j, 1:ncX]) + b0[i]
+}
+
+# Survival part I
+# ---------------
+log.h0.T[i] <- inprod(Bs.gammas[1:ncW2], W2[i, 1:ncW2])			# Term 2
+etaBaseline[i] <- gammas * W[i] #inprod(gammas[1:ncW], W[i, 1:ncW])	# Term 1
+f.T[i] <- inprod(betas[1:ncX], Xtime[i, 1:ncX]) + b0[i]
+log.h[i] <- log.h0.T[i] + etaBaseline[i] + alpha * f.T[i]
+
+# Survival part II
+# ----------------
+for (k in 1:K) {
+log.h0.s[i, k] <- inprod(Bs.gammas[1:ncW2], W2s[K * (i - 1) + k, 1:ncW2]) # Term 1
+f.s[i, k] <- inprod(betas[1:ncX], Xs[K * (i - 1) + k, 1:ncX]) + b0[i]
+SurvLong[i, k] <- wk[k] * exp(log.h0.s[i, k] + alpha * f.s[i, k])
+}
+
+# Zeros trick
+# -----------
+log.Surv[i] <- - exp(etaBaseline[i]) * P[i] * sum(SurvLong[i, ])	
+phi[i] <- C - (event[i] * log.h[i]) - log.Surv[i]
+zeros[i] ~ dpois(phi[i])
+
+# Random effects part
+# -------------------
+b0[i] ~ dnorm(0, tau.b0)
+}
+
+# Priors for fixed effects of longitudinal Part
+# ---------------------------------------------
+betas[1] ~ dnorm(0, 0.01)  
+betas[2] ~ dnorm(0, 0.01)
+
+# Priors for variance response
+# ----------------------------
+tau.c ~ dgamma(0.01, 0.01)
+sigma2.c <- 1/tau.c 		# residual error variance
+
+# Priors for baseline covariates of survival Part
+# -----------------------------------------------
+for (k2 in 1:ncW){
+gammas[k2] ~ dnorm(0.0, 0.01)
+}
+
+# Priors for baseline covariates of survival Part
+# -----------------------------------------------
+Bs.gammas ~ dmnorm(mu.Bs[], tauBs * priorTau.Bs.gammas[, ])
+tauBs ~ dgamma(priorA.tauBs, priorB.tauBs)
+
+# Prior for parameter of association
+# ----------------------------------
+alpha ~ dnorm(0.0, 0.01)
+
+# Prior for the random intercept effect of the count process
+# ----------------------------------------------------------
+tau.b0 ~ dunif(0, 20)
+sig.b0 <- 1 / sqrt(tau.b0)
+}
