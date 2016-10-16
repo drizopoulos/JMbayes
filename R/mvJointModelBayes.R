@@ -564,20 +564,29 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
     weights <- stand(LogLiks)
     wmean <- function (x, weights, na.rm = FALSE) sum(x * weights, na.rm = na.rm)
     # Extract the results
-    res <- list(mcmc = mcmc,
-                postMeans = summary_fun(mean, na.rm = TRUE),
-                postwMeans = summary_fun(wmean, weights = weights, na.rm = TRUE),
-                postModes = summary_fun(modes),
-                EffectiveSize = summary_fun(effectiveSize),
-                StDev = summary_fun(sd, na.rm = TRUE),
-                StErr = summary_fun(stdErr),
-                CIs = summary_fun(quantile, probs = c(0.025, 0.975)),
-                Pvalues = summary_fun(computeP),
-                call = cl, families = families, components = components,
-                mcmc.info = list(elapsed.mins = elapsed_time / 60,
-                                 n.burnin = con$n_burnin, n.iter = con$n_iter + con$n_burnin,
-                                 n.thin = con$n_thin),
-                components = components, Data = Data, control = con)
+    res <- list(call = cl, mcmc = mcmc, 
+                mcmc_info = list(
+                    elapsed_mins = elapsed_time / 60, 
+                    n_burnin = con$n_burnin, 
+                    n_iter = con$n_iter + con$n_burnin, n_thin = con$n_thin
+                ),
+                statistics = list(
+                    postMeans = summary_fun(mean, na.rm = TRUE),
+                    postwMeans = summary_fun(wmean, weights = weights, na.rm = TRUE),
+                    postModes = summary_fun(modes),
+                    EffectiveSize = summary_fun(effectiveSize),
+                    StDev = summary_fun(sd, na.rm = TRUE),
+                    StErr = summary_fun(stdErr),
+                    CIs = summary_fun(quantile, probs = c(0.025, 0.975)),
+                    Pvalues = summary_fun(computeP)
+                ),
+                model_info = list(
+                    families = families,
+                    mvglmer_components = components,
+                    coxph_components = list(data = data, Terms = Terms, Time = Time, 
+                                            event = event)
+                ),
+                control = con)
     class(res) <- "mvJMbayes"
     res
 }

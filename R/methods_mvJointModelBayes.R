@@ -1,27 +1,36 @@
 summary.mvJMbayes <- function (object, weighted = TRUE, include.baselineHazard = FALSE, ...) {
-    families <- object$families
+    families <- object$model_info$families
     n_outcomes <- length(families)
-    components <- object$components
+    components <- object$model_info$mvglmer_components
     extract_components <- function (nam) {
         components[grep(nam, names(components), fixed = TRUE)]
     }
     respVars <- unlist(extract_components("respVar"), use.names = FALSE)
     descrpt <- data.frame(" " = unlist(extract_components("N"), use.names = FALSE),
                           row.names = respVars, check.rows = FALSE, check.names = FALSE)
-    postMeans <- if (weighted && !is.null(object$postwMeans)) object$postwMeans else object$postMeans
+    postMeans <- if (weighted && !is.null(object$statistics$postwMeans)) {
+        object$statistics$postwMeans 
+    } else {
+        object$statistics$postMeans
+    }
     out <- list(n = components$n1, descrpt = descrpt, D = postMeans$D,
-                families = families, respVars = respVars, events = object$Data$event,
-                control = object$control, mcmc.info = object$mcmc.info,
-                DIC = object$DIC, pD = object$pD, call = object$call)
+                families = families, respVars = respVars, 
+                events = object$model_info$coxph_components$event,
+                control = object$control, mcmc_info = object$mcmc_info, call = object$call)
     tab_f <- function (name, is_sigma = FALSE) {
-        is_mat <- is.matrix(object$CIs[[name]])
+        is_mat <- is.matrix(object$statistics$CIs[[name]])
         data.frame("PostMean" = postMeans[[name]],
-                   "StDev" = object$StDev[[name]],
-                   "StErr"= object$StErr[[name]],
-                   "2.5%" = if (is_mat) object$CIs[[name]][1, ] else object$CIs[[name]][1],
-                   "97.5%" = if (is_mat) object$CIs[[name]][2, ] else object$CIs[[name]][2],
-                   "P" = object$Pvalues[[name]],
-                   row.names = if (is_sigma) "sigma" else names(object$postMeans[[name]]),
+                   "StDev" = object$statistics$StDev[[name]],
+                   "StErr"= object$statistics$StErr[[name]],
+                   "2.5%" = if (is_mat) 
+                       object$statistics$CIs[[name]][1, ] 
+                   else object$statistics$CIs[[name]][1],
+                   "97.5%" = if (is_mat) 
+                       object$statistics$CIs[[name]][2, ] 
+                   else object$statistics$CIs[[name]][2],
+                   "P" = object$statistics$Pvalues[[name]],
+                   row.names = if (is_sigma) "sigma" 
+                   else names(object$statistics$postMeans[[name]]),
                    check.names = FALSE)
     }
     for (i in seq_len(n_outcomes)) {
@@ -94,9 +103,9 @@ print.summary.mvJMbayes <- function (x, digits = max(4, getOption("digits") - 4)
         print(xx)
     }
     cat("\nMCMC summary:\n")
-    tt <- x$mcmc.info$elapsed.mins
-    cat("iterations:", x$mcmc.info$n.iter,
-        "\nburn-in:", x$mcmc.info$n.burnin, "\nthinning:", x$mcmc.info$n.thin,
+    tt <- x$mcmc_info$elapsed_mins
+    cat("iterations:", x$mcmc_info$n_iter,
+        "\nburn-in:", x$mcmc_info$n_burnin, "\nthinning:", x$mcmc_info$n_thin,
         "\ntime:", if (tt > 60) round(tt/60, 1) else round(tt, 1),
         if (tt > 60) "hours" else "min")
     cat("\n")
