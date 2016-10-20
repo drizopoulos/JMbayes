@@ -58,7 +58,7 @@ mvglmer <- function (formulas, data, families, overdispersion = FALSE,
     ######################################################################################
     # Priors
     prs <- list(priorR.D = diag(rep(NA, JAGS_data$n_RE), JAGS_data$n_RE),
-                priorK.D = JAGS_data$n_RE + 1, A_R.D = 0.5, B_R.D = 0.001,
+                priorK.D = JAGS_data$n_RE + 1, A_R.D = 0.5, B_R.D = 0.01,
                 tau_half_cauchy = 0.1)
     pr_taus_betas <- rep(list(0.001), n_outcomes)
     names(pr_taus_betas) <- paste0("tau_betas", seq_len(n_outcomes))

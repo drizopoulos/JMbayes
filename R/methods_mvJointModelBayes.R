@@ -122,7 +122,7 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density"),
     if (which %in% c("trace", "density", "autocorr")) {
         param <- match.arg(param, several.ok = TRUE)
         if (any(param == "D")) {
-            keepD <- lower.tri(x$postMeans$D, TRUE)
+            keepD <- lower.tri(x$statistics$postMeans$D, TRUE)
             x$mcmc$D <- t(apply(x$mcmc$D, 1, c))[, c(keepD)]
             dnams <- which(keepD, arr.ind = TRUE)
             colnames(x$mcmc$D) <- paste0("D[", dnams[, 1], ", ", dnams[, 2], "]")
