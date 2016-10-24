@@ -583,7 +583,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                 model_info = list(
                     families = families,
                     mvglmer_components = components,
-                    coxph_components = list(data = data, Terms = Terms, Time = Time, 
+                    coxph_components = list(data = dataS, Terms = Terms, Time = Time, 
                                             event = event)
                 ),
                 control = con)
