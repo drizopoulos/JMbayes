@@ -27,6 +27,7 @@ importFrom("utils", "as.relistable", "combn", "glob2rx", "head", "relist",
   "setTxtProgressBar", "tail", "txtProgressBar", "object.size")
 importFrom("Rcpp", "evalCpp")
 importFrom("jagsUI", "jags")
+importFrom("rstan", "stan", "extract", "get_elapsed_time")
 importFrom("parallel", "makeCluster", "stopCluster", "detectCores")
 importFrom("doParallel", "registerDoParallel")
 importFrom("xtable", "xtable")

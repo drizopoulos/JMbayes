@@ -1,6 +1,7 @@
-mvglmer <- function (formulas, data, families, overdispersion = FALSE,
-                      priors = NULL, control = NULL, ...) {
+mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"), 
+                     overdispersion = FALSE, priors = NULL, control = NULL, ...) {
     cl <- match.call()
+    engine <- match.arg(engine)
     if (!is.list(families))
         stop("'families' must be a list of family objects.")
     # depending on the input of the user, set families to the corresponding
@@ -31,41 +32,63 @@ mvglmer <- function (formulas, data, families, overdispersion = FALSE,
     colmns_nHC <- components[grep("colmns_nHC", names(components), fixed = TRUE)]
     seq_outcomes <- seq_len(n_outcomes)
     nams_vars <- c("N", "id", "Z", "Xhc", "ncx", "y")
-    jags_vars <- paste0(rep(nams_vars, each = n_outcomes), seq_outcomes)
+    vars <- paste0(rep(nams_vars, each = n_outcomes), seq_outcomes)
     if (any(ind_td <- sapply(colmns_nHC, length))) {
-        jags_vars <- c(jags_vars, paste0("X", which(ind_td > 0)))
+        vars <- c(vars, paste0("X", which(ind_td > 0)))
     }
-    JAGS_data <- c(list(n = components$n1), components[jags_vars])
-    JAGS_data$n_RE <- sum(unlist(components[grep("ncz", names(components), fixed = TRUE)]))
+    Data <- c(list(n = components$n1), components[vars])
+    Data$n_RE <- sum(unlist(components[grep("ncz", names(components), fixed = TRUE)]))
     RE_inds <- mapply(function (sq, incr) seq_len(sq) + incr,
                       sq = components[grep("ncz", names(components), fixed = TRUE)],
                       incr = cumsum(c(0, head(sapply(colmns_HC, length), -1))),
                       SIMPLIFY = FALSE)
     names(RE_inds) <- paste0("RE_ind", seq_along(RE_inds))
-    JAGS_data <- c(JAGS_data, RE_inds)
+    Data <- c(Data, RE_inds)
     # control
-    con <- list(n.processors = detectCores() - 1, n.chains = 2,
-                n.iter = 28000L, n.burnin = 3000L, n.thin = 50L,
-                n.adapt = 3000L, working.directory = getwd(), clear.model = TRUE,
+    con <- list(n.processors = parallel::detectCores() - 1, n.chains = 2,
+                working.directory = getwd(), clear.model = TRUE,
                 seed = 1L, verbose = FALSE)
+    if (engine == "JAGS") {
+        con$n.iter <- 28000L
+        con$n.burnin <- 3000L
+        con$n.thin <- 50L
+        con$n.adapt <- 3000L 
+    } else {
+        con$n.iter <- 1000
+        con$n.warmup <- floor(con$n.iter / 2)
+        con$n.thin <- 2
+    }
     control <- c(control, list(...))
     namC <- names(con)
     con[(namc <- names(control))] <- control
-    if (!any(namc == "n.thin"))
-        con$n.thin <- max(1, floor((con$n.iter - con$n.burnin) * con$n.chains / 1000))
+    if (!any(namc == "n.thin")) {
+        con$n.thin <- if (engine == "JAGS") {
+            max(1, floor((con$n.iter - con$n.burnin) * con$n.chains / 1000))
+        } else {
+            max(1, floor(con$n.iter * con$n.chains / 1000))
+        }
+    }
     if (length(noNms <- namc[!namc %in% namC]) > 0)
         warning("unknown names in control: ", paste(noNms, collapse = ", "))
     ######################################################################################
     # Priors
-    prs <- list(priorR.D = diag(rep(NA, JAGS_data$n_RE), JAGS_data$n_RE),
-                priorK.D = JAGS_data$n_RE + 1, A_R.D = 0.5, B_R.D = 0.01,
-                tau_half_cauchy = 0.1)
-    pr_taus_betas <- rep(list(0.001), n_outcomes)
-    names(pr_taus_betas) <- paste0("tau_betas", seq_len(n_outcomes))
-    prs <- c(prs, pr_taus_betas)
-    if (any(sapply(families, function (x) x$family == "gaussian")) || overdispersion) {
-        prs$A_tau <- 0.01
-        prs$B_tau <- 0.01
+    if (engine == "JAGS") {
+        prs <- list(priorR_D = diag(rep(NA, Data$n_RE), Data$n_RE),
+                    priorK_D = Data$n_RE + 1, A_RD = 0.5, B_RD = 0.01,
+                    tau_half_cauchy = 0.1)
+        pr_taus_betas <- rep(list(0.01), n_outcomes)
+        names(pr_taus_betas) <- paste0("tau_betas", seq_len(n_outcomes))
+        prs <- c(prs, pr_taus_betas)
+        if (any(sapply(families, function (x) x$family == "gaussian")) || overdispersion) {
+            prs$A_tau <- 0.01
+            prs$B_tau <- 0.01
+        }
+    } else {
+        prs <- list(scale_sigmas = 5, scale_diag_D = 3, lkj_shape = 2,
+                    priorK_D = Data$n_RE + 1)
+        pr_scale_betas <- rep(list(10), n_outcomes)
+        names(pr_scale_betas) <- paste0("scale_betas", seq_len(n_outcomes))
+        prs <- c(prs, pr_scale_betas)
     }
     if (!is.null(priors)) {
         lngths <- lapply(prs[(nam.prs <- names(priors))], length)
@@ -76,26 +99,34 @@ mvglmer <- function (formulas, data, families, overdispersion = FALSE,
             prs[nam.prs] <- priors
         }
     }
-    JAGS_data <- c(JAGS_data, prs)
+    Data <- c(Data, prs)
     ######################################################################################
     # write model
-    model_name <- paste0("jags_mv_glmer", sample(1e06, 1), ".txt")
-    cat(build_model(families, seq_along(families), colmns_HC, colmns_nHC, overdispersion,
-                    JAGS_data$n_RE), file = file.path(con$working.directory, model_name))
+    model_name <- paste0("mv_glmer", sample(1e06, 1), ".txt")
+    if (engine == "JAGS") {
+        cat(build_model(families, seq_along(families), colmns_HC, colmns_nHC, overdispersion,
+                        Data$n_RE), file = file.path(con$working.directory, model_name))
+    } else {
+        cat(data_part(families, lapply(colmns_HC, length), lapply(colmns_nHC, length), Data$n_RE),
+            parameters(families, Data$n_RE),
+            transformed_parameters(families, colmns_HC, colmns_nHC, RE_inds),
+            model(families, Data$n_RE), generated_quantities(Data$n_RE),
+            file = file.path(con$working.directory, model_name))
+    }
     closeAllConnections()
     # parameters to save
     params <- paste0('betas', seq_len(n_outcomes))
     if (any(ind_gs <- sapply(families, function (x) x$family == "gaussian"))) {
         params <- c(params, paste0("sigma", which(ind_gs)))
     }
-    params <- c(params, "inv.D", "b")
+    params <- if (engine == "JAGS") c(params, "inv_D", "b") else c(params, "D", "b")
     inits <- function () {
         ints <- lapply(components[grep("ncx", names(components), fixed = TRUE)],
                         rnorm, sd = 0.1)
         names(ints) <- paste0('betas', seq_len(n_outcomes))
-        ints$u <- drop(matrix(rnorm(JAGS_data$n * JAGS_data$n_RE), JAGS_data$n,
-                              JAGS_data$n_RE))
-        ints$inv.D <- if (JAGS_data$n_RE > 1) diag(JAGS_data$n_RE) else 1
+        ints$u <- drop(matrix(rnorm(Data$n * Data$n_RE), Data$n,
+                              Data$n_RE))
+        ints$inv_D <- ints$D <- if (Data$n_RE > 1) diag(Data$n_RE) else 1
         if (any(ind_gs)) {
             nms <- which(ind_gs)
             taus <- rep(list(1), length(nms))
@@ -104,25 +135,55 @@ mvglmer <- function (formulas, data, families, overdispersion = FALSE,
         }
         ints
     }
-    jags_fit <- jagsUI::jags(data = JAGS_data, inits = inits, parameters.to.save = params,
+    fit <- if (engine == "JAGS") {
+        jagsUI::jags(data = Data, inits = inits, parameters.to.save = params,
                      model.file = file.path(con$working.directory, model_name),
                      parallel = con$n.processors > 1, n.chains = con$n.chains,
                      n.adapt = con$n.adapt, n.iter = con$n.iter, n.burnin = con$n.burnin,
                      n.thin = con$n.thin, seed = con$seed, verbose = con$verbose)
+    } else {
+        options(mc.cores = con$n.chains)
+        out <- stan(file = file.path(con$working.directory, model_name), data = Data, 
+                    pars = params, iter = con$n.iter, chains = con$n.chains, 
+                    thin = con$n.thin, seed = con$seed)
+        sims.list <- lapply(lapply(params, extract, object = out), `[[`, 1)
+        sims.list[] <- lapply(sims.list, function (x) 
+            if (length(dim(x)) == 1) as.matrix(x) else x)
+        splts <- rep(seq_along(sims.list), sapply(sims.list, function (x) prod(dim(x)[-1])))
+        rhats <- head(rstan::summary(out)$summary[, "Rhat"], -1)
+        Rhat <- split(rhats, splts)
+        names(sims.list) <- names(Rhat) <- params
+        list(sims.list = sims.list, Rhat = Rhat,
+             mcmc.info = list(n.chains = con$n.chains, n.thin = con$n.thin,
+                              n.warmup = con$n.warmup,
+                              n.samples = nrow(sims.list[["betas1"]]),
+                              elapsed.mins = sum(get_elapsed_time(out)) / 60), 
+             DIC = NULL, pD = NULL)
+    }
     if (con$clear.model) {
         file.remove(file.path(con$working.directory, model_name))
     }
-    out <- list(mcmc = jags_fit$sims.list, components = components, data = data,
-                families = families, control = con, mcmc.info = jags_fit$mcmc.info,
-                DIC = jags_fit$DIC, pD = jags_fit$pD, Rhat = jags_fit$Rhat,
-                priors = prs)
-    if (JAGS_data$n_RE == 1) {
-        out$mcmc$inv.D <- array(out$mcmc$inv.D, c(length(out$mcmc$inv.D), 1, 1))
+    out <- list(mcmc = fit$sims.list, components = components, data = data,
+                families = families, control = con, mcmc.info = fit$mcmc.info,
+                DIC = fit$DIC, pD = fit$pD, Rhat = fit$Rhat,
+                priors = prs, engine = engine)
+    if (Data$n_RE == 1) {
+        if (engine == "JAGS") 
+            out$mcmc$inv_D <- array(out$mcmc$inv_D, c(length(out$mcmc$inv_D), 1, 1))
+        else 
+            out$mcmc$D <- array(out$mcmc$D, c(length(out$mcmc$D), 1, 1))
         out$mcmc$b <- array(out$mcmc$b, c(nrow(out$mcmc$b), ncol(out$mcmc$b), 1))
     }
-    out$mcmc$D <- out$mcmc$inv.D
-    for (i in seq_len(nrow(out$mcmc$betas1))) {
+    if (engine == "JAGS") {
+        out$mcmc$D <- out$mcmc$inv_D
+        for (i in seq_len(nrow(out$mcmc$betas1))) {
             out$mcmc$D[i, , ] <- solve(out$mcmc$D[i, , ])
+        }
+    } else {
+        out$mcmc$inv_D <- out$mcmc$D
+        for (i in seq_len(nrow(out$mcmc$betas1))) {
+            out$mcmc$inv_D[i, , ] <- solve(out$mcmc$D[i, , ])
+        }
     }
     # fix names
     pat <- paste0("^X", paste(rep("[0-9]", nchar(as.character(n_outcomes))), collapse = ""))
@@ -133,7 +194,7 @@ mvglmer <- function (formulas, data, families, overdispersion = FALSE,
     pat <- paste0("^Z", paste(rep("[0-9]", nchar(as.character(n_outcomes))), collapse = ""))
     Znams <- lapply(components[grep(pat, names(components))], colnames)
     Znams <- unlist(mapply(paste0, Znams, seq_len(n_outcomes), SIMPLIFY = FALSE))
-    dimnames(out$mcmc$D) <- dimnames(out$mcmc$inv.D) <- list(NULL, Znams, Znams)
+    dimnames(out$mcmc$D) <- dimnames(out$mcmc$inv_D) <- list(NULL, Znams, Znams)
     dimnames(out$mcmc$b) <- list(NULL, NULL, Znams)
     # calculate statistics
     summary_fun <- function (FUN, ...) {
@@ -172,7 +233,7 @@ summary.mvglmer <- function (object, ...) {
     out <- list(n = components$n1, descrpt = descrpt, D = object$postMeans$D,
                 families = families, respVars = respVars,
                 control = object$control, mcmc.info = object$mcmc.info,
-                DIC = object$DIC, pD = object$pD, call = object$call)
+                DIC = object$DIC, pD = object$pD, call = object$call, engine = object$engine)
     for (i in seq_len(n_outcomes)) {
         out[[paste0("Outcome", i)]] <- data.frame("PostMean" = object$postMeans[[paste0("betas", i)]],
                                                   "StDev" = object$StDev[[paste0("betas", i)]],
@@ -241,15 +302,21 @@ print.summary.mvglmer <- function (x, digits = max(4, getOption("digits") - 4), 
     n_outcomes <- length(x$families)
     for (i in seq_len(n_outcomes)) {
         cat("\nOutcome:", x$respVars[i],"\n")
-        print(x[[paste0("Outcome", i)]])
+        print(round(x[[paste0("Outcome", i)]], digits))
     }
     cat("\nMCMC summary:\n")
     tt <- x$mcmc.info$elapsed.mins
-    cat("iterations:", x$control$n.iter, "\nadapt:", x$control$n.adapt,
-        "\nburn-in:", x$control$n.burnin, "\nthinning:", x$control$n.thin,
+    cat("engine:", x$engine, 
+        "\niterations:", x$control$n.iter, 
+        if (x$engine == "JAGS") 
+            paste("\nadapt:", x$control$n.adapt,
+                  "\nburn-in:", x$control$n.burnin)
+        else 
+            paste("\nwarmup:", x$control$n.warmup), 
+        "\nthinning:", x$control$n.thin,
         "\ntime:", if (tt > 60) round(tt/60, 1) else round(tt, 1),
         if (tt > 60) "hours" else "min")
-    cat("\n")
+    cat("\n\n")
     invisible(x)
 }
 

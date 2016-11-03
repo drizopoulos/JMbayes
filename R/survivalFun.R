@@ -74,7 +74,7 @@ function (object, times, id = NULL, CI = FALSE, nullY = FALSE, nullCovs = FALSE)
         W <- object$x$W[, seq_along(gammas), drop = FALSE]
         eta.tw <- if (!is.null(W)) c(W %*% gammas) else rep(0, length(object$y$id))
         kn <- object$control$knots
-        W2s <- splineDesign(unlist(kn, use.names = FALSE), c(t(st)), 
+        W2s <- splines::splineDesign(unlist(kn, use.names = FALSE), c(t(st)), 
                             ord = object$control$ordSpline, outer.ok = TRUE)
         Vi <- exp(c(W2s %*% Bs.gammas) + tt)
         cumHaz <- exp(eta.tw) * P * tapply(rep(wk, length.out = length(Vi)) * Vi, id.GK, sum)

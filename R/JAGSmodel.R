@@ -113,9 +113,9 @@ hc_linpred <- function (outcome, colmns_HC, incr, n_RE) {
 build_random_effects <- function (outcomes, colmns_HC, n_RE) {
     ns <- cumsum(c(0, head(sapply(colmns_HC, length), -1)))
     re_spec <- if (n_RE == 1) {
-        "u[i] ~ dnorm(mu.u[i], inv.D)\n"
+        "u[i] ~ dnorm(mu.u[i], inv_D)\n"
     } else {
-        "u[i, 1:n_RE] ~ dmnorm(mu.u[i, ], inv.D[, ])\n"
+        "u[i, 1:n_RE] ~ dmnorm(mu.u[i, ], inv_D[, ])\n"
     }
     paste0(myt(), "for (i in 1:n) {\n",
            paste(mapply(hc_linpred, outcomes, colmns_HC, ns, MoreArgs = list(n_RE = n_RE)),
@@ -142,11 +142,11 @@ priors_taus <- function (family, outcome, overdispersion) {
 
 priors_VC <- function (colmns_HC) {
     if (length(unlist(colmns_HC)) == 1) {
-        "   inv.D ~ dt(0.0, tau_half_cauchy, 1)T(0, )\n"
+        "   inv_D ~ dt(0.0, tau_half_cauchy, 1)T(0, )\n"
     } else {
-        paste("   inv.D ~ dwish(4 * priorR.D[, ], priorK.D)\n",
+        paste("   inv_D ~ dwish(4 * priorR_D[, ], priorK_D)\n",
               "    for (l in 1:n_RE) {\n",
-              "        priorR.D[l, l] ~ dgamma(A_R.D, B_R.D)\n",
+              "        priorR_D[l, l] ~ dgamma(A_RD, B_RD)\n",
               "    }\n")
     }
 }

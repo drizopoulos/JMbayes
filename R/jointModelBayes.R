@@ -362,11 +362,11 @@ jointModelBayes <- function (lmeObject, survObject, timeVar,
     kn <- kn[kn < max(Time)]
     rr <- sort(c(rep(range(Time, st), con$ordSpline), kn))
     con$knots <- rr
-    W2 <- splineDesign(rr, Time, ord = con$ordSpline)
+    W2 <- splines::splineDesign(rr, Time, ord = con$ordSpline)
     if (any(colSums(W2) == 0))
         stop("\nsome of the knots of the B-splines basis are set outside the range",
              "\nof the observed event times.")
-    W2s <- splineDesign(rr, c(t(st)), ord = con$ordSpline)
+    W2s <- splines::splineDesign(rr, c(t(st)), ord = con$ordSpline)
     if (typeSurvInf == "counting" && LongFormat) {
         TDind <- mapply(findInterval, x = split(st, row(st)), vec = split(TimeLl, idT), 
                         SIMPLIFY = FALSE)

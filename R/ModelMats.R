@@ -17,7 +17,7 @@ ModelMats <- function (time, ii, timeL = NULL) {
     data.id2 <- data.id2[ind, , drop = FALSE]
     data.id2[[timeVar]] <- pmax(st - lag, 0)
     kn <- object$control$knots
-    W2s <- splineDesign(unlist(kn, use.names = FALSE), st, 
+    W2s <- splines::splineDesign(unlist(kn, use.names = FALSE), st, 
                         ord = object$control$ordSpline, outer.ok = TRUE)    
     out <- list(st = st, wk = rep(wk, length(P)), P = P, W2s = W2s, kn = kn, 
                 idT = rep(seq_along(P), each = length(sk)))

@@ -1,6 +1,6 @@
 hMats <-
 function (Time) {
-    W2 <- splineDesign(unlist(object$control$knots, use.names = FALSE), Time, 
+    W2 <- splines::splineDesign(unlist(object$control$knots, use.names = FALSE), Time, 
                        ord = object$control$ordSpline, outer.ok = TRUE)
     data.id2 <- data.id
     data.id2[[timeVar]] <- pmax(Time - lag, 0)

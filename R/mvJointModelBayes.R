@@ -10,7 +10,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                 knots = NULL, ObsTimes.knots = TRUE,
                 lng.in.kn = 15L, ordSpline = 4L, diff = 2L,
                 GQsurv = "GaussKronrod", GQsurv.k = 15L, seed = 1L,
-                n_cores = max(1, detectCores() - 1), update_RE = TRUE)
+                n_cores = max(1, parallel::detectCores() - 1), update_RE = TRUE)
     control <- c(control, list(...))
     namC <- names(con)
     con[(namc <- names(control))] <- control
@@ -141,8 +141,8 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                         sort = FALSE, all = FALSE)
     # design matrices for the survival submodel, W1 is for the baseline hazard,
     # W2 for the baseline and external time-varying covariates
-    W1 <- splineDesign(con$knots, Time, ord = con$ordSpline)
-    W1s <- splineDesign(con$knots, c(t(st)), ord = con$ordSpline)
+    W1 <- splines::splineDesign(con$knots, Time, ord = con$ordSpline)
+    W1s <- splines::splineDesign(con$knots, c(t(st)), ord = con$ordSpline)
     W2 <- model.matrix(Terms, data = dataS.id)[, -1, drop = FALSE]
     W2s <- model.matrix(Terms, data = dataS.id2)[, -1, drop = FALSE]
     extract_component <- function (component, fixed = TRUE) {
@@ -248,7 +248,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                       SIMPLIFY = FALSE)
     bb <- mvglmerObject$mcmc$b
     b <- lapply(RE_inds, function (ind) bb[, , ind, drop = FALSE])
-    inv.D <- mvglmerObject$mcmc[grep("inv.D", names(mvglmerObject$mcmc), fixed = TRUE)]
+    inv_D <- mvglmerObject$mcmc[grep("inv_D", names(mvglmerObject$mcmc), fixed = TRUE)]
     sigmas <- vector("list", n_outcomes)
     if (any(which_gaussian <- sapply(families, "[[", "family") == "gaussian")) {
         sigmas[which_gaussian] <- mvglmerObject$mcmc[grep("sigma",
@@ -293,7 +293,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
     }
     postMean_betas <- lapply(betas, colMeans, na.rm = TRUE)
     postMean_b <- lapply(b, function (m) apply(m, 2:3, mean, na.rm = TRUE))
-    postMean_inv.D <- lapply(inv.D, function (m) apply(m, 2:3, mean, na.rm = TRUE))
+    postMean_inv_D <- lapply(inv_D, function (m) apply(m, 2:3, mean, na.rm = TRUE))
     mean_null <- function (x) if (is.null(x)) as.numeric(NA) else mean(x)
     postMean_sigmas <- lapply(sigmas, mean_null)
     Xbetas <- Xbetas_calc(X, postMean_betas)
@@ -330,14 +330,22 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
             prs[nam.prs] <- priors
         }
     }
-    tau_betas <- mvglmerObject$priors[grep("tau_betas", names(mvglmerObject$priors),
-                                           fixed = TRUE)]
-    prs$Tau_betas <- diag(rep(unlist(tau_betas, use.names = FALSE), sapply(betas, ncol)))
-    prs$priorK.D <- mvglmerObject$priors$priorK.D
+    if (mvglmerObject$engine == "JAGS") {
+        tau_betas <- mvglmerObject$priors[grep("tau_betas", names(mvglmerObject$priors), 
+                                               fixed = TRUE)]
+        prs$Tau_betas <- diag(rep(unlist(tau_betas, use.names = FALSE), 
+                                  sapply(betas, ncol)))
+    } else {
+        scale_betas <- mvglmerObject$priors[grep("scale_betas", names(mvglmerObject$priors), 
+                                               fixed = TRUE)]
+        prs$Tau_betas <- diag(rep(1 / unlist(scale_betas, use.names = FALSE)^2, 
+                                  sapply(betas, ncol)))
+    }
+    prs$priorK_D <- mvglmerObject$priors$priorK_D
     # Data passed to the MCMC
     Data <- list(y = y, Xbetas = Xbetas, X = X, Z = Z, RE_inds = RE_inds,
                  RE_inds2 = RE_inds2, idL = idL, idL2 = idL2, sigmas = postMean_sigmas,
-                 invD = postMean_inv.D[[1]], fams = fams, links = links, Time = Time,
+                 invD = postMean_inv_D[[1]], fams = fams, links = links, Time = Time,
                  event = event, idGK_fast = which(idGK_fast) - 1, W1 = W1, W1s = W1s,
                  event_colSumsW1 = colSums(event * W1), W2 = W2, W2s = W2s,
                  event_colSumsW2 = if (ncol(W2)) colSums(event * W2),
@@ -374,7 +382,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
 
         })
     }
-    runParallel <- function (block, betas, b, sigmas, inv.D, inits, data, priors,
+    runParallel <- function (block, betas, b, sigmas, inv_D, inits, data, priors,
                              scales, Covs, control) {
         M <- length(block)
         LogLiks <- numeric(M)
@@ -396,7 +404,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                 data$XXbetas <- Xbetas_calc(data$XX, betas., indFixed, outcome)
                 data$XXsbetas <- Xbetas_calc(data$XXs, betas., indFixed, outcome)
                 data$sigmas <- sampl(sigmas, ii)
-                data$invD <- as.matrix(sampl(inv.D, ii)[[1]])
+                data$invD <- as.matrix(sampl(inv_D, ii)[[1]])
                 oo <- if (any_gammas) {
                     lap_rwm_C(inits, data, priors, scales, Covs, control)
                 } else {
@@ -407,7 +415,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                 pr_betas <- c(dmvnorm2(rbind(current_betas), rep(0, n_betas),
                                       priors$Tau_betas, logd = TRUE))
                 pr_invD <- dwish(data$invD, diag(nrow(data$invD)),
-                                 priors$priorK.D, log = TRUE)
+                                 priors$priorK_D, log = TRUE)
                 LogLiks[i] <- c(oo$logWeights) - pr_betas - pr_invD
                 out[[i]] <- oo$mcmc
                 new_scales[[i]] <- oo$scales$sigma
@@ -500,7 +508,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
         cluster <- makeCluster(con$n_cores)
         registerDoParallel(cluster)
         out1 <- foreach(i = block1, .packages = "JMbayes", .combine = c) %dopar% {
-            runParallel(i, betas, b, sigmas, inv.D, inits, Data, prs, scales, Cvs, con)
+            runParallel(i, betas, b, sigmas, inv_D, inits, Data, prs, scales, Cvs, con)
         }
         stopCluster(cluster)
         calc_new_scales <- function (parm) {
@@ -519,7 +527,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
         cluster <- makeCluster(con$n_cores)
         registerDoParallel(cluster)
         out <- foreach(i = blocks, .packages = c("Rcpp", "JMbayes"), .combine = c) %dopar% {
-            runParallel(i, betas, b, sigmas, inv.D, inits, Data, prs, new_scales, Cvs, con)
+            runParallel(i, betas, b, sigmas, inv_D, inits, Data, prs, new_scales, Cvs, con)
         }
         stopCluster(cluster)
         out <- c(out1, out)

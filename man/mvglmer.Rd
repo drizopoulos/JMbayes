@@ -10,8 +10,8 @@ Fits multivariate mixed models under a Bayesian approach using JAGS.
 }
 
 \usage{
-mvglmer(formulas, data, families, overdispersion = FALSE,
-    priors = NULL, control = NULL, \dots)
+mvglmer(formulas, data, families, engine = c("JAGS", "STAN"), 
+    overdispersion = FALSE, priors = NULL, control = NULL, \dots)
 }
 
 \arguments{
@@ -22,6 +22,8 @@ mvglmer(formulas, data, families, overdispersion = FALSE,
         multivariate mixed model.}
   
   \item{families}{a list of families objects correspond to each outcome.}
+  
+  \item{engine}{a character string indicating whether to use JAGS or STAN to fit the model.}
   
   \item{overdispersion}{logical; for Poisson outcomes, should an overdispersion parameter
         be included.}
