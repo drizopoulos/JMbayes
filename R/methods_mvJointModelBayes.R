@@ -1,4 +1,4 @@
-summary.mvJMbayes <- function (object, weighted = TRUE, include.baselineHazard = FALSE, ...) {
+summary.mvJMbayes <- function (object, weighted = FALSE, include.baselineHazard = FALSE, ...) {
     families <- object$model_info$families
     n_outcomes <- length(families)
     components <- object$model_info$mvglmer_components

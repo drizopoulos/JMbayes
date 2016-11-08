@@ -56,7 +56,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
     } else {
         con$n.iter <- 1000
         con$n.warmup <- floor(con$n.iter / 2)
-        con$n.thin <- 2
+        con$n.thin <- 1
     }
     control <- c(control, list(...))
     namC <- names(con)
@@ -65,7 +65,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
         con$n.thin <- if (engine == "JAGS") {
             max(1, floor((con$n.iter - con$n.burnin) * con$n.chains / 1000))
         } else {
-            max(1, floor(con$n.iter * con$n.chains / 1000))
+            max(1, floor((con$n.iter - con$n.warmup) * con$n.chains / 1000))
         }
     }
     if (length(noNms <- namc[!namc %in% namC]) > 0)
@@ -146,13 +146,16 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
         out <- stan(file = file.path(con$working.directory, model_name), data = Data, 
                     pars = params, iter = con$n.iter, chains = con$n.chains, 
                     thin = con$n.thin, seed = con$seed)
-        sims.list <- lapply(lapply(params, extract, object = out), `[[`, 1)
+        sims.list <- lapply(lapply(params, extract, object = out, permuted = FALSE), bind_chains)
         sims.list[] <- lapply(sims.list, function (x) 
             if (length(dim(x)) == 1) as.matrix(x) else x)
+        names(sims.list) <- params
+        sims.list[['D']] <- fix_D(sims.list[['D']])
+        sims.list[['b']] <- fix_b(sims.list[['b']], Data$n_RE)
         splts <- rep(seq_along(sims.list), sapply(sims.list, function (x) prod(dim(x)[-1])))
         rhats <- head(rstan::summary(out)$summary[, "Rhat"], -1)
         Rhat <- split(rhats, splts)
-        names(sims.list) <- names(Rhat) <- params
+        names(Rhat) <- params
         list(sims.list = sims.list, Rhat = Rhat,
              mcmc.info = list(n.chains = con$n.chains, n.thin = con$n.thin,
                               n.warmup = con$n.warmup,
@@ -359,4 +362,35 @@ plot.mvglmer <- function (x, which = c("trace", "autocorr", "density"),
         par(op)
     }
     invisible()
+}
+
+bind_chains <- function (ar) {
+    d <- dim(ar)
+    e <- seq_len(d[2L]) * d[1L]
+    s <- c(1, head(e, -1) + 1)
+    ind <- mapply(seq, from = s, to = e, SIMPLIFY = FALSE)
+    m <- array(0.0, c(d[1L] * d[2L], d[3L]))
+    for (i in seq_len(d[2L])) {
+        m[ind[[i]], ] <- ar[, i, ]
+    }
+    colnames(m) <- dimnames(ar)[[3]]
+    m
+}
+
+fix_D <- function (D) {
+    d <- dim(D)
+    k <- round(d[2L]/2)
+    m <- array(0.0, c(d[1L], k, k))
+    for (i in seq_len(d[1L]))
+        m[i, , ] <- matrix(D[i, ], k, k)
+    m
+}
+
+fix_b <- function (b, n_RE) {
+    d <- dim(b)
+    n <- round(d[2L] / n_RE)
+    m <- array(0.0, c(d[1L], n, n_RE))
+    for (i in seq_len(d[1L]))
+        m[i, , ] <- matrix(b[i, ], n, n_RE)
+    m
 }
