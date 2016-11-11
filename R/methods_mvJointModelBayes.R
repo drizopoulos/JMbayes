@@ -155,23 +155,41 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density"),
 }
 
 update.mvJMbayes <- function (object, ...) {
-        call <- object$call
-        if (is.null(call))
-            stop("need an object with call component.\n")
-        extras <- match.call(expand.dots = FALSE)$...
-        if (length(extras) > 0) {
-            nams <- names(extras)
-            existing <- !is.na(match(nams, names(call)))
-            for (a in names(extras)[existing]) {
-                call[[a]] <- extras[[a]]
-            }
-            if (any(!existing)) {
-                call <- c(as.list(call), extras[!existing])
-                call <- as.call(call)
-            }
-        } else {
-            call <- c(as.list(call), list(init = extractInits(object)))
+    call <- object$call
+    if (is.null(call))
+        stop("need an object with call component.\n")
+    extras <- match.call(expand.dots = FALSE)$...
+    if (length(extras) > 0) {
+        nams <- names(extras)
+        existing <- !is.na(match(nams, names(call)))
+        for (a in names(extras)[existing]) {
+            call[[a]] <- extras[[a]]
+        }
+        if (any(!existing)) {
+            call <- c(as.list(call), extras[!existing])
             call <- as.call(call)
         }
-        eval(call, parent.frame())
+    } else {
+        call <- c(as.list(call), list(init = extractInits(object)))
+        call <- as.call(call)
     }
+    eval(call, parent.frame())
+}
+
+fixef.mvJMbayes <- function (object, process = c("Longitudinal", "Event"), ...) {
+    if (!inherits(object, "mvJMbayes"))
+        stop("Use only with 'mvJMbayes' objects.\n")
+    process <- match.arg(process)
+    if (process == "Longitudinal") {
+        comps <- object$model_info$mvglmer_components
+        nams_outcomes <- unlist(comps[grep("respVar", names(comps), fixed = TRUE)], 
+                                use.names = FALSE)
+        pMeans <- object$statistics$postMeans
+        betas <- pMeans[grep("betas", names(pMeans), fixed = TRUE)]
+        names(betas) <- nams_outcomes
+        betas
+    } else {
+        c(object$statistics$postMeans$gammas, 
+          object$statistics$postMeans$alphas)
+    }
+}

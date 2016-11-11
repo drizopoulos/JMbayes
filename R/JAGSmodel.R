@@ -99,9 +99,11 @@ hc_linpred <- function (outcome, colmns_HC, incr, n_RE) {
                 ind.cl <- paste0("c(", paste(jj, collapse = ", "), ")")
                 out <- paste0(out, paste0(myt(2), "mu.u[i, ", j.incr, "] <- inprod(betas",
                                           i, "[", ind.cl, "], Xhc", i, "[i, ", ind.cl, "])\n"))
-            } else {
+            } else if (length(jj) == 1) {
                 out <- paste0(out, paste0(myt(2), "mu.u[i, ", j.incr, "] <- betas",
                                           i, "[", jj, "]\n"))
+            } else {
+                out <- paste0(out, paste0(myt(2), "mu.u[i, ", j.incr, "] <- 0.0\n"))
             }
             out <- paste0(out, paste0(myt(2), "b[i, ", j.incr, "] <- u[i, ",
                                       j.incr, "] - mu.u[i, ", j.incr, "]\n"))

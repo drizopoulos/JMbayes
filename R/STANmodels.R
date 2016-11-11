@@ -1,6 +1,6 @@
-data_part <- function (families, ncolsZs, extraXs, n_RE) {
+data_part <- function (families, ncolsZs, extraXs, n_RE, colmns_nHC) {
     outcomes <- seq_along(families)
-    data_outcome <- function (outcome, family, ncolsZ, extraX = FALSE) {
+    data_outcome <- function (outcome, family, ncolsZ, extraX = FALSE, colmns_nHC) {
         type_long_outcome <- switch(family$family,
                                     "gaussian" = paste0("vector[N", outcome, "] y", outcome),
                                     "binomial" = paste0("int<lower=0, upper=1> y", outcome, "[N", outcome, "]"),
@@ -10,6 +10,9 @@ data_part <- function (families, ncolsZs, extraXs, n_RE) {
                myt(), "int ncx", outcome, ";\n",
                myt(), "int id", outcome, "[N", outcome, "];\n",
                myt(), "int RE_ind", outcome, if (ncolsZ > 1) paste0("[", ncolsZ, "]"), ";\n",
+               if (ll <- length(colmns_nHC)) 
+                   paste0(myt(), "int colmns_nHC", outcome, 
+                          if (ll > 1) paste0("[", ll, "]"), ";\n"),
                myt(), type_long_outcome, ";\n", 
                myt(), "matrix[N", outcome, ", ", ncolsZ, "] ", "Z", outcome, ";\n",
                myt(), "matrix[n, ncx", outcome, "] ", "Xhc", outcome, ";\n",
@@ -17,7 +20,8 @@ data_part <- function (families, ncolsZs, extraXs, n_RE) {
                                   "X", outcome, ";\n"))
     }
     paste0("data {\n", myt(), "int n;\n", myt(), "int n_RE;\n", 
-           paste0(mapply(data_outcome, outcomes, families, ncolsZs, extraXs), collapse = ""),
+           paste0(mapply(data_outcome, outcomes, families, ncolsZs, extraXs, colmns_nHC), 
+                  collapse = ""),
            paste0(sapply(outcomes, function (outcome) 
                paste0(myt(), "real<lower=0> scale_betas", outcome, ";\n")), collapse = ""),
            if (any(sapply(families, `[[`, 'family') == "gaussian")) 
@@ -62,9 +66,11 @@ transformed_parameters <- function (families, colmns_HC, colmns_nHC, RE_inds) {
         if (ncol > 1) {
             paste0(myt(2), "mu_u[i, ", i,"] = dot_product(Xhc", outcome, 
                    "[i, ", columns, "], betas", outcome, "[", columns, "]);\n")
-        } else {
+        } else if (ncol == 1) {
             paste0(myt(2), "mu_u[i, ", i,"] = Xhc", outcome, 
                    "[i, ", columns, "] * betas", outcome, "[", columns, "];\n")
+        } else {
+            paste0(myt(2), "mu_u[i, ", i,"] = 0.0;\n")
         }
     }
     linpred_part <- function (outcome, colmns_HC, colmns_nHC, RE_ind) {
@@ -79,11 +85,10 @@ transformed_parameters <- function (families, colmns_HC, colmns_nHC, RE_inds) {
                           RE_ind, "]"),
                if (length(clm <- colmns_nHC)) {
                    if (length(clm) > 1)
-                       paste0(" + dot_product(X", outcome, "[", j_i, ", ",
-                              paste0(clm, collapse = ":"), "], betas", outcome, "[",
-                              paste0(clm, collapse = ":"), "]);\n")
+                       paste0("\n", myt(4), " + dot_product(X", outcome, "[", j_i, ", colmns_nHC",
+                              outcome,"], betas", outcome, "[colmns_nHC", outcome, "]);\n")
                    else
-                       paste0(" + X", outcome, "[", j_i, ", ", clm, "] * betas", outcome, 
+                       paste0("\n", myt(4), " + X", outcome, "[", j_i, ", ", clm, "] * betas", outcome, 
                               "[", clm, "];\n")
                } else ";\n",
                myt(), "}\n")

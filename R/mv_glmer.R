@@ -43,7 +43,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
                       incr = cumsum(c(0, head(sapply(colmns_HC, length), -1))),
                       SIMPLIFY = FALSE)
     names(RE_inds) <- paste0("RE_ind", seq_along(RE_inds))
-    Data <- c(Data, RE_inds)
+    Data <- c(Data, RE_inds, colmns_nHC)
     # control
     con <- list(n.processors = parallel::detectCores() - 1, n.chains = 2,
                 working.directory = getwd(), clear.model = TRUE,
@@ -107,7 +107,8 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
         cat(build_model(families, seq_along(families), colmns_HC, colmns_nHC, overdispersion,
                         Data$n_RE), file = file.path(con$working.directory, model_name))
     } else {
-        cat(data_part(families, lapply(colmns_HC, length), lapply(colmns_nHC, length), Data$n_RE),
+        cat(data_part(families, lapply(colmns_HC, length), lapply(colmns_nHC, length), 
+                      Data$n_RE, colmns_nHC),
             parameters(families, Data$n_RE),
             transformed_parameters(families, colmns_HC, colmns_nHC, RE_inds),
             model(families, Data$n_RE), generated_quantities(Data$n_RE),
@@ -364,6 +365,18 @@ plot.mvglmer <- function (x, which = c("trace", "autocorr", "density"),
     invisible()
 }
 
+fixef.mvglmer <- function (object, ...) {
+    if (!inherits(object, "mvglmer"))
+        stop("Use only with 'mvglmer' objects.\n")
+    comps <- object$components
+    nams_outcomes <- unlist(comps[grep("respVar", names(comps), fixed = TRUE)], 
+                            use.names = FALSE)
+    pMeans <- object$postMeans
+    betas <- pMeans[grep("betas", names(pMeans), fixed = TRUE)]
+    names(betas) <- nams_outcomes
+    betas
+}
+
 bind_chains <- function (ar) {
     d <- dim(ar)
     e <- seq_len(d[2L]) * d[1L]
@@ -379,7 +392,7 @@ bind_chains <- function (ar) {
 
 fix_D <- function (D) {
     d <- dim(D)
-    k <- round(d[2L]/2)
+    k <- round(sqrt(d[2L]))
     m <- array(0.0, c(d[1L], k, k))
     for (i in seq_len(d[1L]))
         m[i, , ] <- matrix(D[i, ], k, k)
