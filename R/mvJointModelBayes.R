@@ -8,7 +8,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                 n_block = 100, n_thin = 300, target_acc = 0.234, c0 = 1, c1 = 0.8,
                 eps1 = 1e-06, eps2 = 1e-05, eps3 = 1e04, adaptCov = FALSE,
                 knots = NULL, ObsTimes.knots = TRUE,
-                lng.in.kn = 15L, ordSpline = 4L, diff = 2L,
+                lng.in.kn = 15L, ordSpline = 4L, diff = 2L, speed_factor = 0.5,
                 GQsurv = "GaussKronrod", GQsurv.k = 15L, seed = 1L,
                 n_cores = max(1, parallel::detectCores() - 1), update_RE = TRUE)
     control <- c(control, list(...))
@@ -523,7 +523,7 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                            "Bs_gammas" = calc_new_scales("Bs_gammas"),
                            "gammas" = if (any_gammas) calc_new_scales("gammas"),
                            "alphas" = calc_new_scales("alphas"))
-        con$n_burnin <- ceiling(0.5 * con$n_burnin / con$n_block) * con$n_block
+        con$n_burnin <- ceiling(con$speed_factor * con$n_burnin / con$n_block) * con$n_block
         cluster <- makeCluster(con$n_cores)
         registerDoParallel(cluster)
         out <- foreach(i = blocks, .packages = c("Rcpp", "JMbayes"), .combine = c) %dopar% {
