@@ -511,22 +511,26 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
             runParallel(i, betas, b, sigmas, inv_D, inits, Data, prs, scales, Cvs, con)
         }
         stopCluster(cluster)
-        calc_new_scales <- function (parm) {
-            if (parm == "b") {
-                apply(do.call("rbind", lapply(new_scales, "[[", "b")), 2L, median)
-            } else {
-                median(do.call("c", lapply(new_scales, "[[", parm)))
+        if (con$speed_factor < 1) {
+            calc_new_scales <- function (parm) {
+                if (parm == "b") {
+                    apply(do.call("rbind", lapply(new_scales, "[[", "b")), 2L, median)
+                } else {
+                    median(do.call("c", lapply(new_scales, "[[", parm)))
+                }
             }
+            new_scales <- lapply(out1, "[[", "scales")
+            new_scales <- list("b" = if (con$update_RE) calc_new_scales("b"),
+                               "Bs_gammas" = calc_new_scales("Bs_gammas"),
+                               "gammas" = if (any_gammas) calc_new_scales("gammas"),
+                               "alphas" = calc_new_scales("alphas"))
+            con$n_burnin <- ceiling(con$speed_factor * con$n_burnin / con$n_block) * con$n_block
+        } else {
+            new_scales <- scales
         }
-        new_scales <- lapply(out1, "[[", "scales")
-        new_scales <- list("b" = if (con$update_RE) calc_new_scales("b"),
-                           "Bs_gammas" = calc_new_scales("Bs_gammas"),
-                           "gammas" = if (any_gammas) calc_new_scales("gammas"),
-                           "alphas" = calc_new_scales("alphas"))
-        con$n_burnin <- ceiling(con$speed_factor * con$n_burnin / con$n_block) * con$n_block
         cluster <- makeCluster(con$n_cores)
         registerDoParallel(cluster)
-        out <- foreach(i = blocks, .packages = c("Rcpp", "JMbayes"), .combine = c) %dopar% {
+        out <- foreach(i = blocks, .packages = "JMbayes", .combine = c) %dopar% {
             runParallel(i, betas, b, sigmas, inv_D, inits, Data, prs, new_scales, Cvs, con)
         }
         stopCluster(cluster)

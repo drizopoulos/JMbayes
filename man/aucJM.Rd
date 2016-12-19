@@ -34,7 +34,7 @@ rocJM(object, newdata, Tstart, \dots)
     that identifies the different subjects (see also argument \code{idVar}).}
   \item{Tstart}{numeric scalar denoting the time point up to which longitudinal information is to be used to derive predictions.}
   \item{Thoriz}{numeric scalar denoting the time point for which a prediction of the survival status is of interest; 
-    \code{Thoriz} mast be later than \code{Tstart} and either \code{Dt} or \code{Thoriz} must be specified. If \code{Thoriz} is \code{NULL}
+    \code{Thoriz} must be later than \code{Tstart} and either \code{Dt} or \code{Thoriz} must be specified. If \code{Thoriz} is \code{NULL}
     is set equal to \code{Tstart + Dt}.}
   \item{Dt}{numeric scalar denoting the length of the time interval of prediction; either \code{Dt} or \code{Thoriz} must be specified.}
   \item{idVar}{the name of the variable in \code{newdata} that identifies the different subjects.}
