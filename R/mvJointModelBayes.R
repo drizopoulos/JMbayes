@@ -594,9 +594,16 @@ mvJointModelBayes <- function (mvglmerObject, coxphObject, timeVar,
                 ),
                 model_info = list(
                     families = families,
+                    timeVar = timeVar,
+                    Formulas = Formulas,
+                    Interactions = Interactions,
                     mvglmer_components = components,
                     coxph_components = list(data = dataS, Terms = Terms, Time = Time, 
-                                            event = event)
+                                            event = event),
+                    functions = list(build_model_matrix = build_model_matrix,
+                                     last_rows = last_rows, right_rows = right_rows,
+                                     Xbetas_calc = Xbetas_calc, 
+                                     designMatLong = designMatLong)
                 ),
                 control = con)
     class(res) <- "mvJMbayes"
