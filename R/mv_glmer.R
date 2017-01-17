@@ -102,7 +102,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
     Data <- c(Data, prs)
     ######################################################################################
     # write model
-    model_name <- paste0("mv_glmer", sample(1e06, 1), ".txt")
+    model_name <- paste0("mv_glmer", sample(1e06, 1), if (engine == "JAGS") ".txt" else ".stan")
     if (engine == "JAGS") {
         cat(build_model(families, seq_along(families), colmns_HC, colmns_nHC, overdispersion,
                         Data$n_RE), file = file.path(con$working.directory, model_name))
