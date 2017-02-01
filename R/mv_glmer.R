@@ -144,7 +144,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
                      n.thin = con$n.thin, seed = con$seed, verbose = con$verbose)
     } else {
         options(mc.cores = con$n.chains)
-        out <- stan(file = file.path(con$working.directory, model_name), data = Data, 
+        out <- rstan::stan(file = file.path(con$working.directory, model_name), data = Data, 
                     pars = params, iter = con$n.iter, chains = con$n.chains, 
                     thin = con$n.thin, seed = con$seed)
         sims.list <- lapply(lapply(params, extract, object = out, permuted = FALSE), bind_chains)

@@ -1,3 +1,9 @@
+Changes in version: JMbayes_0.8-6
+
+  * extractFrames() now correctly constructs the design matrix for hierarchical centering.
+
+---------------------------------------
+
 Changes in version: JMbayes_0.8-3
 
   * added function mvglmer() for fitting multivariate mixed models using JAGS.

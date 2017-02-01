@@ -42,21 +42,21 @@ extractFrames <- function (formula, data) {
         terms.labs_X <- attr(TermsX, "term.labels")
         terms.labs_Z <- attr(TermsZ, "term.labels")
         # check for time-varying covariates
-        timeTerms <- if (length(terms.labs_Z)) 
-            grep(terms.labs_Z[1L], colnames(X), fixed = TRUE)
+        timeTerms <- if (length(terms.labs_Z))
+            unlist(lapply(terms.labs_Z, FUN = function(x) grep(x, colnames(X), fixed = TRUE)))
         which_td <- unname(which(apply(X, 2, check_td, id = id)))
         all_TDterms <- unique(c(timeTerms, which_td))
         baseline <- seq_len(ncol(X))[-all_TDterms]
-        ind_colmns <- c(list(baseline), lapply(colnames(Z)[-1L], find_positions,
+        ind_colmns <- c(list(baseline), lapply(colnames(Z)[-1L], find_positions, 
                                                nams2 = colnames(X)))
         ind_colmns2 <- seq_len(ncol(X))
         ind_colmns2 <- ind_colmns2[!ind_colmns2 %in% unlist(ind_colmns)]
         data.id <- data[!duplicated(id), ]
         Xhc <- if (length(terms.labs_Z)) {
-            #data.id[[terms.labs_Z[1L]]] <- 1
             mfHC <- model.frame(TermsX, data = data.id)
-            which.timeVar <- grep(terms.labs_Z[1L], names(mfHC), fixed = TRUE)
-            mfHC[which.timeVar] <- lapply(mfHC[which.timeVar],
+            which.timevar <- unique(unlist(lapply(terms.labs_Z, 
+                                                  FUN = function (x) grep(x, names(mfHC), fixed = TRUE))))
+            mfHC[which.timevar] <- lapply(mfHC[which.timevar], 
                                           function (x) { x[] <- 1; x })
             model.matrix(formYx, mfHC)
         } else {
