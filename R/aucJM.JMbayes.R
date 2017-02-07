@@ -10,6 +10,7 @@ aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
         stop("either 'Thoriz' or 'Dt' must be non null.\n")
     if (is.null(Thoriz))
         Thoriz <- Tstart + Dt
+    Thoriz <- Thoriz + 1e-07
     id <- newdata[[idVar]]
     id <- match(id, unique(id))
     TermsT <- object$Terms$termsT
@@ -45,6 +46,9 @@ aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
         event <- SurvT[!duplicated(id), 2]
     }
     names(Time) <- names(event) <- as.character(unique(id))
+    if (any(dupl <- duplicated(Time))) {
+        Time[dupl] <- Time[dupl] + 1e-07
+    }
     if (!all(names(pi.u.t) == names(Time)))
         stop("mismatch between 'Time' variable names and survival probabilities names.")
     auc <- if (length(Time) > 1) {
@@ -55,24 +59,70 @@ aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
         dj <- event[pairs[2, ]]
         pi.u.t.i <- pi.u.t[pairs[1, ]]
         pi.u.t.j <- pi.u.t[pairs[2, ]]
-        ind1 <- (Ti < Thoriz & di == 1) & Tj > Thoriz
-        ind2 <- (Ti <  Thoriz & di == 1) & (Tj == Thoriz & dj == 0)
-        ind3 <- (Ti < Thoriz & di == 0) & Tj > Thoriz
-        ind <- ind1 | ind2 | ind3
-        if (any(ind3)) {
-            nams <- unique(names(ind3[ind3]))
+        ind1 <- (Ti <= Thoriz & di == 1) & Tj > Thoriz
+        ind2 <- (Ti <= Thoriz & di == 0) & Tj > Thoriz
+        ind3 <- (Ti <= Thoriz & di == 1) & (Tj <= Thoriz & dj == 0)
+        ind4 <- (Ti <= Thoriz & di == 0) & (Tj <= Thoriz & dj == 0)
+        names(ind1) <- names(ind2) <- names(ind3) <- names(ind4) <- paste(names(Ti), names(Tj), sep = "_")
+        ind <- ind1 | ind2 | ind3 | ind4
+        if (any(ind2)) {
+            nams <- strsplit(names(ind2[ind2]), "_")
+            nams_i <- sapply(nams, "[", 1)
+            unq_nams_i <- unique(nams_i)
             pi2 <- if (is_counting) {
-                survfitJM(object, newdata = newdata2[id %in% nams, ], idVar = idVar, 
-                             last.time = Time[nams], survTimes = Thoriz, 
+                survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], idVar = idVar, 
+                             last.time = Time[unq_nams_i], survTimes = Thoriz, 
                              simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
             } else {
-                survfitJM(object, newdata = newdata2[id %in% nams, ], idVar = idVar, 
-                          last.time = Time[nams], survTimes = Thoriz, 
+                survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], idVar = idVar, 
+                          last.time = Time[unq_nams_i], survTimes = Thoriz, 
                           simulate = simulate, M = M)
             }
             pi2 <- 1 - sapply(pi2$summaries, "[", 1, 2)
-            nams2 <- names(ind3[ind3])
-            ind[ind3] <- ind[ind3] * pi2[nams2]
+            ind[ind2] <- ind[ind2] * pi2[nams_i]
+        }
+        if (any(ind3)) {
+            nams <- strsplit(names(ind3[ind3]), "_")
+            nams_j <- sapply(nams, "[", 2)
+            unq_nams_j <- unique(nams_j)
+            pi3 <- if (is_counting) {
+                survfitJM(object, newdata = newdata2[id %in% unq_nams_j, ], idVar = idVar, 
+                          last.time = Time[unq_nams_j], survTimes = Thoriz, 
+                          simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
+            } else {
+                survfitJM(object, newdata = newdata2[id %in% unq_nams_j, ], idVar = idVar, 
+                          last.time = Time[unq_nams_j], survTimes = Thoriz, 
+                          simulate = simulate, M = M)
+            }
+            pi3 <- sapply(pi3$summaries, "[", 1, 2)
+            ind[ind3] <- ind[ind3] * pi3[nams_j]
+        }
+        if (any(ind4)) {
+            nams <- strsplit(names(ind4[ind4]), "_")
+            nams_i <- sapply(nams, "[", 1)
+            nams_j <- sapply(nams, "[", 2)
+            unq_nams_i <- unique(nams_i)
+            unq_nams_j <- unique(nams_j)
+            if (is_counting) {
+                pi4_i <- survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], 
+                                   idVar = idVar, last.time = Time[unq_nams_i], survTimes = Thoriz, 
+                                   simulate = simulate, M = M, 
+                                   LeftTrunc_var = all.vars(TermsT)[1L])
+                pi4_j <- survfitJM(object, newdata = newdata2[id %in% unq_nams_j, ], 
+                                   idVar = idVar, last.time = Time[unq_nams_j], survTimes = Thoriz, 
+                                   simulate = simulate, M = M, 
+                                   LeftTrunc_var = all.vars(TermsT)[1L])
+            } else {
+                pi4_i <- survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], 
+                                   idVar = idVar, last.time = Time[unq_nams_i], survTimes = Thoriz, 
+                                   simulate = simulate, M = M)
+                pi4_j <- survfitJM(object, newdata = newdata2[id %in% unq_nams_j, ], 
+                                   idVar = idVar, last.time = Time[unq_nams_j], survTimes = Thoriz, 
+                                   simulate = simulate, M = M)
+            }
+            pi4_i <- 1 - sapply(pi4_i$summaries, "[", 1, 2)
+            pi4_j <- sapply(pi4_j$summaries, "[", 1, 2)
+            ind[ind4] <- ind[ind4] * pi4_i[nams_i] * pi4_j[nams_j]
         }
         sum((pi.u.t.i < pi.u.t.j) * c(ind), na.rm = TRUE) / sum(ind, na.rm = TRUE)
     } else {

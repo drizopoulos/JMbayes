@@ -142,8 +142,8 @@ priors_taus <- function (family, outcome, overdispersion) {
     } else ""
 }
 
-priors_VC <- function (colmns_HC) {
-    if (length(unlist(colmns_HC)) == 1) {
+priors_VC <- function (n_RE) {
+    if (n_RE == 1) {
         "   inv_D ~ dt(0.0, tau_half_cauchy, 1)T(0, )\n"
     } else {
         paste("   inv_D ~ dwish(4 * priorR_D[, ], priorK_D)\n",
@@ -165,7 +165,7 @@ build_model <- function (families, outcomes, colmns_HC, colmns_nHC, overdispersi
     #priors <- paste0(priors, "    for (l in 1:n_RE) {\n",
     #                 "        priorR.D[l, l] ~ dgamma(A_R.D, B_R.D)\n",
     #                 "    }\n")
-    priors <- paste(priors, priors_VC(colmns_HC))
+    priors <- paste(priors, priors_VC(n_RE))
     paste0("model {\n", models, REs, priors, "}\n", collapse = "")
 }
 

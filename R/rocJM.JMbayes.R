@@ -10,6 +10,7 @@ rocJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
         stop("either 'Thoriz' or 'Dt' must be non null.\n")
     if (is.null(Thoriz))
         Thoriz <- Tstart + Dt
+    Thoriz <- Thoriz + 1e-07
     id <- newdata[[idVar]]
     id <- match(id, unique(id))
     TermsT <- object$Terms$termsT

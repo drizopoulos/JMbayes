@@ -43,7 +43,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
                       incr = cumsum(c(0, head(sapply(colmns_HC, length), -1))),
                       SIMPLIFY = FALSE)
     names(RE_inds) <- paste0("RE_ind", seq_along(RE_inds))
-    Data <- c(Data, RE_inds, colmns_nHC)
+    Data <- c(Data, RE_inds, unlist(colmns_HC, recursive = FALSE), colmns_nHC)
     # control
     con <- list(n.processors = parallel::detectCores() - 1, n.chains = 2,
                 working.directory = getwd(), clear.model = TRUE,
@@ -108,7 +108,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
                         Data$n_RE), file = file.path(con$working.directory, model_name))
     } else {
         cat(data_part(families, lapply(colmns_HC, length), lapply(colmns_nHC, length), 
-                      Data$n_RE, colmns_nHC),
+                      Data$n_RE, unlist(colmns_HC, recursive = FALSE), colmns_nHC),
             parameters(families, Data$n_RE),
             transformed_parameters(families, colmns_HC, colmns_nHC, RE_inds),
             model(families, Data$n_RE), generated_quantities(Data$n_RE),

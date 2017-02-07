@@ -1,6 +1,6 @@
-data_part <- function (families, ncolsZs, extraXs, n_RE, colmns_nHC) {
+data_part <- function (families, ncolsZs, extraXs, n_RE, colmns_HC, colmns_nHC) {
     outcomes <- seq_along(families)
-    data_outcome <- function (outcome, family, ncolsZ, extraX = FALSE, colmns_nHC) {
+    data_outcome <- function (outcome, family, ncolsZ, extraX = FALSE, colmns_HC, colmns_nHC) {
         type_long_outcome <- switch(family$family,
                                     "gaussian" = paste0("vector[N", outcome, "] y", outcome),
                                     "binomial" = paste0("int<lower=0, upper=1> y", outcome, "[N", outcome, "]"),
@@ -10,6 +10,9 @@ data_part <- function (families, ncolsZs, extraXs, n_RE, colmns_nHC) {
                myt(), "int ncx", outcome, ";\n",
                myt(), "int id", outcome, "[N", outcome, "];\n",
                myt(), "int RE_ind", outcome, if (ncolsZ > 1) paste0("[", ncolsZ, "]"), ";\n",
+               if (ll <- length(colmns_HC)) 
+                   paste0(myt(), "int colmns_HC", outcome, 
+                          if (ll > 1) paste0("[", ll, "]"), ";\n"),
                if (ll <- length(colmns_nHC)) 
                    paste0(myt(), "int colmns_nHC", outcome, 
                           if (ll > 1) paste0("[", ll, "]"), ";\n"),
@@ -20,7 +23,7 @@ data_part <- function (families, ncolsZs, extraXs, n_RE, colmns_nHC) {
                                   "X", outcome, ";\n"))
     }
     paste0("data {\n", myt(), "int n;\n", myt(), "int n_RE;\n", 
-           paste0(mapply(data_outcome, outcomes, families, ncolsZs, extraXs, colmns_nHC), 
+           paste0(mapply(data_outcome, outcomes, families, ncolsZs, extraXs, colmns_HC, colmns_nHC), 
                   collapse = ""),
            paste0(sapply(outcomes, function (outcome) 
                paste0(myt(), "real<lower=0> scale_betas", outcome, ";\n")), collapse = ""),
@@ -65,7 +68,7 @@ transformed_parameters <- function (families, colmns_HC, colmns_nHC, RE_inds) {
     HC_part <- function (outcome, columns, ncol, i) {
         if (ncol > 1) {
             paste0(myt(2), "mu_u[i, ", i,"] = dot_product(Xhc", outcome, 
-                   "[i, ", columns, "], betas", outcome, "[", columns, "]);\n")
+                   "[i, colmns_HC", outcome, "], betas", outcome, "[colmns_HC", outcome, "]);\n")
         } else if (ncol == 1) {
             paste0(myt(2), "mu_u[i, ", i,"] = Xhc", outcome, 
                    "[i, ", columns, "] * betas", outcome, "[", columns, "];\n")
