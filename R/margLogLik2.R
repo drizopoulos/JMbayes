@@ -98,7 +98,7 @@ marglogLik2 <- function (thetas, Data, priors, temp = 1.0, fixed_tau_Bs_gammas =
     out <- as.vector(0.5 * (d * log(2 * pi) - log_det_hessian) - opt$value)
     #iLap <- iLap(opt, ff = fn, ff.gr = gr, ff.hess = hes, control = list(n.cores = 6))
     if (fixed_tau_Bs_gammas) {
-        invH <- solve(opt$hessian)
+        invH <- nearPD(solve(hes(opt$par)))
         ind <- rep(seq_along(list_thetas), sapply(list_thetas, length))
         if (ncol(W2)) {
             ind_Bs_gammas <- which(ind == 1)

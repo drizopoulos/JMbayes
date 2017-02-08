@@ -8,6 +8,8 @@ aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
         stop("'idVar' not in 'newdata'.\n")
     if (is.null(Thoriz) && is.null(Dt))
         stop("either 'Thoriz' or 'Dt' must be non null.\n")
+    if (!is.null(Thoriz) && Thoriz <= Tstart)
+        stop("'Thoriz' must be larger than 'Tstart'.")
     if (is.null(Thoriz))
         Thoriz <- Tstart + Dt
     Thoriz <- Thoriz + 1e-07
