@@ -15,7 +15,9 @@ prederrJM.coxph <- function (object, newdata, Tstart, Thoriz, lossFun = c("absol
         lf <- match.arg(lossFun)
         if (lf == "absolute") function (x) abs(x) else function (x) x*x
     }
-    newdata$area <- newdata$slope <- 0
+    summary <- match.arg(summary)
+    if (summary %in% c("slope", "area"))
+        newdata$area <- newdata$slope <- 0
     id <- newdata[[idVar]]
     id <- match(id, unique(id))
     TermsT <- object$terms
