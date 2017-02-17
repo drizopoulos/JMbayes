@@ -2,7 +2,11 @@ nearPD <-
 function (M, eig.tol = 1e-06, conv.tol = 1e-07, posd.tol = 1e-08, maxits = 100) {
     # based on function nearcor() submitted to R-help by Jens Oehlschlagel on 2007-07-13, and
     # function posdefify() from package `sfsmisc'
-    if (!(is.numeric(M) && is.matrix(M) && identical(M, t(M))))
+    if (!is.numeric(M))
+        stop("Input matrix 'M' must be numeric.")
+    if (length(M) == 1)
+        return(abs(M))
+    if (is.matrix(M) && !identical(M, t(M)))
         stop("Input matrix M must be square and symmetric.\n")
     inorm <- function (x) max(rowSums(abs(x)))
     n <- ncol(M)
