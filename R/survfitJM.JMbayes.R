@@ -46,7 +46,7 @@ survfitJM.JMbayes <- function (object, newdata, type = c("SurvProb", "Density"),
     } else {
         !seq_len(nrow(newdata)) %in% na.ind
     }
-    id <- as.numeric(unclass(newdata[[idVar]]))
+    id <- unclass(newdata[[idVar]])
     id <- id. <- match(id, unique(id))
     id <- id[na.ind]
     y <- model.response(mfX)
@@ -254,7 +254,7 @@ survfitJM.JMbayes <- function (object, newdata, type = c("SurvProb", "Density"),
         d.[[timeVar]][nrow(d.)] <- t
         d.
     }, split(newdata, id.), last.time, SIMPLIFY = FALSE))
-    id. <- as.numeric(unclass(newdata.[[idVar]]))
+    id. <- unclass(newdata.[[idVar]])
     id. <- match(id., unique(id.))
     mfX. <- model.frame(delete.response(TermsX), data = newdata.)
     mfZ. <- model.frame(TermsZ, data = newdata.)
