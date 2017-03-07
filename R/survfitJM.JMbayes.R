@@ -46,7 +46,7 @@ survfitJM.JMbayes <- function (object, newdata, type = c("SurvProb", "Density"),
     } else {
         !seq_len(nrow(newdata)) %in% na.ind
     }
-    id <- unclass(newdata[[idVar]])
+    id <- newdata[[idVar]]
     id <- id. <- match(id, unique(id))
     id <- id[na.ind]
     y <- model.response(mfX)
@@ -75,7 +75,7 @@ survfitJM.JMbayes <- function (object, newdata, type = c("SurvProb", "Density"),
     W <- model.matrix.default(formT, mfT)[, -1L, drop = FALSE]
     obs.times <- split(newdata[[timeVar]][na.ind], id)
     last.time <- if (is.null(last.time)) {
-        tapply(newdata[[timeVar]], id., tail, n = 1L)
+        tapply(newdata[[timeVar]], id., max)
     } else if (is.character(last.time) && length(last.time) == 1L) {
         tapply(newdata[[last.time]], id., tail, n = 1L)
     } else if (is.numeric(last.time)) {
@@ -254,14 +254,14 @@ survfitJM.JMbayes <- function (object, newdata, type = c("SurvProb", "Density"),
         d.[[timeVar]][nrow(d.)] <- t
         d.
     }, split(newdata, id.), last.time, SIMPLIFY = FALSE))
-    id. <- unclass(newdata.[[idVar]])
+    id. <- newdata.[[idVar]]
     id. <- match(id., unique(id.))
     mfX. <- model.frame(delete.response(TermsX), data = newdata.)
     mfZ. <- model.frame(TermsZ, data = newdata.)
     X. <- model.matrix(formYx, mfX.)
     Z. <- model.matrix(formYz, mfZ.)
     fitted.y <- split(c(X. %*% betas) + rowSums(Z. * modes.b[id., , drop = FALSE]), id.)
-    names(res) <- names(y) <- names(last.time) <- names(obs.times) <- unique(unclass(newdata[[idVar]]))
+    names(res) <- names(y) <- names(last.time) <- names(obs.times) <- as.character(unique(newdata[[idVar]]))
     res <- list(summaries = res, survTimes = survTimes, last.time = last.time, 
         obs.times = obs.times, y = y, 
         fitted.times = split(newdata.[[timeVar]], factor(newdata.[[idVar]])), 
