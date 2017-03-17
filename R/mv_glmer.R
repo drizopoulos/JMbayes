@@ -43,7 +43,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
                       incr = cumsum(c(0, head(sapply(colmns_HC, length), -1))),
                       SIMPLIFY = FALSE)
     names(RE_inds) <- paste0("RE_ind", seq_along(RE_inds))
-    Data <- c(Data, RE_inds, unlist(colmns_HC, recursive = FALSE), colmns_nHC)
+    Data <- c(Data, RE_inds, lapply(colmns_HC, unlist), colmns_nHC)
     # control
     con <- list(n.processors = parallel::detectCores() - 1, n.chains = 2,
                 working.directory = getwd(), clear.model = TRUE,
@@ -57,6 +57,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
         con$n.iter <- 1000
         con$n.warmup <- floor(con$n.iter / 2)
         con$n.thin <- 1
+        con$adapt_delta <- 0.8
     }
     control <- c(control, list(...))
     namC <- names(con)
@@ -108,7 +109,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
                         Data$n_RE), file = file.path(con$working.directory, model_name))
     } else {
         cat(data_part(families, lapply(colmns_HC, length), lapply(colmns_nHC, length), 
-                      Data$n_RE, unlist(colmns_HC, recursive = FALSE), colmns_nHC),
+                      Data$n_RE, lapply(colmns_HC, unlist), colmns_nHC),
             parameters(families, Data$n_RE),
             transformed_parameters(families, colmns_HC, colmns_nHC, RE_inds),
             model(families, Data$n_RE), generated_quantities(Data$n_RE),
@@ -146,7 +147,8 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
         options(mc.cores = con$n.chains)
         out <- rstan::stan(file = file.path(con$working.directory, model_name), data = Data, 
                     pars = params, iter = con$n.iter, chains = con$n.chains, 
-                    thin = con$n.thin, seed = con$seed)
+                    thin = con$n.thin, seed = con$seed, 
+                    control = list('adapt_delta' = con$adapt_delta))
         sims.list <- lapply(lapply(params, extract, object = out, permuted = FALSE), bind_chains)
         sims.list[] <- lapply(sims.list, function (x) 
             if (length(dim(x)) == 1) as.matrix(x) else x)
