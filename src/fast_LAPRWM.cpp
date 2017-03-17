@@ -3,7 +3,6 @@
 
 using namespace Rcpp;
 using namespace arma;
-const double log2pi = std::log(2.0 * M_PI);
 
 uvec seqC(int x, int y, int by) {
     int nRatio = (y - x) / by;
