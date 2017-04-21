@@ -13,6 +13,16 @@ summary.mvJMbayes <- function (object, weighted = FALSE, include.baselineHazard 
     } else {
         object$statistics$postMeans
     }
+    CIs <- if (weighted && !is.null(object$statistics$wCIs)) {
+        object$statistics$wCIs
+    } else {
+        object$statistics$CIs
+    }
+    StDev <- if (weighted && !is.null(object$statistics$wStDev)) {
+        object$statistics$wStDev
+    } else {
+        object$statistics$StDev
+    }
     out <- list(n = components$n1, descrpt = descrpt, D = postMeans$D,
                 families = families, respVars = respVars, 
                 events = object$model_info$coxph_components$event,
@@ -20,14 +30,10 @@ summary.mvJMbayes <- function (object, weighted = FALSE, include.baselineHazard 
     tab_f <- function (name, is_sigma = FALSE) {
         is_mat <- is.matrix(object$statistics$CIs[[name]])
         data.frame("PostMean" = postMeans[[name]],
-                   "StDev" = object$statistics$StDev[[name]],
+                   "StDev" = StDev[[name]],
                    "StErr"= object$statistics$StErr[[name]],
-                   "2.5%" = if (is_mat) 
-                       object$statistics$CIs[[name]][1, ] 
-                   else object$statistics$CIs[[name]][1],
-                   "97.5%" = if (is_mat) 
-                       object$statistics$CIs[[name]][2, ] 
-                   else object$statistics$CIs[[name]][2],
+                   "2.5%" = if (is_mat) CIs[[name]][1, ] else CIs[[name]][1],
+                   "97.5%" = if (is_mat) CIs[[name]][2, ] else CIs[[name]][2],
                    "P" = object$statistics$Pvalues[[name]],
                    row.names = if (is_sigma) "sigma" 
                    else names(object$statistics$postMeans[[name]]),

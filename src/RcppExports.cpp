@@ -21,8 +21,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // lap_rwm_C
-List lap_rwm_C(List initials, List Data, List priors, List scales, List Covs, List control);
-RcppExport SEXP JMbayes_lap_rwm_C(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
+List lap_rwm_C(List initials, List Data, List priors, List scales, List Covs, List control, bool interval_cens);
+RcppExport SEXP JMbayes_lap_rwm_C(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP, SEXP interval_censSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,7 +32,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type scales(scalesSEXP);
     Rcpp::traits::input_parameter< List >::type Covs(CovsSEXP);
     Rcpp::traits::input_parameter< List >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(lap_rwm_C(initials, Data, priors, scales, Covs, control));
+    Rcpp::traits::input_parameter< bool >::type interval_cens(interval_censSEXP);
+    rcpp_result_gen = Rcpp::wrap(lap_rwm_C(initials, Data, priors, scales, Covs, control, interval_cens));
     return rcpp_result_gen;
 END_RCPP
 }

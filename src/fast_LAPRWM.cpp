@@ -129,6 +129,26 @@ arma::mat extract_b(const cube& b, unsigned int sample) {
     return(out);
 }
 
+arma::vec log_p_event_RC (const arma::vec& logh, const arma::vec& H, 
+                          const arma::vec& event) {
+    arma::vec res = event % logh - H;
+    return(res);
+}
+
+arma::vec log_p_event_IC (const arma::vec& logh, const arma::vec& H, const arma::vec& HU,
+                          const LogicalVector& Levent1, const LogicalVector& Levent01,
+                          const LogicalVector& Levent2, const LogicalVector& Levent3) {
+    int n = logh.n_rows;
+    arma::vec res(n, fill::zeros);
+    for (int i = 0; i < n; ++i) {
+        if (Levent1(i)) res.at(i) += logh.at(i);
+        if (Levent01(i)) res.at(i) -= H.at(i);
+        if (Levent2(i)) res.at(i) += log(1 - exp(-H.at(i)));
+        if (Levent3(i)) res.at(i) += log(exp(-HU.at(i)) - exp(HU.at(i)));
+    }
+    return(res);
+}
+
 arma::vec log_longF(const field<vec>& y, const field<vec>& eta,
                     const CharacterVector& fams, const CharacterVector& links,
                     const List& sigmas, const field<uvec>& id, const int& n) {
@@ -204,8 +224,8 @@ arma::vec log_postREF(const mat& b_mat, const vec& Bs_gammas, const vec& gammas,
     mat Wlongs = lin_pred_matF(XXsbetas, ZZs, b_mat, Us, RE_inds2, idTs,
                                col_inds, row_inds_Us, ns, n_alphas);
     vec log_h = W1 * Bs_gammas + W2 * gammas + Wlong * alphas;
-    vec H = Pw % exp(W1s * Bs_gammas + W2s * gammas + Wlongs * alphas);
-    vec log_ptb = (event % log_h) - rowsum(H, idGK);
+    vec H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + Wlongs * alphas), idGK);
+    vec log_ptb = (event % log_h) - H;
     vec out = log_pyb + log_ptb + log_pb;
     return(out);
 }
@@ -234,8 +254,8 @@ arma::vec log_postRE_nogammasF(const mat& b_mat, const vec& Bs_gammas, const vec
     mat Wlongs = lin_pred_matF(XXsbetas, ZZs, b_mat, Us, RE_inds2, idTs,
                                col_inds, row_inds_Us, ns, n_alphas);
     vec log_h = W1 * Bs_gammas + Wlong * alphas;
-    vec H = Pw % exp(W1s * Bs_gammas + Wlongs * alphas);
-    vec log_ptb = (event % log_h) - rowsum(H, idGK);
+    vec H = rowsum(Pw % exp(W1s * Bs_gammas + Wlongs * alphas), idGK);
+    vec log_ptb = (event % log_h) - H;
     vec out = log_pyb + log_ptb + log_pb;
     return(out);
 }
@@ -313,7 +333,7 @@ mat bounds_Cov (mat Sigma, double eps2, double eps3) {
 
 // [[Rcpp::export]]
 List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
-                List control) {
+                List control, bool interval_cens) {
     // Data
     List y = as<List>(Data["y"]);
     field<vec> yF = List2Field_vec(y);
@@ -360,6 +380,17 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     List idTs = as<List>(Data["idTs"]);
     field<uvec> idTsF = List2Field_uvec(idTs);
     vec Pw = as<vec>(Data["Pw"]);
+    if (interval_cens) {
+        mat W1s_int = as<mat>(Data["W1s_int"]);
+        mat W2s_int = as<mat>(Data["W2s_int"]);
+        List Us_int = as<List>(Data["Us_int"]);
+        List XXsbetas_int = as<List>(Data["XXsbetas_int"]);
+        field<vec> XXsbetasF_int = List2Field_vec(XXsbetas_int);
+        field<mat> UsF_int = List2Field_mat(Us_int);
+        List ZZs_int = as<List>(Data["ZZs_int"]);
+        field<mat> ZZsF_int = List2Field_mat(ZZs_int);
+        vec Pw_int = as<vec>(Data["Pw_int"]);
+    }
     // Initials
     mat b = as<mat>(initials["b"]);
     vec Bs_gammas = as<vec>(initials["Bs_gammas"]);

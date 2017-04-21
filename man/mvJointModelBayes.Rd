@@ -10,7 +10,7 @@ Fits multivariate shared parameter joint models for longitudinal and survival ou
 }
 
 \usage{
-mvJointModelBayes(mvglmerObject, coxphObject, timeVar,
+mvJointModelBayes(mvglmerObject, survObject, timeVar,
     Formulas = list(NULL), Interactions = list(NULL),
     priors = NULL, control = NULL, \dots)
 }
@@ -19,8 +19,8 @@ mvJointModelBayes(mvglmerObject, coxphObject, timeVar,
   \item{mvglmerObject}{an object of class 'mvglmer' fitted by function 
     \code{mvglmer()}.}
   
-  \item{coxphObject}{an object of class 'coxph' fitted by function \code{coxph()} 
-    from package \bold{survival}.}
+  \item{survObject}{an object of class 'coxph' fitted by function \code{coxph()} or
+    'survreg' fitted by function \code{survreg()} from package \bold{survival}.}
   
   \item{timeVar}{a character string indicating the time variable in the multivariate 
     mixed effects model.}

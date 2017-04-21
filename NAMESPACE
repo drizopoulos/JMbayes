@@ -12,6 +12,7 @@ importFrom("nlme", "fixed.effects", "fixef", "random.effects", "ranef",
 importFrom("survival", "survfit", "coxph", "survreg")
 importFrom("splines", "ns", "bs", "splineDesign")
 importFrom("MASS", "mvrnorm")
+importFrom("Hmisc", "wtd.quantile", "wtd.var")
 importFrom("grDevices", "dev.cur", "dev.size", "xy.coords")
 importFrom("graphics", "abline", "axis", "lines", "matlines", "matplot", 
   "mtext", "par", "plot", "points", "polygon", "segments")
