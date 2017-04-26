@@ -230,6 +230,45 @@ arma::vec log_postREF(const mat& b_mat, const vec& Bs_gammas, const vec& gammas,
     return(out);
 }
 
+arma::vec log_postREICF(const mat& b_mat, const vec& Bs_gammas, const vec& gammas,
+                        const vec& alphas, const field<vec>& y, const field<vec>& Xbetas,
+                        const field<mat>& Z,
+                        const field<uvec>& RE_inds, const field<uvec>& RE_inds2,
+                        const field<uvec>& idL, const field<uvec>& idL2,
+                        const CharacterVector& fams, const CharacterVector& links,
+                        const List& sigmas, const mat& invD,
+                        const int& n, const int& ns, const int& n_alphas,
+                        const LogicalVector& Levent1, const LogicalVector& Levent01,
+                        const LogicalVector& Levent2, const LogicalVector& Levent3, 
+                        const mat& W1, const mat& W1s, const mat& W1s_int, 
+                        const mat& W2, const mat& W2s, const mat& W2s_int, 
+                        const field<vec>& XXbetas, const field<vec>& XXsbetas, 
+                        const field<vec>& XXsbetas_int, 
+                        const field<mat>& ZZ, 
+                        const field<mat>& ZZs, const field<mat>& ZZs_int, 
+                        const field<mat>& U, const field<mat>& Us, const field<mat>& Us_int, 
+                        const vec& Pw, const vec& Pw_int, const uvec& idGK,
+                        const field<uvec>& idT, const field<uvec>& idTs,
+                        const field<uvec>& col_inds,
+                        const uvec& row_inds_U, const uvec& row_inds_Us) {
+    field<vec> eta = lin_predF(Xbetas, Z, b_mat, RE_inds, idL);
+    vec log_pyb = log_longF(y, eta, fams, links, sigmas, idL2, n);
+    vec log_pb = - 0.5 * sum((b_mat * invD) % b_mat, 1);
+    mat Wlong = lin_pred_matF(XXbetas, ZZ, b_mat, U, RE_inds2, idT,
+                              col_inds, row_inds_U, n, n_alphas);
+    mat Wlongs = lin_pred_matF(XXsbetas, ZZs, b_mat, Us, RE_inds2, idTs,
+                               col_inds, row_inds_Us, ns, n_alphas);
+    vec log_h = W1 * Bs_gammas + W2 * gammas + Wlong * alphas;
+    vec H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + Wlongs * alphas), idGK);
+    mat Wlongs_int = lin_pred_matF(XXsbetas_int, ZZs_int, b_mat, Us_int, RE_inds2, idTs,
+                                   col_inds, row_inds_Us, ns, n_alphas);
+    vec HU = rowsum(Pw_int % exp(W1s_int * Bs_gammas + W2s_int * gammas + 
+        Wlongs_int * alphas), idGK);
+    vec log_ptb = log_p_event_IC (log_h, H, HU, Levent1, Levent01, Levent2, Levent3);
+    vec out = log_pyb + log_ptb + log_pb;
+    return(out);
+}
+
 arma::vec log_postRE_nogammasF(const mat& b_mat, const vec& Bs_gammas, const vec& alphas,
                                const field<vec>& y, const field<vec>& Xbetas,
                                const field<mat>& Z,
@@ -256,6 +295,43 @@ arma::vec log_postRE_nogammasF(const mat& b_mat, const vec& Bs_gammas, const vec
     vec log_h = W1 * Bs_gammas + Wlong * alphas;
     vec H = rowsum(Pw % exp(W1s * Bs_gammas + Wlongs * alphas), idGK);
     vec log_ptb = (event % log_h) - H;
+    vec out = log_pyb + log_ptb + log_pb;
+    return(out);
+}
+
+arma::vec log_postREIC_nogammasF(const mat& b_mat, const vec& Bs_gammas,
+                        const vec& alphas, const field<vec>& y, const field<vec>& Xbetas,
+                        const field<mat>& Z,
+                        const field<uvec>& RE_inds, const field<uvec>& RE_inds2,
+                        const field<uvec>& idL, const field<uvec>& idL2,
+                        const CharacterVector& fams, const CharacterVector& links,
+                        const List& sigmas, const mat& invD,
+                        const int& n, const int& ns, const int& n_alphas,
+                        const LogicalVector& Levent1, const LogicalVector& Levent01,
+                        const LogicalVector& Levent2, const LogicalVector& Levent3, 
+                        const mat& W1, const mat& W1s, const mat& W1s_int, 
+                        const field<vec>& XXbetas, const field<vec>& XXsbetas, 
+                        const field<vec>& XXsbetas_int, 
+                        const field<mat>& ZZ, 
+                        const field<mat>& ZZs, const field<mat>& ZZs_int, 
+                        const field<mat>& U, const field<mat>& Us, const field<mat>& Us_int, 
+                        const vec& Pw, const vec& Pw_int, const uvec& idGK,
+                        const field<uvec>& idT, const field<uvec>& idTs,
+                        const field<uvec>& col_inds,
+                        const uvec& row_inds_U, const uvec& row_inds_Us) {
+    field<vec> eta = lin_predF(Xbetas, Z, b_mat, RE_inds, idL);
+    vec log_pyb = log_longF(y, eta, fams, links, sigmas, idL2, n);
+    vec log_pb = - 0.5 * sum((b_mat * invD) % b_mat, 1);
+    mat Wlong = lin_pred_matF(XXbetas, ZZ, b_mat, U, RE_inds2, idT,
+                              col_inds, row_inds_U, n, n_alphas);
+    mat Wlongs = lin_pred_matF(XXsbetas, ZZs, b_mat, Us, RE_inds2, idTs,
+                               col_inds, row_inds_Us, ns, n_alphas);
+    vec log_h = W1 * Bs_gammas + Wlong * alphas;
+    vec H = rowsum(Pw % exp(W1s * Bs_gammas + Wlongs * alphas), idGK);
+    mat Wlongs_int = lin_pred_matF(XXsbetas_int, ZZs_int, b_mat, Us_int, RE_inds2, idTs,
+                                   col_inds, row_inds_Us, ns, n_alphas);
+    vec HU = rowsum(Pw_int % exp(W1s_int * Bs_gammas + Wlongs_int * alphas), idGK);
+    vec log_ptb = log_p_event_IC (log_h, H, HU, Levent1, Levent01, Levent2, Levent3);
     vec out = log_pyb + log_ptb + log_pb;
     return(out);
 }
@@ -351,8 +427,8 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     field<uvec> idLF = List2Field_uvec(idL);
     List idL2 = as<List>(Data["idL2"]);
     field<uvec> idL2F = List2Field_uvec(idL2, false);
-    CharacterVector fams = as< CharacterVector>(Data["fams"]);
-    CharacterVector links = as< CharacterVector>(Data["links"]);
+    CharacterVector fams = as<CharacterVector>(Data["fams"]);
+    CharacterVector links = as<CharacterVector>(Data["links"]);
     vec event = as<vec>(Data["event"]);
     uvec idGK = as<uvec>(Data["idGK_fast"]);
     mat W1 = as<mat>(Data["W1"]);
@@ -381,6 +457,10 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     field<uvec> idTsF = List2Field_uvec(idTs);
     vec Pw = as<vec>(Data["Pw"]);
     if (interval_cens) {
+        LogicalVector Levent1 = as<LogicalVector>(Data["Levent1"]);
+        LogicalVector Levent01 = as<LogicalVector>(Data["Levent01"]);
+        LogicalVector Levent2 = as<LogicalVector>(Data["Levent2"]);
+        LogicalVector Levent3 = as<LogicalVector>(Data["Levent3"]);
         mat W1s_int = as<mat>(Data["W1s_int"]);
         mat W2s_int = as<mat>(Data["W2s_int"]);
         List Us_int = as<List>(Data["Us_int"]);
@@ -501,7 +581,6 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                                                  XXsbetasF, ZZF, ZZsF, UF, UsF,
                                                  Pw, idGK, idTF, idTsF, col_indsF,
                                                  row_inds_U, row_inds_Us);
-
             new_b = b + extract_b(rand_b, i);
             vec new_logpost_RE = log_postREF(new_b, Bs_gammas, gammas, alphas, yF, XbetasF, ZF,
                                              RE_indsF, RE_inds2F, idLF, idL2F, fams,

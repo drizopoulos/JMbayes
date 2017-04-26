@@ -74,7 +74,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
     ######################################################################################
     # Priors
     if (engine == "JAGS") {
-        prs <- list(priorR_D = diag(rep(NA, Data$n_RE), Data$n_RE),
+        prs <- list(priorR_D = diag(rep(as.numeric(NA), Data$n_RE), Data$n_RE),
                     priorK_D = Data$n_RE + 1, A_RD = 0.5, B_RD = 0.01,
                     tau_half_cauchy = 0.1)
         pr_taus_betas <- rep(list(0.01), n_outcomes)
