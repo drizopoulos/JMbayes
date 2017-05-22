@@ -1,7 +1,6 @@
 mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                Formulas = list(NULL), Interactions = list(NULL),
-                               priors = NULL, control = NULL,
-                               ...) {
+                               transFuns = NULL, priors = NULL, control = NULL, ...) {
     cl <- match.call()
     # control values
     con <- list(temps = 1.0, n_iter = 300, n_burnin = 1000,
@@ -25,6 +24,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     Terms <- attr(dataS, "terms")
     SurvInf <- model.response(dataS)
     typeSurvInf <- attr(SurvInf, "type")
+    TimeVar <- all.vars(Terms)[1L]
     if (typeSurvInf == "right") {
         if (class(survObject) == 'survreg') {
             stop("Please refit the survival submodel using coxph().\n")
@@ -166,10 +166,12 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     dataLS <- merge(dataL, dataS.id[survVars_notin_long], all = TRUE, sort = FALSE)
     dataLS.id <- merge(dataL.id, dataS.id[survVars_notin_long], by = idVar,
                        all = TRUE, sort = FALSE)
+    dataLS.id[[TimeVar]] <- dataLS.id[[timeVar]]
     dataS.id2[["id2merge"]] <- paste(dataS.id2[[idVar]], round(c(t(st)), 8), sep = ":")
     dataL.id2[["id2merge"]] <- paste(dataL.id2[[idVar]], round(c(t(st)), 8), sep = ":")
     dataLS.id2 <- merge(dataL.id2, dataS.id2[survVars_notin_long2], by = "id2merge",
                         sort = FALSE, all = FALSE)
+    dataLS.id2[[TimeVar]] <- dataLS.id2[[timeVar]]
     if (typeSurvInf == "interval") {
         dataS_int.id <- last_rows(dataS, dataS[[idVar]])
         dataS_int.id2 <- right_rows(dataS, TimeLl, idT, st_int)
@@ -316,6 +318,20 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                                           fixed = TRUE)]
     }
     # create design matrix long for relative risk model
+    trans_Funs <- rep("identity", length(XX))
+    names(trans_Funs) <- names(Formulas)
+    if (!is.null(transFuns)) {
+        if (is.null(names(transFuns)) || !all(names(transFuns) %in% names(trans_Funs))) {
+            stop("unknown names in 'transFuns'; valid names are the ones induced by the 'Formulas' ",
+                 "argument; these are:\n", paste(names(Formulas), collapse = ", "))
+        }
+        valid_funs <- c("identity", "expit", "log", "log2", "log10", "sqrt")
+        if (!is.character(transFuns) || !all(transFuns %in% valid_funs)) {
+            stop("invalid functions names in 'transFuns'; the functions currently supported are: ", 
+                 paste(valid_funs, collapse = ", "), ".\nThese should be provided as character vector.")
+        }
+        trans_Funs[names(transFuns)] <- transFuns
+    }
     indFixed <- lapply(Formulas, "[[", "indFixed")
     indRandom <- lapply(Formulas, "[[", "indRandom")
     RE_inds2 <- mapply(function (ind, select) ind[select], RE_inds[outcome], indRandom,
@@ -333,7 +349,11 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         }
         out
     }
-    designMatLong <- function (X, betas, Z, b, id, outcome, indFixed, indRandom, U) {
+    get_fun <- function (f) {
+        if (f == "identity") function (x) x else get(f, mode = "function")
+    }
+    designMatLong <- function (X, betas, Z, b, id, outcome, indFixed, indRandom, U,
+                               trans_Funs) {
         n <- length(X)
         cols <- sapply(U, ncol)
         cols_inds <- cbind(c(1, head(cumsum(cols) + 1, -1)), cumsum(cols))
@@ -347,7 +367,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
             betas_i <- betas[[ii]][indFixed[[i]]]
             Z_i <- Z[[i]]
             b_i <- as.matrix(b[[ii]])[id[[ii]], indRandom[[i]], drop = FALSE]
-            out[, iii] <- U[[i]] * c(X_i %*% betas_i) + rowSums(Z_i * b_i)
+            Fun <- get(trans_Funs[i])
+            out[, iii] <- U[[i]] * Fun(c(X_i %*% betas_i) + rowSums(Z_i * b_i))
         }
         attr(out, "col_inds") <- col_inds_out
         out
@@ -370,9 +391,9 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         which(x) - 1
     })
     Wlong <- designMatLong(XX, postMean_betas, ZZ, postMean_b, id, outcome,
-                           indFixed, indRandom, U)
+                           indFixed, indRandom, U, trans_Funs)
     Wlongs <- designMatLong(XXs, postMean_betas, ZZs, postMean_b, ids, outcome,
-                            indFixed, indRandom, Us)
+                            indFixed, indRandom, Us, trans_Funs)
     if (typeSurvInf == "interval") {
         Wlongs_int <- designMatLong(XXs_int, postMean_betas, ZZs_int, postMean_b, ids, 
                                     outcome, indFixed, indRandom, Us_int)
@@ -380,10 +401,25 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     # priors
     DD <- diag(ncol(W1))
     Tau_Bs_gammas <- crossprod(diff(DD, differences = con$diff)) + 1e-06 * DD
+    find_td_cols <- function (x) grep('td(', colnames(x), fixed = TRUE)
+    td_cols <- lapply(U, find_td_cols)
+    Tau_alphas <- lapply(U, function (x) 0.01 * diag(NCOL(x)))
+    pen_matrix <- function (td_cols, Tau_alphas) {
+        if (ncol(Tau_alphas) == length(td_cols)) {
+            DD <- diag(ncol(Tau_alphas))
+            crossprod(diff(DD, differences = con$diff)) + 1e-06 * DD
+        } else Tau_alphas
+    }
+    Tau_alphas <- bdiag(mapply(pen_matrix, td_cols, Tau_alphas, SIMPLIFY = FALSE))
+    which_td <- as.logical(sapply(td_cols, length))
+    td_cols <- mapply(seq, from = c(1, head(cumsum(sapply(U, ncol)), -1) + 1),
+                      to = cumsum(sapply(U, ncol)), SIMPLIFY = FALSE)[which_td]
     prs <- list(mean_Bs_gammas = rep(0, ncol(W1)), Tau_Bs_gammas = Tau_Bs_gammas,
                 mean_gammas = rep(0, ncol(W2)), Tau_gammas = 0.01 * diag(ncol(W2)),
-                mean_alphas = rep(0, ncol(Wlong)), Tau_alphas = 0.01 * diag(ncol(Wlong)),
-                A_tau_Bs_gammas = 1, B_tau_Bs_gammas = 0.01, rank_Tau_Bs_gammas = qr(Tau_Bs_gammas)$rank,
+                mean_alphas = rep(0, ncol(Wlong)), Tau_alphas = Tau_alphas,
+                td_cols = unname(td_cols),
+                A_tau_Bs_gammas = 1, B_tau_Bs_gammas = 0.01, 
+                rank_Tau_Bs_gammas = qr(Tau_Bs_gammas)$rank,
                 A_phi_Bs_gammas = 1, B_phi_Bs_gammas = 0.01, shrink_Bs_gammas = FALSE,
                 A_tau_gammas = 0.1, B_tau_gammas = 0.1, rank_Tau_gammas = ncol(W2),
                 A_phi_gammas = 1, B_phi_gammas = 0.01, shrink_gammas = FALSE,
@@ -424,7 +460,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                  XXbetas = XXbetas, XXsbetas = XXsbetas, XX = XX, XXs = XXs, ZZ = ZZ,
                  ZZs = ZZs, P = P[ids[[1]]], w = rep(wk, nT),
                  Pw = P[ids[[1]]] * rep(wk, nT), idT = id[outcome], idTs = ids[outcome],
-                 outcome = outcome, indFixed = indFixed, indRandom = indRandom)
+                 outcome = outcome, indFixed = indFixed, indRandom = indRandom,
+                 trans_Funs = trans_Funs)
     if (typeSurvInf == "interval") {
         Data <- c(Data, list(W1s_int = W1s_int, W2s_int = W2s_int, Wlongs_int = Wlongs_int,
                              Us_int = Us_int, XXsbetas_int = XXsbetas_int,

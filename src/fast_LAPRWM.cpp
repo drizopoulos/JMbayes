@@ -27,7 +27,7 @@ arma::vec rowsum(const vec& x_, const uvec& group) {
 arma::vec Vpnorm(const vec& x) {
     int n = x.size();
     vec res(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         res[i] = ::Rf_pnorm5(x[i], 0.0, 1.0, 1, 0);
     }
     return(res);
@@ -81,13 +81,29 @@ arma::mat lin_pred_matF(const field<vec>& Xbetas, const field<mat>& Z,
                         const mat& b, const field<mat>& U,
                         const field<uvec>& RE_inds, const field<uvec>& id,
                         const field<uvec>& col_inds, const uvec& row_inds,
-                        const int& nrows, const int& ncols) {
+                        const int& nrows, const int& ncols,
+                        const CharacterVector& trans_Funs) {
     int n_field = Xbetas.size();
     mat out = mat(nrows, ncols, fill::zeros);
     for (int i = 0; i < n_field; ++i) {
         mat bb = b.cols(RE_inds.at(i));
         vec Zb = sum(Z.at(i) % bb.rows(id.at(i)), 1);
-        out.submat(row_inds, col_inds.at(i)) = U.at(i).each_col() % (Xbetas.at(i) + Zb);
+        if (trans_Funs[i] == "identity") {
+            out.submat(row_inds, col_inds.at(i)) = U.at(i).each_col() % (Xbetas.at(i) + Zb);
+        } else if (trans_Funs[i] == "expit") {
+            vec exp_eta = exp(Xbetas.at(i) + Zb);
+            out.submat(row_inds, col_inds.at(i)) = U.at(i).each_col() % (exp_eta / (1 + exp_eta));
+        } else if (trans_Funs[i] == "exp") {
+            out.submat(row_inds, col_inds.at(i)) = U.at(i).each_col() % exp(Xbetas.at(i) + Zb);
+        } else if (trans_Funs[i] == "log") {
+            out.submat(row_inds, col_inds.at(i)) = U.at(i).each_col() % log(Xbetas.at(i) + Zb);
+        } else if (trans_Funs[i] == "log2") {
+            out.submat(row_inds, col_inds.at(i)) = U.at(i).each_col() % log2(Xbetas.at(i) + Zb);
+        } else if (trans_Funs[i] == "log10") {
+            out.submat(row_inds, col_inds.at(i)) = U.at(i).each_col() % log10(Xbetas.at(i) + Zb);
+        } else if (trans_Funs[i] == "sqrt") {
+            out.submat(row_inds, col_inds.at(i)) = U.at(i).each_col() % sqrt(Xbetas.at(i) + Zb);
+        }
     }
     return(out);
 }
@@ -215,14 +231,15 @@ arma::vec log_postREF(const mat& b_mat, const vec& Bs_gammas, const vec& gammas,
                       const field<mat>& Us, const vec& Pw, const uvec& idGK,
                       const field<uvec>& idT, const field<uvec>& idTs,
                       const field<uvec>& col_inds,
-                      const uvec& row_inds_U, const uvec& row_inds_Us) {
+                      const uvec& row_inds_U, const uvec& row_inds_Us,
+                      const CharacterVector& trans_Funs) {
     field<vec> eta = lin_predF(Xbetas, Z, b_mat, RE_inds, idL);
     vec log_pyb = log_longF(y, eta, fams, links, sigmas, idL2, n);
     vec log_pb = - 0.5 * sum((b_mat * invD) % b_mat, 1);
     mat Wlong = lin_pred_matF(XXbetas, ZZ, b_mat, U, RE_inds2, idT,
-                              col_inds, row_inds_U, n, n_alphas);
+                              col_inds, row_inds_U, n, n_alphas, trans_Funs);
     mat Wlongs = lin_pred_matF(XXsbetas, ZZs, b_mat, Us, RE_inds2, idTs,
-                               col_inds, row_inds_Us, ns, n_alphas);
+                               col_inds, row_inds_Us, ns, n_alphas, trans_Funs);
     vec log_h = W1 * Bs_gammas + W2 * gammas + Wlong * alphas;
     vec H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + Wlongs * alphas), idGK);
     vec log_ptb = (event % log_h) - H;
@@ -250,18 +267,19 @@ arma::vec log_postREICF(const mat& b_mat, const vec& Bs_gammas, const vec& gamma
                         const vec& Pw, const vec& Pw_int, const uvec& idGK,
                         const field<uvec>& idT, const field<uvec>& idTs,
                         const field<uvec>& col_inds,
-                        const uvec& row_inds_U, const uvec& row_inds_Us) {
+                        const uvec& row_inds_U, const uvec& row_inds_Us,
+                        const CharacterVector& trans_Funs) {
     field<vec> eta = lin_predF(Xbetas, Z, b_mat, RE_inds, idL);
     vec log_pyb = log_longF(y, eta, fams, links, sigmas, idL2, n);
     vec log_pb = - 0.5 * sum((b_mat * invD) % b_mat, 1);
     mat Wlong = lin_pred_matF(XXbetas, ZZ, b_mat, U, RE_inds2, idT,
-                              col_inds, row_inds_U, n, n_alphas);
+                              col_inds, row_inds_U, n, n_alphas, trans_Funs);
     mat Wlongs = lin_pred_matF(XXsbetas, ZZs, b_mat, Us, RE_inds2, idTs,
-                               col_inds, row_inds_Us, ns, n_alphas);
+                               col_inds, row_inds_Us, ns, n_alphas, trans_Funs);
     vec log_h = W1 * Bs_gammas + W2 * gammas + Wlong * alphas;
     vec H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + Wlongs * alphas), idGK);
     mat Wlongs_int = lin_pred_matF(XXsbetas_int, ZZs_int, b_mat, Us_int, RE_inds2, idTs,
-                                   col_inds, row_inds_Us, ns, n_alphas);
+                                   col_inds, row_inds_Us, ns, n_alphas, trans_Funs);
     vec HU = rowsum(Pw_int % exp(W1s_int * Bs_gammas + W2s_int * gammas + 
         Wlongs_int * alphas), idGK);
     vec log_ptb = log_p_event_IC (log_h, H, HU, Levent1, Levent01, Levent2, Levent3);
@@ -284,14 +302,15 @@ arma::vec log_postRE_nogammasF(const mat& b_mat, const vec& Bs_gammas, const vec
                                const field<mat>& Us, const vec& Pw, const uvec& idGK,
                                const field<uvec>& idT, const field<uvec>& idTs,
                                const field<uvec>& col_inds,
-                               const uvec& row_inds_U, const uvec& row_inds_Us) {
+                               const uvec& row_inds_U, const uvec& row_inds_Us,
+                               const CharacterVector& trans_Funs) {
     field<vec> eta = lin_predF(Xbetas, Z, b_mat, RE_inds, idL);
     vec log_pyb = log_longF(y, eta, fams, links, sigmas, idL2, n);
     vec log_pb = - 0.5 * sum((b_mat * invD) % b_mat, 1);
     mat Wlong = lin_pred_matF(XXbetas, ZZ, b_mat, U, RE_inds2, idT,
-                              col_inds, row_inds_U, n, n_alphas);
+                              col_inds, row_inds_U, n, n_alphas, trans_Funs);
     mat Wlongs = lin_pred_matF(XXsbetas, ZZs, b_mat, Us, RE_inds2, idTs,
-                               col_inds, row_inds_Us, ns, n_alphas);
+                               col_inds, row_inds_Us, ns, n_alphas, trans_Funs);
     vec log_h = W1 * Bs_gammas + Wlong * alphas;
     vec H = rowsum(Pw % exp(W1s * Bs_gammas + Wlongs * alphas), idGK);
     vec log_ptb = (event % log_h) - H;
@@ -318,18 +337,19 @@ arma::vec log_postREIC_nogammasF(const mat& b_mat, const vec& Bs_gammas,
                         const vec& Pw, const vec& Pw_int, const uvec& idGK,
                         const field<uvec>& idT, const field<uvec>& idTs,
                         const field<uvec>& col_inds,
-                        const uvec& row_inds_U, const uvec& row_inds_Us) {
+                        const uvec& row_inds_U, const uvec& row_inds_Us,
+                        const CharacterVector& trans_Funs) {
     field<vec> eta = lin_predF(Xbetas, Z, b_mat, RE_inds, idL);
     vec log_pyb = log_longF(y, eta, fams, links, sigmas, idL2, n);
     vec log_pb = - 0.5 * sum((b_mat * invD) % b_mat, 1);
     mat Wlong = lin_pred_matF(XXbetas, ZZ, b_mat, U, RE_inds2, idT,
-                              col_inds, row_inds_U, n, n_alphas);
+                              col_inds, row_inds_U, n, n_alphas, trans_Funs);
     mat Wlongs = lin_pred_matF(XXsbetas, ZZs, b_mat, Us, RE_inds2, idTs,
-                               col_inds, row_inds_Us, ns, n_alphas);
+                               col_inds, row_inds_Us, ns, n_alphas, trans_Funs);
     vec log_h = W1 * Bs_gammas + Wlong * alphas;
     vec H = rowsum(Pw % exp(W1s * Bs_gammas + Wlongs * alphas), idGK);
     mat Wlongs_int = lin_pred_matF(XXsbetas_int, ZZs_int, b_mat, Us_int, RE_inds2, idTs,
-                                   col_inds, row_inds_Us, ns, n_alphas);
+                                   col_inds, row_inds_Us, ns, n_alphas, trans_Funs);
     vec HU = rowsum(Pw_int % exp(W1s_int * Bs_gammas + Wlongs_int * alphas), idGK);
     vec log_ptb = log_p_event_IC (log_h, H, HU, Levent1, Levent01, Levent2, Levent3);
     vec out = log_pyb + log_ptb + log_pb;
@@ -429,6 +449,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     field<uvec> idL2F = List2Field_uvec(idL2, false);
     CharacterVector fams = as<CharacterVector>(Data["fams"]);
     CharacterVector links = as<CharacterVector>(Data["links"]);
+    CharacterVector trans_Funs = as<CharacterVector>(Data["trans_Funs"]);
     vec event = as<vec>(Data["event"]);
     uvec idGK = as<uvec>(Data["idGK_fast"]);
     mat W1 = as<mat>(Data["W1"]);
@@ -598,9 +619,9 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             }
             // sample survival
             mat Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idTF,
-                                      col_indsF, row_inds_U, n, n_alphas);
+                                      col_indsF, row_inds_U, n, n_alphas, trans_Funs);
             mat Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idTsF,
-                                       col_indsF, row_inds_Us, ns, n_alphas);
+                                       col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
             double current_logpost = logPosterior(event, W1, W1s, Bs_gammas,
                                                   W2, W2s, gammas, Wlong, Wlongs, alphas, Pw,
                                                   mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
@@ -860,13 +881,13 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
             }
             // sample survival
             mat Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idTF,
-                                      col_indsF, row_inds_U, n, n_alphas);
+                                      col_indsF, row_inds_U, n, n_alphas, trans_Funs);
             mat Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idTsF,
                                        col_indsF, row_inds_Us, ns, n_alphas);
             double current_logpost = logPosterior_nogammas(event, W1, W1s, Bs_gammas,
                                                            Wlong, Wlongs, alphas, Pw,
                                                            mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
-                                                           mean_alphas, Tau_alphas, tau_alphas);
+                                                           mean_alphas, Tau_alphas, tau_alphas, trans_Funs);
             new_Bs_gammas = Bs_gammas + rand_Bs_gammas.col(i);
             new_alphas = alphas + rand_alphas.col(i);
             double new_logpost = logPosterior_nogammas(event, W1, W1s, new_Bs_gammas,

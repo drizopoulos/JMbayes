@@ -113,5 +113,4 @@ aucJM.coxph <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVa
                 classObject = class(object), nameObject = deparse(substitute(object)))
     class(out) <- "aucJM"
     out
-    
 }
