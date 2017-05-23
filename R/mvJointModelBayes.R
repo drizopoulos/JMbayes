@@ -667,7 +667,10 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     colnames(mcmc$gammas) <- colnames(W2)
     get_U_colnames <- unlist(lapply(U, function (u)
         gsub("(Intercept)", "", colnames(u), fixed = TRUE)))
-    colnames(mcmc$alphas) <- paste0(rep(names(U), sapply(U, ncol)),
+    nam_alph <- names(U)
+    trans_Funs <- trans_Funs[names(U)]
+    nam_alph[nam_alph != "identity"] <- paste0(trans_Funs, "(", nam_alph, ")")
+    colnames(mcmc$alphas) <- paste0(rep(nam_alph, sapply(U, ncol)),
                                     ifelse(get_U_colnames == "", "", ":"),
                                     get_U_colnames)
     # caclulate summaries from the Monte Carlo samples
