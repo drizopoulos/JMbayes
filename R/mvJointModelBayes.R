@@ -325,7 +325,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
             stop("unknown names in 'transFuns'; valid names are the ones induced by the 'Formulas' ",
                  "argument; these are:\n", paste(names(Formulas), collapse = ", "))
         }
-        valid_funs <- c("identity", "expit", "log", "log2", "log10", "sqrt")
+        valid_funs <- c("identity", "expit", "exp", "log", "log2", "log10", "sqrt")
         if (!is.character(transFuns) || !all(transFuns %in% valid_funs)) {
             stop("invalid functions names in 'transFuns'; the functions currently supported are: ", 
                  paste(valid_funs, collapse = ", "), ".\nThese should be provided as character vector.")
@@ -350,7 +350,11 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         out
     }
     get_fun <- function (f) {
-        if (f == "identity") function (x) x else get(f, mode = "function")
+        if (f == "identity") {
+            function (x) x 
+        } else if (f == "expit") {
+            function (x) exp(x) / (1 + exp(x))
+        } else get(f, mode = "function")
     }
     designMatLong <- function (X, betas, Z, b, id, outcome, indFixed, indRandom, U,
                                trans_Funs) {
@@ -367,7 +371,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
             betas_i <- betas[[ii]][indFixed[[i]]]
             Z_i <- Z[[i]]
             b_i <- as.matrix(b[[ii]])[id[[ii]], indRandom[[i]], drop = FALSE]
-            Fun <- get(trans_Funs[i])
+            Fun <- get_fun(trans_Funs[i])
             out[, iii] <- U[[i]] * Fun(c(X_i %*% betas_i) + rowSums(Z_i * b_i))
         }
         attr(out, "col_inds") <- col_inds_out
@@ -722,13 +726,15 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                     Interactions = Interactions,
                     RE_inds = RE_inds,
                     RE_inds2 = RE_inds2,
+                    trans_Funs = trans_Funs,
                     mvglmer_components = components,
                     coxph_components = list(data = dataS, Terms = Terms, Time = Time, 
                                             event = event),
                     functions = list(build_model_matrix = build_model_matrix,
                                      last_rows = last_rows, right_rows = right_rows,
                                      Xbetas_calc = Xbetas_calc, 
-                                     designMatLong = designMatLong)
+                                     designMatLong = designMatLong,
+                                     get_fun = get_fun)
                 ),
                 control = con)
     class(res) <- "mvJMbayes"

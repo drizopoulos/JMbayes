@@ -12,7 +12,7 @@ Fits multivariate shared parameter joint models for longitudinal and survival ou
 \usage{
 mvJointModelBayes(mvglmerObject, survObject, timeVar,
     Formulas = list(NULL), Interactions = list(NULL),
-    priors = NULL, control = NULL, \dots)
+    transFuns = NULL, priors = NULL, control = NULL, \dots)
 }
 
 \arguments{
@@ -35,6 +35,12 @@ mvJointModelBayes(mvglmerObject, survObject, timeVar,
   
   \item{Interactions}{a list specifying interaction terms for the components of the 
     longitudinal outcomes that are included in the survival submodel. See \bold{Examples}.}
+  
+  \item{transFuns}{a character vector providing transformations of the linear predictors of
+  the mixed models that enter in the linear predictor of the relative risk model. 
+  Currently available options are \code{"identity"} (identity function), 
+  \code{"expit"} (logistic transformation), \code{"exp"}, \code{"log"}, \code{"log2"},
+  \code{"log10"} and \code{"sqrt"}.}
   
   \item{priors}{a named list of user-specified prior parameters:
     \describe{

@@ -601,7 +601,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                                                  event, W1, W1s, W2, W2s, XXbetasF,
                                                  XXsbetasF, ZZF, ZZsF, UF, UsF,
                                                  Pw, idGK, idTF, idTsF, col_indsF,
-                                                 row_inds_U, row_inds_Us);
+                                                 row_inds_U, row_inds_Us, trans_Funs);
             new_b = b + extract_b(rand_b, i);
             vec new_logpost_RE = log_postREF(new_b, Bs_gammas, gammas, alphas, yF, XbetasF, ZF,
                                              RE_indsF, RE_inds2F, idLF, idL2F, fams,
@@ -609,7 +609,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                                              event, W1, W1s, W2, W2s, XXbetasF,
                                              XXsbetasF, ZZF, ZZsF, UF, UsF,
                                              Pw, idGK, idTF, idTsF, col_indsF,
-                                             row_inds_U, row_inds_Us);
+                                             row_inds_U, row_inds_Us, trans_Funs);
             vec lRatio_RE = new_logpost_RE - current_logpost_RE;
             for (int m = 0; m < n; ++m) {
                 if (log_us_RE.at(m, iter) < lRatio_RE[m]) {
@@ -647,26 +647,31 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             block_gammas.col(i) = gammas;
             block_alphas.col(i) = alphas;
             // sample scales
-            double Bpost_tau_Bs_gammas = B_tau_Bs_gammas + 0.5 * as_scalar(Bs_gammas.t() * Tau_Bs_gammas * Bs_gammas);
+            double Bpost_tau_Bs_gammas = B_tau_Bs_gammas + 
+                0.5 * as_scalar(Bs_gammas.t() * Tau_Bs_gammas * Bs_gammas);
             tau_Bs_gammas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_Bs_gammas, 1.0 / Bpost_tau_Bs_gammas)));
             if (shrink_gammas) {
                 for (int k1 = 0; k1 < n_gammas; ++k1) {
-                    double Bpost_phi_gammas = B_phi_gammas + 0.5 * tau_gammas * pow(gammas.at(k1), 2);
+                    double Bpost_phi_gammas = B_phi_gammas + 
+                        0.5 * tau_gammas * pow(gammas.at(k1), 2);
                     phi_gammas.at(k1) = std::min(eps3,
                                      std::max(eps2, ::Rf_rgamma(Apost_phi_gammas, 1.0 / Bpost_phi_gammas)));
                 }
                 Tau_gammas.diag() = phi_gammas;
-                double Bpost_tau_gammas = B_tau_gammas + 0.5 * as_scalar(gammas.t() * Tau_gammas * gammas);
+                double Bpost_tau_gammas = B_tau_gammas + 
+                    0.5 * as_scalar(gammas.t() * Tau_gammas * gammas);
                 tau_gammas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_gammas, 1.0 / Bpost_tau_gammas)));
             }
             if (shrink_alphas) {
                 for (int k2 = 0; k2 < n_alphas; ++k2) {
-                    double Bpost_phi_alphas = B_phi_alphas + 0.5 * tau_alphas * pow(alphas.at(k2), 2);
+                    double Bpost_phi_alphas = B_phi_alphas + 
+                        0.5 * tau_alphas * pow(alphas.at(k2), 2);
                     phi_alphas.at(k2) = std::min(eps3,
                                   std::max(eps2, ::Rf_rgamma(Apost_phi_alphas, 1.0 / Bpost_phi_alphas)));
                 }
                 Tau_alphas.diag() = phi_alphas;
-                double Bpost_tau_alphas = B_tau_alphas + 0.5 * as_scalar(alphas.t() * Tau_alphas * alphas);
+                double Bpost_tau_alphas = B_tau_alphas + 
+                    0.5 * as_scalar(alphas.t() * Tau_alphas * alphas);
                 tau_alphas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_alphas, 1.0 / Bpost_tau_alphas)));
             }
             // store results
@@ -752,6 +757,7 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
     field<uvec> idL2F = List2Field_uvec(idL2, false);
     CharacterVector fams = as< CharacterVector>(Data["fams"]);
     CharacterVector links = as< CharacterVector>(Data["links"]);
+    CharacterVector trans_Funs = as< CharacterVector>(Data["trans_Funs"]);
     vec event = as<vec>(Data["event"]);
     uvec idGK = as<uvec>(Data["idGK_fast"]);
     mat W1 = as<mat>(Data["W1"]);
@@ -863,7 +869,7 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
                                                           links, sigmas, invD, n, ns, n_alphas, event, W1, W1s,
                                                           XXbetasF, XXsbetasF, ZZF, ZZsF, UF, UsF,
                                                           Pw, idGK, idTF, idTsF, col_indsF,
-                                                          row_inds_U, row_inds_Us);
+                                                          row_inds_U, row_inds_Us, trans_Funs);
 
             new_b = b + extract_b(rand_b, i);
             vec new_logpost_RE = log_postRE_nogammasF(new_b, Bs_gammas, alphas, yF, XbetasF, ZF,
@@ -871,7 +877,7 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
                                                       links, sigmas, invD, n, ns, n_alphas, event, W1, W1s,
                                                       XXbetasF, XXsbetasF, ZZF, ZZsF, UF, UsF,
                                                       Pw, idGK, idTF, idTsF, col_indsF,
-                                                      row_inds_U, row_inds_Us);
+                                                      row_inds_U, row_inds_Us, trans_Funs);
             vec lRatio_RE = new_logpost_RE - current_logpost_RE;
             for (int m = 0; m < n; ++m) {
                 if (log_us_RE.at(m, iter) < lRatio_RE[m]) {
@@ -883,11 +889,11 @@ List lap_rwm_C_nogammas (List initials, List Data, List priors, List scales, Lis
             mat Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idTF,
                                       col_indsF, row_inds_U, n, n_alphas, trans_Funs);
             mat Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idTsF,
-                                       col_indsF, row_inds_Us, ns, n_alphas);
+                                       col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
             double current_logpost = logPosterior_nogammas(event, W1, W1s, Bs_gammas,
                                                            Wlong, Wlongs, alphas, Pw,
                                                            mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
-                                                           mean_alphas, Tau_alphas, tau_alphas, trans_Funs);
+                                                           mean_alphas, Tau_alphas, tau_alphas);
             new_Bs_gammas = Bs_gammas + rand_Bs_gammas.col(i);
             new_alphas = alphas + rand_alphas.col(i);
             double new_logpost = logPosterior_nogammas(event, W1, W1s, new_Bs_gammas,
