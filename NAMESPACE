@@ -4,7 +4,7 @@ export(anova.JMbayes, aucJM, bma.combine, cvDCL, dynCJM, dynInfo, dgt,
        dbs, dns, fixef.JMbayes, jointModelBayes, ibs, ins, IndvPred_lme, 
        logLik.JMbayes, pgt, plot.JMbayes, 
        plot.survfit.JMbayes, prederrJM, predict.JMbayes, ranef.JMbayes, rgt, rocJM, 
-       runDynPred, survfitJM, qgt, xtable.JMbayes)
+       runDynPred, survfitJM, qgt, xtable.JMbayes, td)
 
 # Imported functions
 importFrom("nlme", "fixed.effects", "fixef", "random.effects", "ranef",

@@ -422,6 +422,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 mean_gammas = rep(0, ncol(W2)), Tau_gammas = 0.01 * diag(ncol(W2)),
                 mean_alphas = rep(0, ncol(Wlong)), Tau_alphas = Tau_alphas,
                 td_cols = unname(td_cols),
+                rank_Tau_td_alphas = if (length(td_cols)) length(td_cols[[1]]) else 0,
                 A_tau_Bs_gammas = 1, B_tau_Bs_gammas = 0.01, 
                 rank_Tau_Bs_gammas = qr(Tau_Bs_gammas)$rank,
                 A_phi_Bs_gammas = 1, B_phi_Bs_gammas = 0.01, shrink_Bs_gammas = FALSE,
@@ -476,7 +477,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     # initial values
     inits <- list(Bs_gammas = rep(0, ncol(W1)), tau_Bs_gammas = 200, phi_Bs_gammas = rep(1, ncol(W1)),
                   gammas = rep(0, ncol(W2)), tau_gammas = 1, phi_gammas = rep(1, ncol(W2)),
-                  alphas = rep(0, ncol(Wlong)), tau_alphas = 1, phi_alphas = rep(1, ncol(Wlong)))
+                  alphas = rep(0, ncol(Wlong)), tau_alphas = 1, phi_alphas = rep(1, ncol(Wlong)),
+                  tau_td_alphas = rep(200, length(td_cols)))
     inits2 <- marglogLik2(inits[c("Bs_gammas", "gammas", "alphas", "tau_Bs_gammas")],
                           Data, prs, fixed_tau_Bs_gammas = TRUE)
     inits[names(attr(inits2, "inits"))] <- attr(inits2, "inits")
@@ -729,7 +731,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                     Interactions = Interactions,
                     RE_inds = RE_inds,
                     RE_inds2 = RE_inds2,
-                    trans_Funs = trans_Funs,
+                    transFuns = trans_Funs,
                     mvglmer_components = components,
                     coxph_components = list(data = dataS, Terms = Terms, Time = Time, 
                                             event = event),

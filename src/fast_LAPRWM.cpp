@@ -499,6 +499,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     vec alphas = as<vec>(initials["alphas"]);
     vec phi_gammas = as<vec>(initials["phi_gammas"]);
     vec phi_alphas = as<vec>(initials["phi_alphas"]);
+    vec tau_td_alphas = as<vec>(initials["tau_td_alphas"]);
     double tau_Bs_gammas = as<double>(initials["tau_Bs_gammas"]);
     double tau_gammas = as<double>(initials["tau_gammas"]);
     double tau_alphas = as<double>(initials["tau_alphas"]);
@@ -530,7 +531,15 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     double A_phi_alphas = as<double>(priors["A_phi_alphas"]);
     double B_phi_alphas = as<double>(priors["B_phi_alphas"]);
     double Apost_phi_alphas = A_phi_alphas + 0.5;
-    // Control parameters
+    //
+    List td_cols = as<List>(priors["td_cols"]);
+    field<uvec> td_colsF = List2Field_uvec(td_cols);
+    int n_td_effects = td_colsF.size();
+    bool any_td_effects = n_td_effects > 0;
+    double B_tau_td_alphas = B_tau_Bs_gammas;
+    double Apost_tau_td_alphas = A_tau_Bs_gammas + 0.5 * as<double>(priors["rank_Tau_td_alphas"]);
+    mat Tau_alphas_pen = Tau_alphas;
+    //Control parameters
     int n_iter = as<int>(control["n_iter"]);
     int n_burnin = as<int>(control["n_burnin"]);
     int n_block = as<int>(control["n_block"]);
@@ -571,6 +580,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     vec out_tau_alphas(n_out, fill::zeros);
     mat out_phi_gammas(n_gammas, n_out, fill::zeros);
     mat out_phi_alphas(n_alphas, n_out, fill::zeros);
+    mat out_tau_td_alphas(n_td_effects, n_out, fill::zeros);
     vec out_logWeights(n_out, fill::zeros);
     RNGScope scope;
     int keep_iterator = 0;
@@ -649,13 +659,27 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             // sample scales
             double Bpost_tau_Bs_gammas = B_tau_Bs_gammas + 
                 0.5 * as_scalar(Bs_gammas.t() * Tau_Bs_gammas * Bs_gammas);
-            tau_Bs_gammas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_Bs_gammas, 1.0 / Bpost_tau_Bs_gammas)));
+            tau_Bs_gammas = std::min(eps3, std::max(eps2, 
+                        ::Rf_rgamma(Apost_tau_Bs_gammas, 1.0 / Bpost_tau_Bs_gammas)));
+            if (any_td_effects) {
+                for (int kk = 0; kk < n_td_effects; ++kk) {
+                    vec td_alphas = alphas.elem(td_colsF.at(kk));
+                    mat td_Tau_alphas = Tau_alphas_pen.submat(td_colsF.at(kk), td_colsF.at(kk));
+                    double Bpost_tau_td_alphas = B_tau_td_alphas +
+                        0.5 * as_scalar(td_alphas.t() * td_Tau_alphas * td_alphas);
+                    tau_td_alphas.at(kk) = std::min(eps3, std::max(eps2, 
+                        ::Rf_rgamma(Apost_tau_td_alphas, 1.0 / Bpost_tau_td_alphas)));
+                    Tau_alphas.submat(td_colsF.at(kk), td_colsF.at(kk)) = 
+                        tau_td_alphas.at(kk) * Tau_alphas_pen.submat(td_colsF.at(kk), td_colsF.at(kk));
+                }
+            }
             if (shrink_gammas) {
                 for (int k1 = 0; k1 < n_gammas; ++k1) {
                     double Bpost_phi_gammas = B_phi_gammas + 
                         0.5 * tau_gammas * pow(gammas.at(k1), 2);
                     phi_gammas.at(k1) = std::min(eps3,
-                                     std::max(eps2, ::Rf_rgamma(Apost_phi_gammas, 1.0 / Bpost_phi_gammas)));
+                                     std::max(eps2, 
+                                ::Rf_rgamma(Apost_phi_gammas, 1.0 / Bpost_phi_gammas)));
                 }
                 Tau_gammas.diag() = phi_gammas;
                 double Bpost_tau_gammas = B_tau_gammas + 
@@ -685,6 +709,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                 out_tau_Bs_gammas.at(keep_iterator) = tau_Bs_gammas;
                 out_tau_gammas.at(keep_iterator) = tau_gammas;
                 out_tau_alphas.at(keep_iterator) = tau_alphas;
+                out_tau_td_alphas.col(keep_iterator) = tau_td_alphas;
                 out_logWeights.at(keep_iterator) = log_weightsREF(b, yF, XbetasF, ZF, RE_indsF,
                                   idLF, idL2F, fams, links, sigmas, invD, n);
                 keep_iterator += 1;
@@ -717,7 +742,8 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
         Named("phi_alphas") = out_phi_alphas,
         Named("tau_Bs_gammas") = out_tau_Bs_gammas,
         Named("tau_gammas") = out_tau_gammas,
-        Named("tau_alphas") = out_tau_alphas
+        Named("tau_alphas") = out_tau_alphas,
+        Named("tau_td_alphas") = out_tau_td_alphas
     ),
     Named("logWeights") = out_logWeights,
     Named("scales") = List::create(
