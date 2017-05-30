@@ -4,7 +4,7 @@ export(anova.JMbayes, aucJM, bma.combine, cvDCL, dynCJM, dynInfo, dgt,
        dbs, dns, fixef.JMbayes, jointModelBayes, ibs, ins, IndvPred_lme, 
        logLik.JMbayes, pgt, plot.JMbayes, 
        plot.survfit.JMbayes, prederrJM, predict.JMbayes, ranef.JMbayes, rgt, rocJM, 
-       runDynPred, survfitJM, qgt, xtable.JMbayes, td)
+       runDynPred, survfitJM, qgt, xtable.JMbayes, tve)
 
 # Imported functions
 importFrom("nlme", "fixed.effects", "fixef", "random.effects", "ranef",
@@ -56,7 +56,7 @@ S3method(makepredictcall, dbs)
 S3method(makepredictcall, dns)
 S3method(makepredictcall, ibs)
 S3method(makepredictcall, ins)
-S3method(makepredictcall, td)
+S3method(makepredictcall, tve)
 S3method(plot, JMbayes)
 S3method(plot, mvJMbayes)
 S3method(plot, mvglmer)

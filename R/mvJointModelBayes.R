@@ -671,7 +671,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         gsub("(Intercept)", "", colnames(u), fixed = TRUE)))
     nam_alph <- names(U)
     trans_Funs <- trans_Funs[names(U)]
-    nam_alph[nam_alph != "identity"] <- paste0(trans_Funs, "(", nam_alph, ")")
+    ind <- trans_Funs != "identity"
+    nam_alph[ind] <- paste0(trans_Funs[ind], "(", nam_alph, ")")
     colnames(mcmc$alphas) <- paste0(rep(nam_alph, sapply(U, ncol)),
                                     ifelse(get_U_colnames == "", "", ":"),
                                     get_U_colnames)
