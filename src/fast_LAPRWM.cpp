@@ -408,6 +408,7 @@ double logPosterior_nogammas (const vec& event,
     return(out);
 }
 
+
 double bounds_sigma (double sigma, double eps1, double eps3) {
     if (sigma < eps1) {
         sigma = eps1;
@@ -505,6 +506,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     double tau_alphas = as<double>(initials["tau_alphas"]);
     int n = b.n_rows;
     int ns = Pw.n_rows;
+    int n_quadpoints = round(ns / n);
     // Priors
     vec mean_Bs_gammas = as<vec>(priors["mean_Bs_gammas"]);
     mat Tau_Bs_gammas = as<mat>(priors["Tau_Bs_gammas"]);
@@ -587,6 +589,16 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     int check_iterator = 0;
     vec log_us = log(randu<vec>(its * n_block));
     mat log_us_RE = log(randu<mat>(n, its * n_block));
+    field<vec> current_eta = lin_predF(XbetasF, ZF, b, RE_indsF, idLF);
+    vec current_log_pyb = log_longF(yF, current_eta, fams, links, sigmas, idL2F, n);
+    vec current_log_pb = - 0.5 * sum((b * invD) % b, 1);
+    mat current_Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idTF,
+                                      col_indsF, row_inds_U, n, n_alphas, trans_Funs);
+    mat current_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idTsF,
+                                       col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
+    vec current_log_h = W1 * Bs_gammas + W2 * gammas + current_Wlong * alphas;
+    vec current_H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + current_Wlongs * alphas), idGK);
+    vec current_log_ptb = (event % current_log_h) - current_H;
     for (int it = 0; it < its; ++it) {
         mat accept_b(n, n_block, fill::zeros);
         vec accept_s(n_block, fill::zeros);
@@ -605,52 +617,60 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
         for (int i = 0; i < n_block; ++i) {
             int iter = it * n_block + i;
             // sample random effects
-            vec current_logpost_RE = log_postREF(b, Bs_gammas, gammas, alphas, yF, XbetasF, ZF,
-                                                 RE_indsF, RE_inds2F, idLF, idL2F, fams,
-                                                 links, sigmas, invD, n, ns, n_alphas,
-                                                 event, W1, W1s, W2, W2s, XXbetasF,
-                                                 XXsbetasF, ZZF, ZZsF, UF, UsF,
-                                                 Pw, idGK, idTF, idTsF, col_indsF,
-                                                 row_inds_U, row_inds_Us, trans_Funs);
+            vec current_logpost_RE = current_log_pyb + current_log_ptb + current_log_pb;
             new_b = b + extract_b(rand_b, i);
-            vec new_logpost_RE = log_postREF(new_b, Bs_gammas, gammas, alphas, yF, XbetasF, ZF,
-                                             RE_indsF, RE_inds2F, idLF, idL2F, fams,
-                                             links, sigmas, invD, n, ns, n_alphas,
-                                             event, W1, W1s, W2, W2s, XXbetasF,
-                                             XXsbetasF, ZZF, ZZsF, UF, UsF,
-                                             Pw, idGK, idTF, idTsF, col_indsF,
-                                             row_inds_U, row_inds_Us, trans_Funs);
+            field<vec> new_eta = lin_predF(XbetasF, ZF, new_b, RE_indsF, idLF);
+            vec new_log_pyb = log_longF(yF, new_eta, fams, links, sigmas, idL2F, n);
+            vec new_log_pb = - 0.5 * sum((new_b * invD) % new_b, 1);
+            mat new_Wlong = lin_pred_matF(XXbetasF, ZZF, new_b, UF, RE_inds2F, idTF,
+                                              col_indsF, row_inds_U, n, n_alphas, trans_Funs);
+            mat new_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, new_b, UsF, RE_inds2F, idTsF,
+                                           col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
+            vec new_log_h = W1 * Bs_gammas + W2 * gammas + new_Wlong * alphas;
+            vec new_H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + new_Wlongs * alphas), idGK);
+            vec new_log_ptb = (event % new_log_h) - new_H;
+            vec new_logpost_RE = new_log_pyb + new_log_ptb + new_log_pb;
             vec lRatio_RE = new_logpost_RE - current_logpost_RE;
             for (int m = 0; m < n; ++m) {
                 if (log_us_RE.at(m, iter) < lRatio_RE[m]) {
                     accept_b.at(m, i) = 1.0;
                     b.row(m) = new_b.row(m);
+                    current_log_pyb.at(m) = new_log_pyb.at(m);
+                    current_log_pb.at(m) = new_log_pb.at(m);
+                    current_Wlong.row(m) = new_Wlong.row(m);
+                    int first = m * n_quadpoints;
+                    int last = first + n_quadpoints - 1;
+                    current_Wlongs.rows(first, last) = new_Wlongs.rows(first, last);
+                    current_log_h.at(m) = new_log_h.at(m);
+                    current_H.at(m) = new_H.at(m);
+                    current_log_ptb.at(m) = new_log_ptb.at(m);
                 }
             }
             // sample survival
-            mat Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idTF,
-                                      col_indsF, row_inds_U, n, n_alphas, trans_Funs);
-            mat Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idTsF,
-                                       col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
-            double current_logpost = logPosterior(event, W1, W1s, Bs_gammas,
-                                                  W2, W2s, gammas, Wlong, Wlongs, alphas, Pw,
-                                                  mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
-                                                  mean_gammas, Tau_gammas, tau_gammas,
-                                                  mean_alphas, Tau_alphas, tau_alphas);
+          double current_logpost_surv = sum(current_log_ptb) + 
+                logPrior(Bs_gammas, mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas) +
+                logPrior(gammas, mean_gammas, Tau_gammas, tau_gammas) +
+                logPrior(alphas, mean_alphas, Tau_alphas, tau_alphas);
             new_Bs_gammas = Bs_gammas + rand_Bs_gammas.col(i);
             new_gammas = gammas + rand_gammas.col(i);
             new_alphas = alphas + rand_alphas.col(i);
-            double new_logpost = logPosterior(event, W1, W1s, new_Bs_gammas,
-                                              W2, W2s, new_gammas, Wlong, Wlongs, new_alphas, Pw,
-                                              mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas,
-                                              mean_gammas, Tau_gammas, tau_gammas,
-                                              mean_alphas, Tau_alphas, tau_alphas);
-            double lRatio = new_logpost - current_logpost;
+            new_log_h = W1 * new_Bs_gammas + W2 * new_gammas + current_Wlong * new_alphas;
+            new_H = rowsum(Pw % exp(W1s * new_Bs_gammas + W2s * new_gammas + 
+                current_Wlongs * new_alphas), idGK);
+            new_log_ptb = (event % new_log_h) - new_H;
+            double new_logpost_surv = sum(new_log_ptb) + 
+                logPrior(new_Bs_gammas, mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas) +
+                logPrior(new_gammas, mean_gammas, Tau_gammas, tau_gammas) +
+                logPrior(new_alphas, mean_alphas, Tau_alphas, tau_alphas);
+            double lRatio = new_logpost_surv - current_logpost_surv;
             if (log_us.at(iter) < lRatio) {
-                accept_s.at(i) = 1.0;
-                Bs_gammas = new_Bs_gammas;
-                gammas = new_gammas;
-                alphas = new_alphas;
+               accept_s.at(i) = 1.0;
+               Bs_gammas = new_Bs_gammas;
+               gammas = new_gammas;
+               alphas = new_alphas;
+               current_log_h = new_log_h;
+               current_H = new_H;
+               current_log_ptb = new_log_ptb;
             }
             block_b.slice(i) = b;
             block_Bs_gammas.col(i) = Bs_gammas;
