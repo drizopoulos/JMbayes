@@ -37,22 +37,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// lap_rwm_C_nogammas
-List lap_rwm_C_nogammas(List initials, List Data, List priors, List scales, List Covs, List control);
-RcppExport SEXP JMbayes_lap_rwm_C_nogammas(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type initials(initialsSEXP);
-    Rcpp::traits::input_parameter< List >::type Data(DataSEXP);
-    Rcpp::traits::input_parameter< List >::type priors(priorsSEXP);
-    Rcpp::traits::input_parameter< List >::type scales(scalesSEXP);
-    Rcpp::traits::input_parameter< List >::type Covs(CovsSEXP);
-    Rcpp::traits::input_parameter< List >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(lap_rwm_C_nogammas(initials, Data, priors, scales, Covs, control));
-    return rcpp_result_gen;
-END_RCPP
-}
 // lap_rwm_C_woRE
 List lap_rwm_C_woRE(List initials, List Data, List priors, List scales, List Covs, List control);
 RcppExport SEXP JMbayes_lap_rwm_C_woRE(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
@@ -207,7 +191,6 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"JMbayes_dmvnorm2", (DL_FUNC) &JMbayes_dmvnorm2, 4},
     {"JMbayes_lap_rwm_C", (DL_FUNC) &JMbayes_lap_rwm_C, 7},
-    {"JMbayes_lap_rwm_C_nogammas", (DL_FUNC) &JMbayes_lap_rwm_C_nogammas, 6},
     {"JMbayes_lap_rwm_C_woRE", (DL_FUNC) &JMbayes_lap_rwm_C_woRE, 6},
     {"JMbayes_lap_rwm_C_woRE_nogammas", (DL_FUNC) &JMbayes_lap_rwm_C_woRE_nogammas, 6},
     {"JMbayes_logPosterior", (DL_FUNC) &JMbayes_logPosterior, 22},

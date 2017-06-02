@@ -26,7 +26,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     typeSurvInf <- attr(SurvInf, "type")
     TimeVar <- all.vars(Terms)[1L]
     if (typeSurvInf == "right") {
-        if (class(survObject) == 'survreg') {
+        if (class(survObject)[1L] == 'survreg') {
             stop("Please refit the survival submodel using coxph().\n")
         }
         Time <- SurvInf[, "time"]
@@ -486,6 +486,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     nRE <- sum(sapply(Z, ncol))
     Cvs$b <- array(0.0, c(nRE, nRE, nT))
     for (i in seq_len(nT)) Cvs$b[, , i] <- chol(var(bb[, i, ]))
+    if (is.null(Cvs$gammas)) Cvs$gammas <- matrix(nrow = 0, ncol = 0)
     inits$b <- do.call("cbind", postMean_b)
     scales <- list(b = rep(5.76 / nRE, nT), Bs_gammas = 5.76 / ncol(W1),
                    gammas = 5.76 / ncol(W2), alphas = 5.76 / ncol(Wlong))
@@ -526,11 +527,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 }
                 data$sigmas <- sampl(sigmas, ii)
                 data$invD <- as.matrix(sampl(inv_D, ii)[[1]])
-                oo <- if (any_gammas) {
-                    lap_rwm_C(inits, data, priors, scales, Covs, control, interval_cens)
-                } else {
-                    lap_rwm_C_nogammas(inits, data, priors, scales, Covs, control)
-                }
+                oo <- lap_rwm_C(inits, data, priors, scales, Covs, control, interval_cens)
                 current_betas <- unlist(betas., use.names = FALSE)
                 n_betas <- length(current_betas)
                 pr_betas <- c(dmvnorm2(rbind(current_betas), rep(0, n_betas),
@@ -644,7 +641,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
             new_scales <- lapply(out1, "[[", "scales")
             new_scales <- list("b" = if (con$update_RE) calc_new_scales("b"),
                                "Bs_gammas" = calc_new_scales("Bs_gammas"),
-                               "gammas" = if (any_gammas) calc_new_scales("gammas"),
+                               "gammas" = if (any_gammas) calc_new_scales("gammas") else Inf,
                                "alphas" = calc_new_scales("alphas"))
             con$n_burnin <- round(ceiling(con$speed_factor * 
                                               con$n_burnin / con$n_block) * con$n_block)

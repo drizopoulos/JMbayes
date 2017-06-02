@@ -9,10 +9,6 @@ lap_rwm_C <- function(initials, Data, priors, scales, Covs, control, interval_ce
     .Call('JMbayes_lap_rwm_C', PACKAGE = 'JMbayes', initials, Data, priors, scales, Covs, control, interval_cens)
 }
 
-lap_rwm_C_nogammas <- function(initials, Data, priors, scales, Covs, control) {
-    .Call('JMbayes_lap_rwm_C_nogammas', PACKAGE = 'JMbayes', initials, Data, priors, scales, Covs, control)
-}
-
 lap_rwm_C_woRE <- function(initials, Data, priors, scales, Covs, control) {
     .Call('JMbayes_lap_rwm_C_woRE', PACKAGE = 'JMbayes', initials, Data, priors, scales, Covs, control)
 }
