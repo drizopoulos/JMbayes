@@ -10,6 +10,7 @@ tve <- function (x, df = NULL, knots = NULL, ord = 3) {
     }
     out <- splineDesign(knots, x, ord = ord)
     attr(out, 'knots') <- knots
+    attr(out, 'ord') <- ord
     attr(out, "class") <- c("tve", "basis", "matrix")
     out
 }

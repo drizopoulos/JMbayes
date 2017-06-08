@@ -4,7 +4,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     cl <- match.call()
     # control values
     con <- list(temps = 1.0, n_iter = 300, n_burnin = 1000,
-                n_block = 100, n_thin = 300, target_acc = 0.234, c0 = 1, c1 = 0.8,
+                n_block = 50, n_thin = 300, target_acc = 0.234, c0 = 1, c1 = 0.8,
                 eps1 = 1e-06, eps2 = 1e-05, eps3 = 1e04, adaptCov = FALSE,
                 knots = NULL, ObsTimes.knots = TRUE,
                 lng.in.kn = 15L, ordSpline = 4L, diff = 2L, speed_factor = 0.6,
@@ -405,7 +405,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     # priors
     DD <- diag(ncol(W1))
     Tau_Bs_gammas <- crossprod(diff(DD, differences = con$diff)) + 1e-06 * DD
-    find_td_cols <- function (x) grep('td(', colnames(x), fixed = TRUE)
+    find_td_cols <- function (x) grep('tve(', colnames(x), fixed = TRUE)
     td_cols <- lapply(U, find_td_cols)
     Tau_alphas <- lapply(U, function (x) 0.01 * diag(NCOL(x)))
     pen_matrix <- function (td_cols, Tau_alphas) {
@@ -572,6 +572,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                     "tau_Bs_gammas" = do.call("rbind", out[nams == "tau_Bs_gammas"]),
                     "tau_gammas" = if (any_gammas)do.call("rbind", out[nams == "tau_gammas"]),
                     "tau_alphas" = do.call("rbind", out[nams == "tau_alphas"]),
+                    "tau_td_alphas" = do.call("rbind", out[nams == "tau_td_alphas"]),
                     "phi_Bs_gammas" = do.call("rbind", out[nams == "phi_Bs_gammas"]),
                     "phi_gammas" = if (any_gammas)do.call("rbind", out[nams == "phi_gammas"]),
                     "phi_alphas" = do.call("rbind", out[nams == "phi_alphas"]))
@@ -607,6 +608,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
              "tau_gammas" = if (any_gammas) f(lis, "tau_gammas"),
              "phi_gammas" = if (any_gammas) f(lis, "phi_gammas"),
              "alphas" = f(lis, "alphas"), "tau_alphas" = f(lis, "tau_alphas"),
+             "tau_td_alphas" = f(lis, "tau_td_alphas"),
              "phi_alphas" = f(lis, "phi_alphas"),
              "LogLiks" = f(lis, "LogLiks"))
     }
@@ -706,7 +708,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 mcmc_info = list(
                     elapsed_mins = elapsed_time / 60, 
                     n_burnin = con$n_burnin, 
-                    n_iter = con$n_iter + con$n_burnin, n_thin = con$n_thin
+                    n_iter = con$n_iter + con$n_burnin, n_thin = con$n_thin,
+                    priors = prs
                 ),
                 statistics = list(
                     postMeans = summary_fun(mean, na.rm = TRUE),

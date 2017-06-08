@@ -689,7 +689,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                     tau_td_alphas.at(kk) = std::min(eps3, std::max(eps2, 
                         ::Rf_rgamma(Apost_tau_td_alphas, 1.0 / Bpost_tau_td_alphas)));
                     Tau_alphas.submat(td_colsF.at(kk), td_colsF.at(kk)) = 
-                        tau_td_alphas.at(kk) * Tau_alphas_pen.submat(td_colsF.at(kk), td_colsF.at(kk));
+                        tau_td_alphas.at(kk) * td_Tau_alphas;
                 }
             }
             if (shrink_gammas) {

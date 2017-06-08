@@ -118,7 +118,7 @@ print.summary.mvJMbayes <- function (x, digits = max(4, getOption("digits") - 4)
     invisible(x)
 }
 
-plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density"),
+plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_effect"),
                             param = c("betas", "sigma", "D", "gammas",
                                       "alphas", "Bs_gammas", "tau_Bs_gammas"),
                             ask = TRUE, max.t = NULL, from = 0, ...) {
@@ -156,6 +156,32 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density"),
                 acf(pp[, i], ylab = nams[i], main = paste("Series", nams[i]))
         }
         par(op)
+    }
+    if (which == "tv_effect") {
+        Data_surv <- x$model_info$coxph_components$data
+        attr(Data_surv, "terms") <- NULL
+        Time <- Data_surv[[1]][, 1]
+        TimeVar <- all.vars(x$model_info$coxph_components$Terms)[1L]
+        Data_surv[[TimeVar]] <- x$model_info$coxph_components$Time
+        xx <- seq(min(Time), max(Time), length.out = 100)
+        td_cols <- x$mcmc_info$priors$td_cols
+        extract_alphas <- function (td_cols, alphas) alphas[td_cols]
+        td_alphas_est <- lapply(td_cols, extract_alphas, alphas = x$statistics$postMeans$alphas)
+        td_alphas_low <- lapply(td_cols, extract_alphas, alphas = x$statistics$CIs$alphas[1, ])
+        td_alphas_upp <- lapply(td_cols, extract_alphas, alphas = x$statistics$CIs$alphas[2, ])
+        TD_terms <- lapply(x$model_info$Interactions, terms.formula, data = Data_surv)
+        TD_frames <- lapply(TD_terms, model.frame.default, data = Data_surv)
+        TD_terms <- lapply(TD_frames, terms)
+        pred_data <- data.frame(V1 = xx)
+        pred_data[[TimeVar]] <- pred_data$V1
+        TD_mats <- lapply(TD_terms, model.matrix.default, data = pred_data)
+        plot_fun <- function (est, low, upp, M, xx) {
+            matplot(xx, cbind(M %*% est, M %*% low, M %*% upp), 
+                    col = 1, lty = c(1, 2, 2), type = "l",
+                    xlab = "Time", ylab = "Time-varying Effect")
+        }
+        mapply(plot_fun, td_alphas_est, td_alphas_low, td_alphas_upp, TD_mats, 
+               MoreArgs = list(xx = xx))
     }
     invisible()
 }
