@@ -400,7 +400,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                             indFixed, indRandom, Us, trans_Funs)
     if (typeSurvInf == "interval") {
         Wlongs_int <- designMatLong(XXs_int, postMean_betas, ZZs_int, postMean_b, ids, 
-                                    outcome, indFixed, indRandom, Us_int)
+                                    outcome, indFixed, indRandom, Us_int, trans_Funs)
     }
     # priors
     DD <- diag(ncol(W1))
@@ -468,11 +468,26 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                  outcome = outcome, indFixed = indFixed, indRandom = indRandom,
                  trans_Funs = trans_Funs)
     if (typeSurvInf == "interval") {
-        Data <- c(Data, list(W1s_int = W1s_int, W2s_int = W2s_int, Wlongs_int = Wlongs_int,
+        Data <- c(Data, list(Levent1 = event == 1, 
+                             Levent01 = event == 1 | event == 0,
+                             Levent2 = event == 2, Levent3 = event == 3, 
+                             W1s_int = W1s_int, W2s_int = W2s_int, Wlongs_int = Wlongs_int,
                              Us_int = Us_int, XXsbetas_int = XXsbetas_int,
                              XXs_int = XXs_int, ZZs_int = ZZs_int,
                              P_int = P_int[ids[[1]]], 
                              Pw_int = P_int[ids[[1]]] * rep(wk, nT)))
+    } else {
+        Data <- c(Data, list(Levent1 = logical(0), Levent01 = logical(0),
+                             Levent2 = logical(0), Levent3 = logical(0),
+                             W1s_int = matrix(nrow = 0, ncol = 0), 
+                             W2s_int = matrix(nrow = 0, ncol = 0), 
+                             Wlongs_int = matrix(nrow = 0, ncol = 0),
+                             Us_int = list(matrix(nrow = 0, ncol = 0)), 
+                             XXsbetas_int = list(numeric(0)),
+                             XXs_int = list(matrix(nrow = 0, ncol = 0)), 
+                             ZZs_int = list(matrix(nrow = 0, ncol = 0)),
+                             P_int = numeric(0), 
+                             Pw_int = numeric(0)))
     }
     # initial values
     inits <- list(Bs_gammas = rep(0, ncol(W1)), tau_Bs_gammas = 200, phi_Bs_gammas = rep(1, ncol(W1)),

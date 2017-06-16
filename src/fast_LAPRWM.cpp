@@ -477,21 +477,20 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     List idTs = as<List>(Data["idTs"]);
     field<uvec> idTsF = List2Field_uvec(idTs);
     vec Pw = as<vec>(Data["Pw"]);
-    if (interval_cens) {
-        LogicalVector Levent1 = as<LogicalVector>(Data["Levent1"]);
-        LogicalVector Levent01 = as<LogicalVector>(Data["Levent01"]);
-        LogicalVector Levent2 = as<LogicalVector>(Data["Levent2"]);
-        LogicalVector Levent3 = as<LogicalVector>(Data["Levent3"]);
-        mat W1s_int = as<mat>(Data["W1s_int"]);
-        mat W2s_int = as<mat>(Data["W2s_int"]);
-        List Us_int = as<List>(Data["Us_int"]);
-        List XXsbetas_int = as<List>(Data["XXsbetas_int"]);
-        field<vec> XXsbetasF_int = List2Field_vec(XXsbetas_int);
-        field<mat> UsF_int = List2Field_mat(Us_int);
-        List ZZs_int = as<List>(Data["ZZs_int"]);
-        field<mat> ZZsF_int = List2Field_mat(ZZs_int);
-        vec Pw_int = as<vec>(Data["Pw_int"]);
-    }
+    // interval censoring extras
+    LogicalVector Levent1 = as<LogicalVector>(Data["Levent1"]);
+    LogicalVector Levent01 = as<LogicalVector>(Data["Levent01"]);
+    LogicalVector Levent2 = as<LogicalVector>(Data["Levent2"]);
+    LogicalVector Levent3 = as<LogicalVector>(Data["Levent3"]);
+    mat W1s_int = as<mat>(Data["W1s_int"]);
+    mat W2s_int = as<mat>(Data["W2s_int"]);
+    List Us_int = as<List>(Data["Us_int"]);
+    field<mat> UsF_int = List2Field_mat(Us_int);
+    List XXsbetas_int = as<List>(Data["XXsbetas_int"]);
+    field<vec> XXsbetasF_int = List2Field_vec(XXsbetas_int);
+    List ZZs_int = as<List>(Data["ZZs_int"]);
+    field<mat> ZZsF_int = List2Field_mat(ZZs_int);
+    vec Pw_int = as<vec>(Data["Pw_int"]);
     // Initials
     mat b = as<mat>(initials["b"]);
     vec Bs_gammas = as<vec>(initials["Bs_gammas"]);
@@ -595,9 +594,31 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                                       col_indsF, row_inds_U, n, n_alphas, trans_Funs);
     mat current_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idTsF,
                                        col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
+    mat current_Wlongs_int = current_Wlongs;
+    if (interval_cens) {
+        current_Wlongs_int = lin_pred_matF(XXsbetasF_int, ZZsF_int, b, UsF_int, RE_inds2F,
+                                           idTsF, col_indsF, row_inds_Us, ns, n_alphas, 
+                                           trans_Funs);
+    }
     vec current_log_h = W1 * Bs_gammas + W2 * gammas + current_Wlong * alphas;
-    vec current_H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + current_Wlongs * alphas), idGK);
-    vec current_log_ptb = (event % current_log_h) - current_H;
+    vec current_H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + 
+        current_Wlongs * alphas), idGK);
+    vec current_HL = current_H;
+    if (interval_cens) {
+        current_HL = rowsum(Pw_int % exp(W1s_int * Bs_gammas + W2s_int * gammas + 
+            current_Wlongs_int * alphas), idGK);
+    }
+    vec current_log_ptb(n, fill::zeros);
+    if (interval_cens) {
+        for (int ii = 0; ii < n; ++ii) {
+            if (Levent1(ii)) current_log_ptb.at(ii) += current_log_h.at(ii);
+            if (Levent01(ii)) current_log_ptb.at(ii) -= current_H.at(ii);
+            if (Levent2(ii)) current_log_ptb.at(ii) += log(1 - exp(-current_H.at(ii)));
+            if (Levent3(ii)) current_log_ptb.at(ii) += log(exp(-current_HL.at(ii)) - exp(-current_H.at(ii)));
+        }
+    } else {
+        current_log_ptb = (event % current_log_h) - current_H;
+    }
     for (int it = 0; it < its; ++it) {
         mat accept_b(n, n_block, fill::zeros);
         vec accept_s(n_block, fill::zeros);
@@ -625,9 +646,31 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                                               col_indsF, row_inds_U, n, n_alphas, trans_Funs);
             mat new_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, new_b, UsF, RE_inds2F, idTsF,
                                            col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
+            mat new_Wlongs_int = new_Wlongs;
+            if (interval_cens) {
+                new_Wlongs_int = lin_pred_matF(XXsbetasF_int, ZZsF_int, new_b, UsF_int, 
+                                               RE_inds2F, idTsF, col_indsF, row_inds_Us, 
+                                               ns, n_alphas, trans_Funs);
+            }
             vec new_log_h = W1 * Bs_gammas + W2 * gammas + new_Wlong * alphas;
-            vec new_H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + new_Wlongs * alphas), idGK);
-            vec new_log_ptb = (event % new_log_h) - new_H;
+            vec new_H = rowsum(Pw % exp(W1s * Bs_gammas + W2s * gammas + 
+                new_Wlongs * alphas), idGK);
+            vec new_HL = new_H;
+            if (interval_cens) {
+                new_HL = rowsum(Pw_int % exp(W1s_int * Bs_gammas + W2s_int * gammas + 
+                    new_Wlongs_int * alphas), idGK);
+            }
+            vec new_log_ptb(n, fill::zeros);
+            if (interval_cens) {
+                for (int ii = 0; ii < n; ++ii) {
+                    if (Levent1(ii)) new_log_ptb.at(ii) += new_log_h.at(ii);
+                    if (Levent01(ii)) new_log_ptb.at(ii) -= new_H.at(ii);
+                    if (Levent2(ii)) new_log_ptb.at(ii) += log(1 - exp(-new_H.at(ii)));
+                    if (Levent3(ii)) new_log_ptb.at(ii) += log(exp(-new_HL.at(ii)) - exp(-new_H.at(ii)));
+                }
+            } else {
+                new_log_ptb = (event % new_log_h) - new_H;
+            }
             vec new_logpost_RE = new_log_pyb + new_log_ptb + new_log_pb;
             vec lRatio_RE = new_logpost_RE - current_logpost_RE;
             for (int m = 0; m < n; ++m) {
@@ -640,8 +683,14 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                     int first = m * n_quadpoints;
                     int last = first + n_quadpoints - 1;
                     current_Wlongs.rows(first, last) = new_Wlongs.rows(first, last);
+                    if (interval_cens) {
+                        current_Wlongs_int.rows(first, last) = new_Wlongs_int.rows(first, last);
+                    }
                     current_log_h.at(m) = new_log_h.at(m);
                     current_H.at(m) = new_H.at(m);
+                    if (interval_cens) {
+                        current_HL.at(m) = new_HL.at(m);
+                    }
                     current_log_ptb.at(m) = new_log_ptb.at(m);
                 }
             }
@@ -656,7 +705,21 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             new_log_h = W1 * new_Bs_gammas + W2 * new_gammas + current_Wlong * new_alphas;
             new_H = rowsum(Pw % exp(W1s * new_Bs_gammas + W2s * new_gammas + 
                 current_Wlongs * new_alphas), idGK);
-            new_log_ptb = (event % new_log_h) - new_H;
+            if (interval_cens) {
+                new_HL = rowsum(Pw_int % exp(W1s_int * new_Bs_gammas + W2s_int * new_gammas + 
+                    current_Wlongs_int * new_alphas), idGK);
+            }
+            new_log_ptb = vec(n, fill::zeros);
+            if (interval_cens) {
+                for (int ii = 0; ii < n; ++ii) {
+                    if (Levent1(ii)) new_log_ptb.at(ii) += new_log_h.at(ii);
+                    if (Levent01(ii)) new_log_ptb.at(ii) -= new_H.at(ii);
+                    if (Levent2(ii)) new_log_ptb.at(ii) += log(1 - exp(-new_H.at(ii)));
+                    if (Levent3(ii)) new_log_ptb.at(ii) += log(exp(-new_HL.at(ii)) - exp(-new_H.at(ii)));
+                }
+            } else {
+                new_log_ptb = (event % new_log_h) - new_H;
+            }
             double new_logpost_surv = sum(new_log_ptb) + 
                 logPrior(new_Bs_gammas, mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas) +
                 logPrior(new_gammas, mean_gammas, Tau_gammas, tau_gammas) +
@@ -669,6 +732,9 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                alphas = new_alphas;
                current_log_h = new_log_h;
                current_H = new_H;
+               if (interval_cens) {
+                   current_HL = new_HL;
+               }
                current_log_ptb = new_log_ptb;
             }
             block_b.slice(i) = b;

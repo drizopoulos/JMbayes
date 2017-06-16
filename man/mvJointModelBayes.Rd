@@ -297,6 +297,50 @@ JMFit4 <- update(JMFit3, Interactions = Ints, priors = list(shrink_alphas = TRUE
 summary(JMFit4)
 plot(JMFit4)
 
+##########################################################################################
+
+########################
+# Time-varying effects #
+########################
+
+# We allow the association parameter to vary with time; the time-varying coefficients are
+# approximated with P-splines
+JMFit_tveffect <- mvJointModelBayes(MixedModelFit1, CoxFit1, timeVar = "year",
+                    Interactions = list("log(serBilir)_value" = ~ 0 + tve(Time, df = 8)))
+
+plot(JMFit_tveffect, "tv_effect")
+
+
+##########################################################################################
+
+############################
+# Interval censoring terms #
+############################
+
+# create artificial interval censoring in the PBC data set
+pbc2$status2 <- as.numeric(pbc2$status != "alive")
+pbc2.id$status2 <- as.numeric(pbc2.id$status != "alive")
+pbc2$status3 <- as.character(pbc2$status)
+ff <- function (x) {
+    out <- if (x[1L] %in% c('dead', 'transplanted')) 'dead' else 
+        switch(sample(1:3, 1), '1' = "alive", '2' = "left", '3' = "interval")
+    rep(out, length(x))
+}
+pbc2$status3 <- unlist(with(pbc2, lapply(split(status3, id), ff)), use.names = FALSE)
+pbc2$status3 <- unname(with(pbc2, sapply(status3, function (x) 
+    switch(x, 'dead' = 1, 'alive' = 0, 'left' = 2, 'interval' = 3))))
+pbc2$yearsU <- as.numeric(NA)
+pbc2$yearsU[pbc2$status3 == 3] <- pbc2$years[pbc2$status3 == 3] + 
+    runif(sum(pbc2$status3 == 3), 0, 4)
+pbc2.id <- pbc2[!duplicated(pbc2$id), ]
+
+# next we fit a weibull model for interval censored data
+survFit <- survreg(Surv(years, yearsU, status3, type = "interval") ~ drug + age, 
+                   data = pbc2.id, model = TRUE)
+
+# next we fit the joint model (we use 'MixedModelFit1' from above)
+JMFit_intcens <- mvJointModelBayes(MixedModelFit1, survFit, timeVar = "year")
+summary(JMFit_intcens)
 }
 }
 
