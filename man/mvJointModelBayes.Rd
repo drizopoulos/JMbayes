@@ -322,7 +322,7 @@ pbc2$status2 <- as.numeric(pbc2$status != "alive")
 pbc2.id$status2 <- as.numeric(pbc2.id$status != "alive")
 pbc2$status3 <- as.character(pbc2$status)
 ff <- function (x) {
-    out <- if (x[1L] %in% c('dead', 'transplanted')) 'dead' else 
+    out <- if (x[1L] \%in\% c('dead', 'transplanted')) 'dead' else 
         switch(sample(1:3, 1), '1' = "alive", '2' = "left", '3' = "interval")
     rep(out, length(x))
 }

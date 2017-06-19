@@ -1,5 +1,6 @@
 mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"), 
-                     overdispersion = FALSE, priors = NULL, control = NULL, ...) {
+                     overdispersion = FALSE, priors = NULL, init = NULL, 
+                     control = NULL, ...) {
     cl <- match.call()
     engine <- match.arg(engine)
     if (!is.list(families))
@@ -47,7 +48,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
     # control
     con <- list(n.processors = parallel::detectCores() - 1, n.chains = 2,
                 working.directory = getwd(), clear.model = TRUE,
-                seed = 1L, verbose = FALSE)
+                seed = 1L, optimize_only = FALSE, verbose = FALSE)
     if (engine == "JAGS") {
         con$n.iter <- 28000L
         con$n.burnin <- 3000L
@@ -145,6 +146,23 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
                      n.thin = con$n.thin, seed = con$seed, verbose = con$verbose)
     } else {
         options(mc.cores = con$n.chains)
+        if (con$optimize_only) {
+            model <- rstan::stan_model(file = file.path(con$working.directory, model_name))
+            if (is.null(init)) {
+                init <- "random"
+            } else {
+                if (!is.list(init)) {
+                    stop("'init' should be a list with appropriate names; run once ",
+                         "mvglmer() and see the components of object$par.")
+                }
+            }
+            out <- rstan::optimizing(model, data = Data, hessian = TRUE, as_vector = FALSE,
+                                     seed = con$n.iter, init = init)
+            if (con$clear.model) {
+                file.remove(file.path(con$working.directory, model_name))
+            }
+            return(out)
+        }
         out <- rstan::stan(file = file.path(con$working.directory, model_name), data = Data, 
                     pars = params, iter = con$n.iter, chains = con$n.chains, 
                     thin = con$n.thin, seed = con$seed, 
