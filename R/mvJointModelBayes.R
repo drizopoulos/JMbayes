@@ -172,6 +172,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     dataLS.id2 <- merge(dataL.id2, dataS.id2[survVars_notin_long2], by = "id2merge",
                         sort = FALSE, all = FALSE)
     dataLS.id2[[TimeVar]] <- dataLS.id2[[timeVar]]
+    # corresponding dataset for interval censoring data
     if (typeSurvInf == "interval") {
         dataS_int.id <- last_rows(dataS, dataS[[idVar]])
         dataS_int.id2 <- right_rows(dataS, TimeLl, idT, st_int)
