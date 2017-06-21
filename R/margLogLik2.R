@@ -92,8 +92,21 @@ marglogLik2 <- function (thetas, Data, priors, temp = 1.0, fixed_tau_Bs_gammas =
     }
     d <- length(unlist(list_thetas))
     pscale <- if (fixed_tau_Bs_gammas) rep(1, d) else c(rep(1, d - 1), 0.1)
-    opt <- optim(vec_thetas, fn, gr, method = "BFGS", hessian = TRUE,
-                 control = list(parscale = pscale))
+    tt1 <- try(opt <- optim(vec_thetas, fn, gr, method = "BFGS", hessian = TRUE,
+                            control = list(parscale = pscale)), silent = TRUE)
+    if (inherits(tt1, "try-error")) {
+        vec_thetas2 <- vec_thetas + rnorm(length(vec_thetas), sd = 0.1)
+        tt2 <- try(opt <- optim(vec_thetas2, fn, gr, method = "BFGS", hessian = TRUE,
+                                control = list(parscale = pscale)), silent = TRUE)
+        if (inherits(tt2, "try-error")) {
+            tt3 <- try(opt <- optim(vec_thetas, fn, gr, method = "Nelder-Mead", 
+                                    hessian = TRUE, 
+                                    control = list(parscale = pscale)), silent = TRUE)
+            if (inherits(tt2, "try-error")) {
+                stop("lll")
+            }
+        }
+    }
     log_det_hessian <- determinant(opt$hessian)$modulus
     out <- as.vector(0.5 * (d * log(2 * pi) - log_det_hessian) - opt$value)
     #iLap <- iLap(opt, ff = fn, ff.gr = gr, ff.hess = hes, control = list(n.cores = 6))
