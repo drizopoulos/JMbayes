@@ -185,6 +185,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         dataL_int.id2[["id2merge"]] <- paste(dataL.id2[[idVar]], uu, sep = ":")
         dataLS_int.id2 <- merge(dataL_int.id2, dataS_int.id2[survVars_notin_long2], 
                                 by = "id2merge", sort = FALSE, all = FALSE)
+        dataLS_int.id2[[TimeVar]] <- dataLS_int.id2[[timeVar]]
     }
     # design matrices for the survival submodel, W1 is for the baseline hazard,
     # W2 for the baseline and external time-varying covariates
