@@ -291,14 +291,20 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     Interactions <- Interactions[order(match(names(Interactions), names(Formulas)))]
     Interactions <- Interactions[!sapply(Interactions, is.null)]
     U <- lapply(Interactions, function (form) {
-        model.matrix(terms(form, data = dataLS), data = dataLS.id)
+        MF <- model.frame.default(terms(form), data = dataLS.id)
+        Terms <- terms(MF)
+        model.matrix(Terms, data = dataLS.id)
     })
     Us <- lapply(Interactions, function (form) {
-        model.matrix(terms(form, data = dataLS), data = dataLS.id2)
+        MF <- model.frame.default(terms(form), data = dataLS.id)
+        Terms <- terms(MF)
+        model.matrix(Terms, data = dataLS.id2)
     })
     if (typeSurvInf == "interval") {
         Us_int <- lapply(Interactions, function (form) {
-            model.matrix(terms(form, data = dataLS_int), data = dataLS_int.id2)
+            MF <- model.frame.default(terms(form), data = dataLS.id)
+            Terms <- terms(MF)
+            model.matrix(Terms, data = dataLS_int.id2)
         })
     }
     id <- lapply(seq_len(n_outcomes), function (i) seq_len(nT))

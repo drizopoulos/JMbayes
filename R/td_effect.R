@@ -3,8 +3,9 @@ tve <- function (x, df = NULL, knots = NULL, ord = 3) {
         stop("either 'df' or 'knots' need to be specified.\n")
     }
     if (is.null(knots) && !is.null(df)) {
-        min_x <- min(x) - 0.1
-        max_x <- max(x) + 0.1
+        eps <- 0.1 * sd(x)
+        min_x <- min(x) - eps
+        max_x <- max(x) + eps
         dx <- (max_x - min_x) / df
         knots <- seq(min_x - (ord-1) * dx, max_x + (ord-1) * dx, by = dx)
     }

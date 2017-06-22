@@ -121,7 +121,8 @@ print.summary.mvJMbayes <- function (x, digits = max(4, getOption("digits") - 4)
 plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_effect"),
                             param = c("betas", "sigma", "D", "gammas",
                                       "alphas", "Bs_gammas", "tau_Bs_gammas"),
-                            ask = TRUE, max.t = NULL, from = 0, ...) {
+                            ask = TRUE, max.t = NULL, from = 0, shade_CI = TRUE, 
+                            col_CI = "lightgrey", ...) {
     if (!inherits(x, "mvJMbayes"))
         stop("Use only with 'mvJMbayes' objects.\n")
     which <- match.arg(which)
@@ -176,9 +177,13 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_eff
         pred_data[[TimeVar]] <- pred_data$V1
         TD_mats <- lapply(TD_terms, model.matrix.default, data = pred_data)
         plot_fun <- function (est, low, upp, M, xx) {
-            matplot(xx, cbind(M %*% est, M %*% low, M %*% upp), 
-                    col = 1, lty = c(1, 2, 2), type = "l",
-                    xlab = "Time", ylab = "Time-varying Effect")
+            Fits <- cbind(M %*% est, M %*% low, M %*% upp)
+            matplot(xx, Fits, type = "n", xlab = "Time", ylab = "Time-varying Effect")
+            if (shade_CI) {
+                polygon(c(xx, rev(xx)), c(Fits[, 2], rev(Fits[, 3])), col = col_CI,
+                        border = NA)
+            }
+            matlines(xx, Fits, col = 1, lty = c(1, 2, 2))
         }
         mapply(plot_fun, td_alphas_est, td_alphas_low, td_alphas_upp, TD_mats, 
                MoreArgs = list(xx = xx))

@@ -106,7 +106,8 @@ marglogLik2 <- function (thetas, Data, priors, temp = 1.0, fixed_tau_Bs_gammas =
                 stop("failed to find initial values.")
             }
         }
-    }    log_det_hessian <- determinant(opt$hessian)$modulus
+    }
+    log_det_hessian <- determinant(opt$hessian)$modulus
     out <- as.vector(0.5 * (d * log(2 * pi) - log_det_hessian) - opt$value)
     #iLap <- iLap(opt, ff = fn, ff.gr = gr, ff.hess = hes, control = list(n.cores = 6))
     if (fixed_tau_Bs_gammas) {
