@@ -11,7 +11,7 @@ Fits multivariate mixed models under a Bayesian approach using JAGS.
 
 \usage{
 mvglmer(formulas, data, families, engine = c("JAGS", "STAN"), 
-    overdispersion = FALSE, priors = NULL, control = NULL, \dots)
+    overdispersion = FALSE, priors = NULL, init = NULL, control = NULL, \dots)
 }
 
 \arguments{
@@ -57,6 +57,8 @@ mvglmer(formulas, data, families, engine = c("JAGS", "STAN"),
             Gaussian outcomes.}
     }
   }
+  
+  \item{init}{a list of initial values.}
   
   \item{control}{a list of control values with components:
     \describe{        

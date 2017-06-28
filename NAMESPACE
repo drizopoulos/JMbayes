@@ -23,7 +23,7 @@ importFrom("stats", "acf", "ar", "as.formula", "ave", "bw.SJ", "coef",
   "model.matrix.default", "model.response", "optim", "pnorm", "pt", "qt", 
   "quantile", "rWishart", "rchisq", "reformulate", "rexp", "rgamma", 
   "rnorm", "rt", "runif", "sd", "terms", "var", "vcov", "makepredictcall",
-  "model.offset", "complete.cases", ".getXlevels")
+  "model.offset", "complete.cases", ".getXlevels", "cov.wt", "terms.formula")
 importFrom("utils", "as.relistable", "combn", "glob2rx", "head", "relist", 
   "setTxtProgressBar", "tail", "txtProgressBar", "object.size")
 importFrom("Rcpp", "evalCpp")
@@ -34,7 +34,7 @@ importFrom("doParallel", "registerDoParallel")
 importFrom("xtable", "xtable")
 importFrom("foreach", "foreach", "%dopar%")
 
-useDynLib(JMbayes)
+useDynLib(JMbayes, .registration = TRUE)
 
 
 # S3 methods

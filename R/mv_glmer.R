@@ -116,7 +116,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
             model(families, Data$n_RE), generated_quantities(Data$n_RE),
             file = file.path(con$working.directory, model_name))
     }
-    closeAllConnections()
+    #closeAllConnections()
     # parameters to save
     params <- paste0('betas', seq_len(n_outcomes))
     if (any(ind_gs <- sapply(families, function (x) x$family == "gaussian"))) {

@@ -15,4 +15,4 @@ LaTeX: pdfLaTeX
 BuildType: Package
 PackageUseDevtools: Yes
 PackageInstallArgs: --no-multiarch --with-keep.source
-PackageCheckArgs: --no-multiarch
+PackageCheckArgs: --no-vignettes --no-build-vignettes

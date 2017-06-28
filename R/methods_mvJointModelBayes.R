@@ -55,8 +55,8 @@ summary.mvJMbayes <- function (object, weighted = FALSE, include.baselineHazard 
 print.summary.mvJMbayes <- function (x, digits = max(4, getOption("digits") - 4), ...) {
     cat("\nCall:\n", printCall(x$call), "\n\n", sep = "")
     cat("Data Descriptives:")
-    cat("\nNumber of Groups: ", x$n, "\t\tNumber of events: ", sum(x$event),
-        " (", round(100 * mean(x$event), 1), "%)", sep = "")
+    cat("\nNumber of Groups: ", x$n, "\t\tNumber of events: ", sum(x$event == 1),
+        " (", round(100 * mean(x$event == 1), 1), "%)", sep = "")
     cat("\nNumber of Observations:")
     obs <- x$descrpt
     for (i in 1:nrow(obs)) {
@@ -122,7 +122,7 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_eff
                             param = c("betas", "sigma", "D", "gammas",
                                       "alphas", "Bs_gammas", "tau_Bs_gammas"),
                             ask = TRUE, max.t = NULL, from = 0, shade_CI = TRUE, 
-                            col_CI = "lightgrey", ...) {
+                            col = 1, col_CI = "lightgrey", return_values = FALSE, ...) {
     if (!inherits(x, "mvJMbayes"))
         stop("Use only with 'mvJMbayes' objects.\n")
     which <- match.arg(which)
@@ -157,6 +157,7 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_eff
                 acf(pp[, i], ylab = nams[i], main = paste("Series", nams[i]))
         }
         par(op)
+        values <- NULL
     }
     if (which == "tv_effect") {
         Data_surv <- x$model_info$coxph_components$data
@@ -177,18 +178,25 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_eff
         pred_data[[TimeVar]] <- pred_data$V1
         TD_mats <- lapply(TD_terms, model.matrix.default, data = pred_data)
         plot_fun <- function (est, low, upp, M, xx) {
-            Fits <- cbind(M %*% est, M %*% low, M %*% upp)
-            matplot(xx, Fits, type = "n", xlab = "Time", ylab = "Time-varying Effect")
-            if (shade_CI) {
-                polygon(c(xx, rev(xx)), c(Fits[, 2], rev(Fits[, 3])), col = col_CI,
-                        border = NA)
+            Fits <- cbind(est = M %*% est, low = M %*% low, upp = M %*% upp)
+            if (return_values) {
+                out <- cbind(times = xx, Fits)
+                colnames(out) <- c("times", "est", "low", "upp")
+                out
+            } else {
+                matplot(xx, Fits, type = "n", xlab = "Time", ylab = "Time-varying Effect", 
+                        col = col)
+                if (shade_CI) {
+                    polygon(c(xx, rev(xx)), c(Fits[, 2], rev(Fits[, 3])), col = col_CI,
+                            border = NA)
+                }
+                matlines(xx, Fits, col = 1, lty = c(1, 2, 2))
             }
-            matlines(xx, Fits, col = 1, lty = c(1, 2, 2))
         }
-        mapply(plot_fun, td_alphas_est, td_alphas_low, td_alphas_upp, TD_mats, 
-               MoreArgs = list(xx = xx))
+        values <- mapply(plot_fun, td_alphas_est, td_alphas_low, td_alphas_upp, TD_mats, 
+                         MoreArgs = list(xx = xx), SIMPLIFY = FALSE)
     }
-    invisible()
+    invisible(values)
 }
 
 update.mvJMbayes <- function (object, ...) {

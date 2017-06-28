@@ -12,3 +12,6 @@ LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
 LazyData: yes
 License: GPL (>= 2)
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

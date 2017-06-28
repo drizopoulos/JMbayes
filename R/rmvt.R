@@ -1,5 +1,4 @@
-rmvt <-
-function (n, mu, Sigma, df) {
+rmvt <- function (n, mu, Sigma, df) {
     p <- length(mu)
     if (is.list(Sigma)) {
         ev <- Sigma$values
