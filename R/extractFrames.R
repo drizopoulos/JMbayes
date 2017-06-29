@@ -9,6 +9,7 @@ extractFrames <- function (formula, data) {
     formYx <- as.formula(paste(respVar, "~", formYx))
     TermsX <- terms(formYx, data = data)
     mfX <- model.frame(TermsX, data)
+    TermsX <- terms(mfX)
     X <- model.matrix(TermsX, data)
     # Random Effects
     spl <- unlist(strsplit(term_labels[which_RE], " | ", fixed = TRUE))
@@ -19,6 +20,8 @@ extractFrames <- function (formula, data) {
     formYz <- paste(spl[1], collapse = " + ")
     formYz <- as.formula(paste(respVar, "~", formYz))
     TermsZ <- terms(formYz, data = data)
+    mfZ <- model.frame(TermsZ, data = data)
+    TermsZ <- terms(mfZ)
     Z <- model.matrix(TermsZ, data)
     # response variable
     y <- model.response(mfX)
