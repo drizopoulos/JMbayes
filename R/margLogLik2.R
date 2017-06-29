@@ -102,7 +102,7 @@ marglogLik2 <- function (thetas, Data, priors, temp = 1.0, fixed_tau_Bs_gammas =
             tt3 <- try(opt <- optim(vec_thetas, fn, gr, method = "Nelder-Mead", 
                                     hessian = TRUE, 
                                     control = list(parscale = pscale)), silent = TRUE)
-            if (inherits(tt2, "try-error")) {
+            if (inherits(tt3, "try-error")) {
                 stop("failed to find initial values.")
             }
         }
