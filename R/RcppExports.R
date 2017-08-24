@@ -2,34 +2,42 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 dmvnorm2 <- function(x, mean, sigma, logd = FALSE) {
-    .Call(JMbayes_dmvnorm2, x, mean, sigma, logd)
+    .Call(`_JMbayes_dmvnorm2`, x, mean, sigma, logd)
 }
 
 lap_rwm_C <- function(initials, Data, priors, scales, Covs, control, interval_cens) {
-    .Call(JMbayes_lap_rwm_C, initials, Data, priors, scales, Covs, control, interval_cens)
+    .Call(`_JMbayes_lap_rwm_C`, initials, Data, priors, scales, Covs, control, interval_cens)
 }
 
 lap_rwm_C_woRE <- function(initials, Data, priors, scales, Covs, control) {
-    .Call(JMbayes_lap_rwm_C_woRE, initials, Data, priors, scales, Covs, control)
+    .Call(`_JMbayes_lap_rwm_C_woRE`, initials, Data, priors, scales, Covs, control)
 }
 
 lap_rwm_C_woRE_nogammas <- function(initials, Data, priors, scales, Covs, control) {
-    .Call(JMbayes_lap_rwm_C_woRE_nogammas, initials, Data, priors, scales, Covs, control)
+    .Call(`_JMbayes_lap_rwm_C_woRE_nogammas`, initials, Data, priors, scales, Covs, control)
 }
 
 logPosterior <- function(temp, event, idGK_fast, W1, W1s, Bs_gammas, W2, W2s, gammas, Wlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_gammas, Tau_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs) {
-    .Call(JMbayes_logPosterior, temp, event, idGK_fast, W1, W1s, Bs_gammas, W2, W2s, gammas, Wlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_gammas, Tau_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
+    .Call(`_JMbayes_logPosterior`, temp, event, idGK_fast, W1, W1s, Bs_gammas, W2, W2s, gammas, Wlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_gammas, Tau_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
 }
 
 logPosterior_nogammas <- function(temp, event, idGK_fast, W1, W1s, Bs_gammas, Wlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs) {
-    .Call(JMbayes_logPosterior_nogammas, temp, event, idGK_fast, W1, W1s, Bs_gammas, Wlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
+    .Call(`_JMbayes_logPosterior_nogammas`, temp, event, idGK_fast, W1, W1s, Bs_gammas, Wlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
 }
 
 gradient_logPosterior <- function(temp, event, idGK_fast, event_colSumsW1, W1s, Bs_gammas, event_colSumsW2, W2s, gammas, event_colSumsWlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_gammas, Tau_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs) {
-    .Call(JMbayes_gradient_logPosterior, temp, event, idGK_fast, event_colSumsW1, W1s, Bs_gammas, event_colSumsW2, W2s, gammas, event_colSumsWlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_gammas, Tau_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
+    .Call(`_JMbayes_gradient_logPosterior`, temp, event, idGK_fast, event_colSumsW1, W1s, Bs_gammas, event_colSumsW2, W2s, gammas, event_colSumsWlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_gammas, Tau_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
 }
 
 gradient_logPosterior_nogammas <- function(temp, event, idGK_fast, event_colSumsW1, W1s, Bs_gammas, event_colSumsWlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs) {
-    .Call(JMbayes_gradient_logPosterior_nogammas, temp, event, idGK_fast, event_colSumsW1, W1s, Bs_gammas, event_colSumsWlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
+    .Call(`_JMbayes_gradient_logPosterior_nogammas`, temp, event, idGK_fast, event_colSumsW1, W1s, Bs_gammas, event_colSumsWlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs)
+}
+
+log_post_RE_svft <- function(b, Data) {
+    .Call(`_JMbayes_log_post_RE_svft`, b, Data)
+}
+
+survPred_svft_2 <- function(b, Data) {
+    .Call(`_JMbayes_survPred_svft_2`, b, Data)
 }
 

@@ -10,7 +10,7 @@
 
 <meta name="author" content="Dimitris Rizopoulos">
 
-<meta name="date" content="2017-06-28">
+<meta name="date" content="2017-07-06">
 
 <title>Multivariate Joint Models</title>
 
@@ -197,7 +197,7 @@ img.MathJax_strut {border: 0!important; padding: 0!important; margin: 0!importan
 
 <h1 class="title toc-ignore">Multivariate Joint Models</h1>
 <h4 class="author"><em>Dimitris Rizopoulos</em></h4>
-<h4 class="date"><em>2017-06-28</em></h4>
+<h4 class="date"><em>2017-07-06</em></h4>
 
 
 
@@ -281,7 +281,7 @@ CoxFit &lt;-<span class="st"> </span><span class="kw">coxph</span>(<span class="
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 2.7 min</code></pre>
+## time: 2.9 min</code></pre>
 <p>To fit a multivariate joint model for multiple longitudinal outcomes, the only thing that needs to be adapted from the procedure described above, is the call to <code>mvglmer()</code>. For example, to fit a bivariate joint model for serum bilirubin and presence of spiders, we use the syntax:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">MixedModelFit2 &lt;-<span class="st"> </span><span class="kw">mvglmer</span>(<span class="kw">list</span>(<span class="kw">log</span>(serBilir) ~<span class="st"> </span>year +<span class="st"> </span>(year |<span class="st"> </span>id),
                                spiders ~<span class="st"> </span>year +<span class="st"> </span>(<span class="dv">1</span> |<span class="st"> </span>id)), <span class="dt">data =</span> pbc2,
@@ -328,7 +328,7 @@ JMFit2 &lt;-<span class="st"> </span><span class="kw">mvJointModelBayes</span>(M
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 3.8 min</code></pre>
+## time: 3.9 min</code></pre>
 </div>
 <div id="different-functional-forms" class="section level2">
 <h2>Different Functional Forms</h2>
@@ -385,7 +385,7 @@ JMFit3 &lt;-<span class="st"> </span><span class="kw">update</span>(JMFit2, <spa
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 4 min</code></pre>
+## time: 4.1 min</code></pre>
 <p>We further extend the previous model by including the interactions terms between the terms specified in <code>Formulas</code> and the randomized treatment indicator drug. The names specified in the list that defined the interaction factors should match with the names of the output from <code>JMFit3</code>. Because of the many association parameters we place thre shrinkage prior on the association coefficients described above. In particular:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Ints &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="st">"log(serBilir)"</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug, <span class="st">"log(serBilir)_slope"</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug,
              <span class="st">"spiders_area"</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug)
@@ -445,7 +445,7 @@ JMFit4 &lt;-<span class="st"> </span><span class="kw">update</span>(JMFit3, <spa
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 4.5 min</code></pre>
+## time: 4.6 min</code></pre>
 </div>
 <div id="time-varying-effects" class="section level2">
 <h2>Time-varying Effects</h2>

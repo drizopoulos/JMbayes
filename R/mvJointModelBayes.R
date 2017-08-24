@@ -290,15 +290,15 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     Interactions <- c(Interactions, Interactions_ns)
     Interactions <- Interactions[order(match(names(Interactions), names(Formulas)))]
     Interactions <- Interactions[!sapply(Interactions, is.null)]
-    U <- lapply(Interactions, function (form) {
+    TermsU <- lapply(Interactions, function (form) {
         MF <- model.frame.default(terms(form), data = dataLS.id)
-        Terms <- terms(MF)
-        model.matrix(Terms, data = dataLS.id)
+        terms(MF)
     })
-    Us <- lapply(Interactions, function (form) {
-        MF <- model.frame.default(terms(form), data = dataLS.id)
-        Terms <- terms(MF)
-        model.matrix(Terms, data = dataLS.id2)
+    U <- lapply(TermsU, function (term) {
+        model.matrix(term, data = dataLS.id)
+    })
+    Us <- lapply(TermsU, function (term) {
+        model.matrix(term, data = dataLS.id2)
     })
     if (typeSurvInf == "interval") {
         Us_int <- lapply(Interactions, function (form) {
@@ -751,6 +751,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 model_info = list(
                     families = families,
                     timeVar = timeVar,
+                    TimeVar = TimeVar,
                     Formulas = Formulas,
                     Interactions = Interactions,
                     RE_inds = RE_inds,
@@ -758,7 +759,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                     transFuns = trans_Funs,
                     mvglmer_components = components,
                     coxph_components = list(data = dataS, Terms = Terms, Time = Time, 
-                                            event = event),
+                                            event = event, TermsU = TermsU),
                     functions = list(build_model_matrix = build_model_matrix,
                                      last_rows = last_rows, right_rows = right_rows,
                                      Xbetas_calc = Xbetas_calc, 

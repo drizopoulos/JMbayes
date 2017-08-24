@@ -93,7 +93,7 @@ marglogLik2 <- function (thetas, Data, priors, temp = 1.0, fixed_tau_Bs_gammas =
     d <- length(unlist(list_thetas))
     pscale <- if (fixed_tau_Bs_gammas) rep(1, d) else c(rep(1, d - 1), 0.1)
     tt1 <- try(opt <- optim(vec_thetas, fn, gr, method = "BFGS", hessian = TRUE,
-                            control = list(parscale = pscale)), silent = TRUE)
+                            control = list(parscale = pscale)), silent = F)
     if (inherits(tt1, "try-error")) {
         vec_thetas2 <- vec_thetas + rnorm(length(vec_thetas), sd = 0.1)
         tt2 <- try(opt <- optim(vec_thetas2, fn, gr, method = "BFGS", hessian = TRUE,
