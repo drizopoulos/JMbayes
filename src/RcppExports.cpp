@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // dmvnorm2
 arma::vec dmvnorm2(const arma::mat& x, const arma::rowvec& mean, const arma::mat& sigma, bool logd);
-RcppExport SEXP JMbayes_dmvnorm2(SEXP xSEXP, SEXP meanSEXP, SEXP sigmaSEXP, SEXP logdSEXP) {
+RcppExport SEXP _JMbayes_dmvnorm2(SEXP xSEXP, SEXP meanSEXP, SEXP sigmaSEXP, SEXP logdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,7 +22,7 @@ END_RCPP
 }
 // lap_rwm_C
 List lap_rwm_C(List initials, List Data, List priors, List scales, List Covs, List control, bool interval_cens);
-RcppExport SEXP JMbayes_lap_rwm_C(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP, SEXP interval_censSEXP) {
+RcppExport SEXP _JMbayes_lap_rwm_C(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP, SEXP interval_censSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -39,7 +39,7 @@ END_RCPP
 }
 // lap_rwm_C_woRE
 List lap_rwm_C_woRE(List initials, List Data, List priors, List scales, List Covs, List control);
-RcppExport SEXP JMbayes_lap_rwm_C_woRE(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
+RcppExport SEXP _JMbayes_lap_rwm_C_woRE(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -55,7 +55,7 @@ END_RCPP
 }
 // lap_rwm_C_woRE_nogammas
 List lap_rwm_C_woRE_nogammas(List initials, List Data, List priors, List scales, List Covs, List control);
-RcppExport SEXP JMbayes_lap_rwm_C_woRE_nogammas(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
+RcppExport SEXP _JMbayes_lap_rwm_C_woRE_nogammas(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -71,7 +71,7 @@ END_RCPP
 }
 // logPosterior
 double logPosterior(double temp, arma::vec event, arma::uvec idGK_fast, arma::mat W1, arma::mat W1s, arma::vec Bs_gammas, arma::mat W2, arma::mat W2s, arma::vec gammas, arma::mat Wlong, arma::mat Wlongs, arma::vec alphas, arma::vec Pw, arma::vec mean_Bs_gammas, arma::mat Tau_Bs_gammas, arma::vec mean_gammas, arma::mat Tau_gammas, arma::vec mean_alphas, arma::mat Tau_alphas, double tauBs, double A_tauBs, double B_tauBs);
-RcppExport SEXP JMbayes_logPosterior(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP W1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP W2SEXP, SEXP W2sSEXP, SEXP gammasSEXP, SEXP WlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_gammasSEXP, SEXP Tau_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {
+RcppExport SEXP _JMbayes_logPosterior(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP W1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP W2SEXP, SEXP W2sSEXP, SEXP gammasSEXP, SEXP WlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_gammasSEXP, SEXP Tau_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -103,7 +103,7 @@ END_RCPP
 }
 // logPosterior_nogammas
 double logPosterior_nogammas(double temp, arma::vec event, arma::uvec idGK_fast, arma::mat W1, arma::mat W1s, arma::vec Bs_gammas, arma::mat Wlong, arma::mat Wlongs, arma::vec alphas, arma::vec Pw, arma::vec mean_Bs_gammas, arma::mat Tau_Bs_gammas, arma::vec mean_alphas, arma::mat Tau_alphas, double tauBs, double A_tauBs, double B_tauBs);
-RcppExport SEXP JMbayes_logPosterior_nogammas(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP W1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP WlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {
+RcppExport SEXP _JMbayes_logPosterior_nogammas(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP W1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP WlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -130,7 +130,7 @@ END_RCPP
 }
 // gradient_logPosterior
 arma::vec gradient_logPosterior(double temp, arma::vec event, arma::uvec idGK_fast, arma::vec event_colSumsW1, arma::mat W1s, arma::vec Bs_gammas, arma::vec event_colSumsW2, arma::mat W2s, arma::vec gammas, arma::vec event_colSumsWlong, arma::mat Wlongs, arma::vec alphas, arma::vec Pw, arma::vec mean_Bs_gammas, arma::mat Tau_Bs_gammas, arma::vec mean_gammas, arma::mat Tau_gammas, arma::vec mean_alphas, arma::mat Tau_alphas, double tauBs, double A_tauBs, double B_tauBs);
-RcppExport SEXP JMbayes_gradient_logPosterior(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP event_colSumsW1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP event_colSumsW2SEXP, SEXP W2sSEXP, SEXP gammasSEXP, SEXP event_colSumsWlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_gammasSEXP, SEXP Tau_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {
+RcppExport SEXP _JMbayes_gradient_logPosterior(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP event_colSumsW1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP event_colSumsW2SEXP, SEXP W2sSEXP, SEXP gammasSEXP, SEXP event_colSumsWlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_gammasSEXP, SEXP Tau_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -162,7 +162,7 @@ END_RCPP
 }
 // gradient_logPosterior_nogammas
 arma::vec gradient_logPosterior_nogammas(double temp, arma::vec event, arma::uvec idGK_fast, arma::vec event_colSumsW1, arma::mat W1s, arma::vec Bs_gammas, arma::vec event_colSumsWlong, arma::mat Wlongs, arma::vec alphas, arma::vec Pw, arma::vec mean_Bs_gammas, arma::mat Tau_Bs_gammas, arma::vec mean_alphas, arma::mat Tau_alphas, double tauBs, double A_tauBs, double B_tauBs);
-RcppExport SEXP JMbayes_gradient_logPosterior_nogammas(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP event_colSumsW1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP event_colSumsWlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {
+RcppExport SEXP _JMbayes_gradient_logPosterior_nogammas(SEXP tempSEXP, SEXP eventSEXP, SEXP idGK_fastSEXP, SEXP event_colSumsW1SEXP, SEXP W1sSEXP, SEXP Bs_gammasSEXP, SEXP event_colSumsWlongSEXP, SEXP WlongsSEXP, SEXP alphasSEXP, SEXP PwSEXP, SEXP mean_Bs_gammasSEXP, SEXP Tau_Bs_gammasSEXP, SEXP mean_alphasSEXP, SEXP Tau_alphasSEXP, SEXP tauBsSEXP, SEXP A_tauBsSEXP, SEXP B_tauBsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -186,4 +186,47 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(gradient_logPosterior_nogammas(temp, event, idGK_fast, event_colSumsW1, W1s, Bs_gammas, event_colSumsWlong, Wlongs, alphas, Pw, mean_Bs_gammas, Tau_Bs_gammas, mean_alphas, Tau_alphas, tauBs, A_tauBs, B_tauBs));
     return rcpp_result_gen;
 END_RCPP
+}
+// log_post_RE_svft
+arma::vec log_post_RE_svft(arma::vec b, List Data);
+RcppExport SEXP _JMbayes_log_post_RE_svft(SEXP bSEXP, SEXP DataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type b(bSEXP);
+    Rcpp::traits::input_parameter< List >::type Data(DataSEXP);
+    rcpp_result_gen = Rcpp::wrap(log_post_RE_svft(b, Data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// survPred_svft_2
+arma::vec survPred_svft_2(arma::vec b, List Data);
+RcppExport SEXP _JMbayes_survPred_svft_2(SEXP bSEXP, SEXP DataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type b(bSEXP);
+    Rcpp::traits::input_parameter< List >::type Data(DataSEXP);
+    rcpp_result_gen = Rcpp::wrap(survPred_svft_2(b, Data));
+    return rcpp_result_gen;
+END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_JMbayes_dmvnorm2", (DL_FUNC) &_JMbayes_dmvnorm2, 4},
+    {"_JMbayes_lap_rwm_C", (DL_FUNC) &_JMbayes_lap_rwm_C, 7},
+    {"_JMbayes_lap_rwm_C_woRE", (DL_FUNC) &_JMbayes_lap_rwm_C_woRE, 6},
+    {"_JMbayes_lap_rwm_C_woRE_nogammas", (DL_FUNC) &_JMbayes_lap_rwm_C_woRE_nogammas, 6},
+    {"_JMbayes_logPosterior", (DL_FUNC) &_JMbayes_logPosterior, 22},
+    {"_JMbayes_logPosterior_nogammas", (DL_FUNC) &_JMbayes_logPosterior_nogammas, 17},
+    {"_JMbayes_gradient_logPosterior", (DL_FUNC) &_JMbayes_gradient_logPosterior, 22},
+    {"_JMbayes_gradient_logPosterior_nogammas", (DL_FUNC) &_JMbayes_gradient_logPosterior_nogammas, 17},
+    {"_JMbayes_log_post_RE_svft", (DL_FUNC) &_JMbayes_log_post_RE_svft, 2},
+    {"_JMbayes_survPred_svft_2", (DL_FUNC) &_JMbayes_survPred_svft_2, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_JMbayes(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
