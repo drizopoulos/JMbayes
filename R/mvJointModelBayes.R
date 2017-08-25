@@ -648,13 +648,15 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                         length.out = length(blocks[[1L]])))
     blocks <- blocks[-1L]
     elapsed_time <- system.time({
-        cluster <- makeCluster(con$n_cores)
-        registerDoParallel(cluster)
+        #cluster <- makeCluster(con$n_cores)
+        #registerDoParallel(cluster)
+        registerDoParallel(con$n_cores)
         out1 <- foreach(i = block1, .packages = "JMbayes", .combine = c) %dopar% {
             runParallel(i, betas, b, sigmas, inv_D, inits, Data, prs, scales, Cvs, con,
                         typeSurvInf == "interval")
         }
-        stopCluster(cluster)
+        #stopCluster(cluster)
+        stopImplicitCluster()
         if (con$speed_factor < 1) {
             calc_new_scales <- function (parm) {
                 if (parm == "b") {
@@ -673,13 +675,15 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         } else {
             new_scales <- scales
         }
-        cluster <- makeCluster(con$n_cores)
-        registerDoParallel(cluster)
+        #cluster <- makeCluster(con$n_cores)
+        #registerDoParallel(cluster)
+        registerDoParallel(con$n_cores)
         out <- foreach(i = blocks, .packages = "JMbayes", .combine = c) %dopar% {
             runParallel(i, betas, b, sigmas, inv_D, inits, Data, prs, new_scales, Cvs, 
                         con, typeSurvInf == "interval")
         }
-        stopCluster(cluster)
+        #stopCluster(cluster)
+        stopImplicitCluster()
         out <- c(out1, out)
     })["elapsed"]
     # collect the results
