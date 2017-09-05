@@ -1,7 +1,7 @@
 print.survfit.JMbayes <-
 function (x, ...) {
     if (!is.null(x$success.rate)) {
-        cat("\nPrediction of Conditional Probabilities for Event\n\tbased on", 
+        cat("\nPrediction of Conditional Probabilities of Event\n\tbased on", 
             nrow(x$success.rate), "Monte Carlo samples\n\n")
     } else {
         cat("\nPrediction of Conditional Probabilities for Events\n\n")
