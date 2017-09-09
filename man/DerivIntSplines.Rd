@@ -21,10 +21,12 @@ dbs(x, df = NULL, knots = NULL, intercept = FALSE,
     Boundary.knots = range(x), eps = 1e-03)
 
 ins(x, df = NULL, knots = NULL, intercept = FALSE, 
-    Boundary.knots = range(x), from = 0, weight.fun = NULL, \dots)
+    Boundary.knots = range(x), from = 0, weight.fun = NULL, 
+    integrand.fun = NULL, \dots)
 
 ibs(x, df = NULL, knots = NULL, intercept = FALSE, 
-    Boundary.knots = range(x), from = 0, weight.fun = NULL, \dots)
+    Boundary.knots = range(x), from = 0, weight.fun = NULL, 
+    integrand.fun = NULL, \dots)
 } 
 
 \arguments{
@@ -33,6 +35,7 @@ ibs(x, df = NULL, knots = NULL, intercept = FALSE,
             calculates the derivative.}
   \item{from}{a numeric scalar denoting the lower limit of the integral.}
   \item{weight.fun}{a function to be applied as weights.}
+  \item{integrand.fun}{a function to be applied in the integrand.}
   \item{\dots}{extra arguments passed to \code{weight.fun}.}
 }
 

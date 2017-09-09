@@ -1,6 +1,6 @@
 survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id", 
-                                   last.times = NULL, M = 200L, scale = 1.6, log = FALSE, 
-                                   CI.levels = c(0.025, 0.975), seed = 1) {
+                                   last.time = NULL, M = 200L, scale = 1.6, log = FALSE, 
+                                   CI.levels = c(0.025, 0.975), seed = 1L, ...) {
     if (!inherits(object, "mvJMbayes"))
         stop("Use only with 'mvJMbayes' objects.\n")
     if (!is.data.frame(newdata) || nrow(newdata) == 0L)
@@ -65,23 +65,23 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
             na.inds2[[i]][[j]] <- unname(unlist(tmp[[i]])) 
         }
     }
-    last.times <- if (is.null(last.times)) {
+    last.time <- if (is.null(last.time)) {
         tapply(newdata[[timeVar]], idNewL, FUN = max, simplify = FALSE)
     } else {
-        rep_len(last.times, length.out = length(unique(newdata[[idVar]])))
+        rep_len(last.time, length.out = length(unique(newdata[[idVar]])))
     }
     Time <- componentsS$Time
     if (is.null(survTimes) || !is.numeric(survTimes)) {
         survTimes <- seq(min(Time), quantile(Time, probs = 0.90) + 0.01, length.out = 35L)
     }
-    times.to.pred_upper <- lapply(last.times, FUN = function (t) survTimes[survTimes > t])
+    times.to.pred_upper <- lapply(last.time, FUN = function (t) survTimes[survTimes > t])
     times.to.pred_lower <- mapply(FUN = function (t1, t2) as.numeric(c(t1, t2[-length(t2)])), 
-                                  last.times, times.to.pred_upper, SIMPLIFY = FALSE)
+                                  last.time, times.to.pred_upper, SIMPLIFY = FALSE)
     GQsurv <- if (control$GQsurv == "GaussKronrod") gaussKronrod() else gaussLegendre(control$GQsurv.k)
     wk <- GQsurv$wk
     sk <- GQsurv$sk
     K <- length(sk)
-    P <- lapply(last.times, FUN = function (x) x / 2)
+    P <- lapply(last.time, FUN = function (x) x / 2)
     P1 <- mapply(FUN = function (x, y) (x + y) / 2, times.to.pred_upper, times.to.pred_lower, SIMPLIFY = FALSE)
     P2 <- mapply(FUN = function (x, y) (x - y) / 2, times.to.pred_upper, times.to.pred_lower, SIMPLIFY = FALSE)
     GK_points_postRE <- matrix(unlist(lapply(P, FUN = function (x) outer(x, sk + 1))), 
@@ -143,7 +143,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
         ids <- rep(list(idGK), n_outcomes)
         idTs <- ids[outcome]
         newdata.i.id <- last_rows(newdata.i, idL.i)
-        newdata.i.id[[timeVar]] <- last.times[[i]]
+        newdata.i.id[[timeVar]] <- last.time[[i]]
         Us <- lapply(TermsU, function(term) {
             model.matrix(term, data = newdata.GK.postRE.i)
         })
@@ -220,7 +220,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
             ids <- rep(list(idGK), n_outcomes)
             idTs <- ids[outcome]
             newdata.i.id <- last_rows(newdata.i, idL.i)
-            newdata.i.id[[timeVar]] <- last.times[[i]]
+            newdata.i.id[[timeVar]] <- last.time[[i]]
             Us <- lapply(TermsU, function(term) {
                 model.matrix(term, data = newdata.GK.CumHaz.ij)
             })
@@ -267,13 +267,13 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
                      "Pw" = survMats.last[[i]]$Pw, "trans_Funs" = trans_Funs, 
                      "wk" = wk, 
                      "idL3" = which(survMats.last[[i]]$idGK_fast) - 1)
-        ff <- function(b, Data) -log_post_RE_svft(b, Data = Data)
-        gg <- function(b, Data) cd(b, ff, Data = Data, eps = 1e-03)
+        ff <- function (b, Data) -log_post_RE_svft(b, Data = Data)
+        gg <- function (b, Data) cd(b, ff, Data = Data, eps = 1e-03)
         start <- rep(0, ncol(D[[1]]))
         opt <- optim(start, ff, gg, Data = Data, method = "BFGS", hessian = TRUE, 
-                     control = list(parscale = rep(0.1, ncol(D[[1]]))))
+                     control = list(maxit = 200, parscale = rep(0.1, ncol(D[[1]]))))
         modes.b[i, ] <- opt$par
-        invVars.b[[i]] <- opt$hessian/scale
+        invVars.b[[i]] <- opt$hessian / scale
         Vars.b[[i]] <- scale * solve(opt$hessian)
     }
     set.seed(seed)
@@ -374,22 +374,16 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
         )
         rownames(res[[i]]) <- as.character(seq_len(NROW(res[[i]])))
     }
-    res
-    if (n.NewL > 1) {
-        y. <- sapply(y, split, id)
-    } else {
-        y. <- as.matrix(sapply(y, split, id))
-    }
-    y <- vector("list", nrow(y.))
-    for (i in 1:nrow(y.)) {
-        y[[i]] <- y.[i, ]
+    y. <- lapply(y, split, id)
+    y <- vector("list", n.NewL)
+    for (i in seq_len(n.NewL)) {
+        y[[i]] <- lapply(y., "[[", i)
     }
     newdata. <- do.call(rbind, mapply(function (d, t) {
         d. <- rbind(d, d[nrow(d), ])
         d.[[timeVar]][nrow(d.)] <- t
         d.
-    }, split(newdata, id.), last.times, SIMPLIFY = FALSE))
-    
+    }, split(newdata, id.), last.time, SIMPLIFY = FALSE))
     id. <- newdata.[[idVar]]
     id. <- match(id., unique(id.))
     mfX. <- lapply(TermsL[grep("TermsX", names(TermsL))], 
@@ -408,14 +402,15 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
             fits[[j]] <- c(X.[[j]][id_i, , drop = FALSE] %*% betas[[j]]) + 
                 rowSums(Z.[[j]][id_i, , drop = FALSE] * modes.b[rep(i, sum(id_i)), RE_inds[[j]], drop = FALSE])
         }
-        fitted.y[[i]] <- fits 
+        fitted.y[[i]] <- fits
     }
+    fitted.y <- fitted.y[!sapply(fitted.y, is.null)]
     fitted.times <- split(newdata.[[timeVar]], factor(newdata.[[idVar]]))
-    names(res) <- names(last.times) <- names(obs.times) <- names(fitted.times) <- names(y) <- names(fitted.y) <- levels(idNewL)
+    names(res) <- names(last.time) <- names(obs.times) <- names(fitted.times) <- names(y) <- names(fitted.y) <- levels(idNewL)
     y[] <- lapply(y, function (x, nam) {names(x) <- nam; x}, nam = respVars)
     fitted.y[] <- lapply(fitted.y, function (x, nam) {names(x) <- nam; x}, nam = respVars)
     names(families) <- respVars
-    res <- list(summaries = res, survTimes = survTimes, last.times = last.times, 
+    res <- list(summaries = res, survTimes = survTimes, last.time = last.time, 
                 obs.times = obs.times, y = y, M = M, families = families, respVars = respVars,
                 fitted.times = fitted.times, 
                 fitted.y = fitted.y, ry = lapply(componentsL[grep("y", names(componentsL))], FUN = range, na.rm = TRUE), 
@@ -457,7 +452,7 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL,
     xlim <- range(unlist(x$obs.times), x$survTimes)
     add_surv <- function (xaxis = TRUE, outer = TRUE) {
         summ <- x$summaries[[i]]
-        times <- c(x$last.times[[i]], summ[, "times"])
+        times <- c(x$last.time[[i]], summ[, "times"])
         surv <- c(1, summ[, "Mean"])
         low <- c(1, summ[, "Lower"])
         upp <- c(1, summ[, "Upper"])
@@ -472,7 +467,7 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL,
             lines(times, upp, lwd = lwd_lines, lty = lty_lines_CI, col = col_lines_CI)
         }
         lines(times, surv, lwd = lwd_lines, col = col_lines)
-        abline(v = x$last.times[[i]], lty = 2)
+        abline(v = x$last.time[[i]], lty = 2)
         if (xaxis) axis(1)
         axis(4)
         mtext(zlab, side = 4, line = 1.8, outer = outer)
@@ -511,7 +506,7 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL,
                 if (fact_y) axis(2, at = 0:1, labels = lvy) else axis(2)
                 if (add_xaxis <- par()$mfcol[1L] == j) axis(1)
                 lines(fitted_times, fitted_y, lwd = lwd_lines, col = col_lines)
-                abline(v = x$last.times[[i]], lty = 2)
+                abline(v = x$last.time[[i]], lty = 2)
                 mtext(ylab[j], side = 2, line = 1.8)
                 ylim <- NULL
                 if (surv_in_all) {

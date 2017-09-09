@@ -2,6 +2,7 @@
 
 \alias{survfitJM}
 \alias{survfitJM.JMbayes}
+\alias{survfitJM.mvJMbayes}
 
 \title{Prediction in Joint Models}
 
@@ -20,10 +21,16 @@ survfitJM(object, newdata, \dots)
    CI.levels = c(0.025, 0.975), log = FALSE, scale = 1.6, 
    weight = rep(1, nrow(newdata)), 
    init.b = NULL, seed = 1L, \dots)
+
+\method{survfitJM}{mvJMbayes}(object, newdata, 
+    survTimes = NULL, idVar = "id", last.time = NULL, 
+    M = 200L, scale = 1.6, log = FALSE, 
+    CI.levels = c(0.025, 0.975), seed = 1L, \dots)
 }
 
+
 \arguments{
-  \item{object}{an object inheriting from class \code{JMBayes}.}
+  \item{object}{an object inheriting from class \code{JMBayes} or \code{mvJMBayes}.}
   \item{newdata}{a data frame that contains the longitudinal and covariate information for the subjects for which prediction 
     of survival probabilities is required. The names of the variables in this data frame must be the same as in the data frames that
     were used to fit the linear mixed effects model (using \code{lme()}) and the survival model (using \code{coxph()})
@@ -133,10 +140,41 @@ for (i in 1:nrow(ND)) {
 }
 survPreds
 
+###########################################################################
+
+# Predictions from multivariate models
+
+pbc2.id$Time <- pbc2.id$years
+pbc2.id$event <- as.numeric(pbc2.id$status != "alive")
+
+# Fit the bivariate joint model
+MixedModelFit <- mvglmer(list(log(serBilir) ~ year + (year | id),
+                              spiders ~ year + (year | id)), data = pbc2,
+                         families = list(gaussian, binomial))
+
+CoxFit <- coxph(Surv(Time, event) ~ drug + age, data = pbc2.id, model = TRUE)
+
+JMFit <- mvJointModelBayes(MixedModelFit, CoxFit, timeVar = "year")
+
+# We want survival probabilities for three subjects
+ND <- pbc2[pbc2$id \%in\% c(2, 25, 81), ]
+
+sprobs <- survfitJM(JMFit, ND)
+sprobs
+
+# Basic plot
+plot(sprobs)
+
+# split in a 2 rows 2 columns and include the survival function in 
+# a separate panel; plot only the third & first subjects; change various defaults
+plot(sprobs, split = c(2, 2), surv_in_all = FALSE, which_subjects = c(3, 1),
+     lty_lines_CI = 3, col_lines = "blue", col_fill_CI = "red", 
+     col_points = "pink", pch_points = 12)
+
+###########################################################################
+
 # run Shiny app
-if (require("shiny")) {
-    shiny::runApp(file.path(.Library, "JMbayes/demo"))
-}
+runDynPred()
 }
 }
 
