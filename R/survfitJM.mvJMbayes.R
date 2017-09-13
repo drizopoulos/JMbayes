@@ -190,7 +190,15 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
         survMats.last[[i]][["idGK_fast"]] <- c(idGK[-length(idGK)] != idGK[-1L], TRUE)
         survMats.last[[i]][["idTs"]] <- idTs
         survMats.last[[i]][["Us"]] <- Us
-        survMats.last[[i]][["y_long"]] <- y_long
+        factor2numeric <- function (x) {
+            if (is.factor(x)) {
+                if (length(levels(x)) > 2){
+                    stop("Currently only binary outcomes can be considered.")
+                }
+                as.numeric(x == levels(x)[2L])
+            } else x
+        }
+        survMats.last[[i]][["y_long"]] <- lapply(y_long, factor2numeric)
         survMats.last[[i]][["Xbetas"]] <- Xbetas_postRE
         survMats.last[[i]][["Z_long"]] <- Z_long
         survMats.last[[i]][["X_long"]] <- X_long
@@ -315,7 +323,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
             invD.new <- mcmc$inv_D[m, ,] 
             Bs_gammas.new <- mcmc$Bs_gammas[m, ]
             gammas.new <- mcmc$gammas[m, ]
-            sigma.new <- mcmc$sigma1[m] # <---------------
+            sigma.new <- lapply(mcmc[grep("sigma", names(mcmc))], function (x) x[m])
             p.b <- proposed.b[[i]][m, ]
             dmvt.old <- dmvt(b.old[i, ], modes.b[i, ], invSigma = invVars.b[[i]], df = 4, log = TRUE)
             dmvt.prop <- dmvt.proposed[[i]][m]

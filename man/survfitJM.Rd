@@ -144,13 +144,16 @@ survPreds
 
 # Predictions from multivariate models
 
+pbc2 <- pbc2[!is.na(pbc2$serChol), ]
+pbc2.id <- pbc2[!duplicated(pbc2$id), ]
 pbc2.id$Time <- pbc2.id$years
 pbc2.id$event <- as.numeric(pbc2.id$status != "alive")
 
-# Fit the bivariate joint model
+# Fit a trivariate joint model
 MixedModelFit <- mvglmer(list(log(serBilir) ~ year + (year | id),
-                              spiders ~ year + (year | id)), data = pbc2,
-                         families = list(gaussian, binomial))
+                              sqrt(serChol) ~ year + (year | id),
+                              hepatomegaly ~ year + (year | id)), data = pbc2,
+                         families = list(gaussian, gaussian, binomial), engine = "STAN")
 
 CoxFit <- coxph(Surv(Time, event) ~ drug + age, data = pbc2.id, model = TRUE)
 
