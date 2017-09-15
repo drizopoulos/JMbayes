@@ -255,10 +255,21 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     }
     outcome <- match(names(Formulas), respVars)
     names(Formulas) <- names_alphas(Formulas)
+    TermsFormulas <- function (input_terms, dataOrig, which) {
+        out <- vector("list", length(input_terms))
+        for (i in seq_along(input_terms)) {
+            MF <- model.frame.default(terms(input_terms[[i]][[which]]), dataOrig)
+            out[[i]] <- terms(MF)
+        }
+        out
+    }
+    TermsFormulas_fixed <- TermsFormulas(Formulas, dataL, "fixed")
+    TermsFormulas_random <- TermsFormulas(Formulas, dataL, "random")
     build_model_matrix <- function (input_terms, dataOrig, data, which) {
         out <- vector("list", length(input_terms))
         for (i in seq_along(input_terms)) {
-            tr <- terms(input_terms[[i]][[which]], data = dataOrig)
+            MF <- model.frame.default(terms(input_terms[[i]][[which]]), dataOrig)
+            tr <- terms(MF)
             out[[i]] <- model.matrix(tr, model.frame(tr, data = data, na.action = NULL))
         }
         out
@@ -763,7 +774,9 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                     transFuns = trans_Funs,
                     mvglmer_components = components,
                     coxph_components = list(data = dataS, Terms = Terms, Time = Time, 
-                                            event = event, TermsU = TermsU),
+                                            event = event, TermsU = TermsU,
+                                            TermsFormulas_fixed = TermsFormulas_fixed,
+                                            TermsFormulas_random = TermsFormulas_random),
                     functions = list(build_model_matrix = build_model_matrix,
                                      last_rows = last_rows, right_rows = right_rows,
                                      Xbetas_calc = Xbetas_calc, 

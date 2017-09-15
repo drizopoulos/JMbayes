@@ -9,7 +9,6 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
         stop("'idVar' not in 'newdata'.\n")
     last_rows <- object$model_info$functions$last_rows
     right_rows <- object$model_info$functions$right_rows
-    build_model_matrix <- object$model_info$functions$build_model_matrix
     Xbetas_calc <- object$model_info$functions$Xbetas_calc
     designMatLong <- object$model_info$functions$designMatLong
     get_fun <- object$model_info$functions$get_fun
@@ -24,6 +23,16 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     componentsL <- object$model_info$mvglmer_components
     componentsS <- object$model_info$coxph_components
     TermsL <- componentsL[grep("Terms", names(componentsL), fixed = TRUE)]
+    TermsFormulas_fixed <- object$model_info$coxph_components$TermsFormulas_fixed
+    TermsFormulas_random <- object$model_info$coxph_components$TermsFormulas_random
+    build_model_matrix <- function (Terms, data) {
+        out <- vector("list", length(Terms))
+        for (i in seq_along(Terms)) {
+            MF <- model.frame(Terms[[i]], data = data, na.action = NULL)
+            out[[i]] <- model.matrix(Terms[[i]], MF)
+        }
+        out
+    }
     #######################################################################
     mfLna <- lapply(TermsL, FUN = model.frame.default, data = newdata)
     mfLnaNULL <- lapply(TermsL, FUN = model.frame.default, data = newdata, na.action = NULL)
@@ -72,7 +81,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     }
     Time <- componentsS$Time
     if (is.null(survTimes) || !is.numeric(survTimes)) {
-        survTimes <- seq(min(Time), quantile(Time, probs = 0.90) + 0.01, length.out = 35L)
+        survTimes <- seq(min(Time), max(Time) + 0.01, length.out = 35L)
     }
     times.to.pred_upper <- lapply(last.time, FUN = function (t) survTimes[survTimes > t])
     times.to.pred_lower <- mapply(FUN = function (t1, t2) as.numeric(c(t1, t2[-length(t2)])), 
@@ -109,7 +118,6 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
                                                           unique(newdata.GK.CumHaz[[i]][[j]][[idVar]]))
         }
     }
-    
     postMeans <- object$statistics$postMeans
     betas <- postMeans[grep("betas", names(postMeans), fixed = TRUE)] 
     sigma <- postMeans[grep("sigma", names(postMeans), fixed = TRUE)]
@@ -118,7 +126,6 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     alphas <- postMeans[grep("^alphas", names(postMeans), fixed = FALSE)]
     Bs_gammas <- postMeans[grep("^Bs.*gammas$", names(postMeans), fixed = FALSE)]
     invD <- postMeans[grep("inv_D", names(postMeans))]
-    
     Formulas <- object$model_info$Formulas
     nams_Formulas <- names(Formulas)
     nams_Formulas <- gsub("_[^_]+$", "", nams_Formulas)
@@ -170,9 +177,9 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
         for (j in seq_len(length(Z_long))) {
             Z_long[[j]] <- Z_long[[j]][na.inds2[[i]][[j]], , drop = FALSE]
         }
-        XXs <- build_model_matrix(Formulas, newdata.i, newdata.GK.postRE.i, "fixed")
+        XXs <- build_model_matrix(TermsFormulas_fixed, newdata.GK.postRE.i)
         XXsbetas <- Xbetas_calc(XXs, betas, indFixed, outcome)
-        ZZs <- build_model_matrix(Formulas, newdata.i, newdata.GK.postRE.i, "random")
+        ZZs <- build_model_matrix(TermsFormulas_random, newdata.GK.postRE.i)
         W1s <- splines::splineDesign(control$knots, GK_points_postRE[i, ], ord = control$ordSpline, outer.ok = TRUE)
         W2s <- model.matrix(formulasS, newdata.GK.postRE.i)[, -1, drop = FALSE]
         post_b_input_only <- lapply(indRandom, function(x) rbind(rep(0, max(x))))
@@ -232,9 +239,9 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
             Us <- lapply(TermsU, function(term) {
                 model.matrix(term, data = newdata.GK.CumHaz.ij)
             })
-            XXs <- build_model_matrix(Formulas, newdata.i, newdata.GK.CumHaz.ij, "fixed")
+            XXs <- build_model_matrix(TermsFormulas_fixed, newdata.GK.CumHaz.ij)
             XXsbetas <- Xbetas_calc(XXs, betas, indFixed, outcome)
-            ZZs <- build_model_matrix(Formulas, newdata.i, newdata.GK.CumHaz.ij, "random")
+            ZZs <- build_model_matrix(TermsFormulas_random, newdata.GK.CumHaz.ij)
             W1s <- splines::splineDesign(control$knots, GK_points_CumHaz[[i]][j, ], ord = control$ordSpline, outer.ok = TRUE)
             W2s <- model.matrix(formulasS, newdata.GK.CumHaz.ij)[, -1, drop = FALSE]
             post_b_input_only <- lapply(indRandom, function(x) rbind(rep(0, max(x))))
