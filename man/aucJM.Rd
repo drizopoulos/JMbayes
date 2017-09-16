@@ -3,7 +3,9 @@
 \alias{aucJM}
 \alias{rocJM}
 \alias{aucJM.JMbayes}
+\alias{aucJM.mvJMbayes}
 \alias{rocJM.JMbayes}
+\alias{rocJM.mvJMbayes}
 
 
 \title{Time-Dependent ROCs and AUCs for Joint Models}
@@ -19,14 +21,20 @@ aucJM(object, newdata, Tstart, \dots)
 \method{aucJM}{JMbayes}(object, newdata, Tstart, Thoriz = NULL, 
     Dt = NULL, idVar = "id", simulate = FALSE, M = 100, \dots)
 
+\method{aucJM}{mvJMbayes}(object, newdata, Tstart, Thoriz = NULL, 
+    Dt = NULL, idVar = "id", M = 100, \dots)
+
 rocJM(object, newdata, Tstart, \dots)
 
 \method{rocJM}{JMbayes}(object, newdata, Tstart, Thoriz = NULL, 
     Dt = NULL, idVar = "id", simulate = FALSE, M = 100, \dots)
+
+\method{rocJM}{mvJMbayes}(object, newdata, Tstart, Thoriz = NULL, 
+    Dt = NULL, idVar = "id", M = 100, \dots)
 }
 
 \arguments{
-  \item{object}{an object inheriting from class \code{JMBayes}.}
+  \item{object}{an object inheriting from class \code{JMbayes} or \code{mvJMbayes}.}
   \item{newdata}{a data frame that contains the longitudinal and covariate information for the subjects for which prediction 
     of survival probabilities is required. The names of the variables in this data frame must be the same as in the data frames that
     were used to fit the linear mixed effects model (using \code{lme()}) and the survival model (using \code{coxph()})

@@ -170,7 +170,7 @@ plot(sprobs)
 
 # split in a 2 rows 2 columns and include the survival function in 
 # a separate panel; plot only the third & first subjects; change various defaults
-plot(sprobs, split = c(2, 2), surv_in_all = FALSE, which_subjects = c(3, 1),
+plot(sprobs, split = c(3, 2), surv_in_all = FALSE, which_subjects = c(3, 1),
      lty_lines_CI = 3, col_lines = "blue", col_fill_CI = "red", 
      col_points = "pink", pch_points = 12)
 
