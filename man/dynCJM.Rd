@@ -36,7 +36,7 @@ dynCJM(object, newdata, Dt, \dots)
 
 \details{
 (\bold{Note:} The following contain some math formulas, which are better viewed in the pdf version 
-of the manual accessible at \url{http://cran.r-project.org/package=JMbayes}.)
+of the manual accessible at \url{https://cran.r-project.org/package=JMbayes}.)
 
 Function \code{dynC} computes the following discrimination index
 \deqn{\mbox{C}_{dyn}^{\Delta t} = \int_0^{t_{max}} \mbox{AUC}(t, \Delta t) \, 
