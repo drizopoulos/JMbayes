@@ -1,6 +1,6 @@
 JMbayes: Joint Models for Longitudinal and Survival Data under the Bayesian Approach
 ================
-[![CRAN status](http://www.r-pkg.org/badges/version/JMbayes)](https://cran.r-project.org/package=JMbayes) [![Download counter](http://cranlogs.r-pkg.org/badges/JMbayes)](https://cran.r-project.org/package=JMbayes)
+[![CRAN status](http://www.r-pkg.org/badges/version/JMbayes)](https://cran.r-project.org/package=JMbayes) [![](https://cranlogs.r-pkg.org/badges/grand-total/JMbayes)](https://CRAN.R-project.org/package=JMbayes) [![Download counter](http://cranlogs.r-pkg.org/badges/JMbayes)](https://cran.r-project.org/package=JMbayes)
 
 Description
 ------------
@@ -70,11 +70,15 @@ components using some pre-defined transformation function (i.e., `exp()`, `expit
 Dynamic predictions
 ------------
 
-* function `survfitJM()` computes dynamic survival probabilities.
+* Function `survfitJM()` computes dynamic survival probabilities.
 
-* function `predict()` computes dynamic predictions for the longitudinal outcome.
+* Function `predict()` computes dynamic predictions for the longitudinal outcome.
 
-* function `aucJM()` calculates time-dependent AUCs for joint models, and function 
+* Function `aucJM()` calculates time-dependent AUCs for joint models, and function 
 `rocJM()` calculates the corresponding time-dependent sensitivities and specifies.
 
-* function `prederrJM()` calculates prediction errors for joint models.
+* Function `prederrJM()` calculates prediction errors for joint models.
+
+* Function `runDynPred()` invokes a [shiny](https://shiny.rstudio.com/) application that 
+can be used to streamline the calculation of dynamic predictions for models fitted by
+**JMbayes**.
