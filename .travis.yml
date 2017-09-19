@@ -2,9 +2,13 @@
 
 language: r
 cache: packages
-sudo: false
+sudo: required
+warnings_are_errors: false
 
 r_check_args: '--as-cran --ignore-vignettes --no-examples'
+
+before_install:
+  - sudo apt-get install jags
 
 os:
   - linux
@@ -19,3 +23,9 @@ cran: http://cran.rstudio.com
 repos:
   CRAN: http://cran.rstudio.com
   
+r_packages:
+  - covr
+  - rjags
+
+after_success:
+- travis_wait 20 Rscript -e 'covr::codecov()'
