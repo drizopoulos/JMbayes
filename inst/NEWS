@@ -1,3 +1,15 @@
+Changes in version: JMbayes_0.8-66
+
+  * added function for dynamic predictions from multivariate models.
+  * new methods for aucJM(), rocJM() and prederrJM() for multivariate models.
+  * handling of interval censored data.
+  * allow for time-varying effects in the survival submodel.
+  * added a vignette in the doc/ directory for multivariate models.
+  * faster C++ implementation.
+  * corrected issues in predVars in model.frames.
+
+---------------------------------------
+
 Changes in version: JMbayes_0.8-6
 
   * extractFrames() now correctly constructs the design matrix for hierarchical centering.

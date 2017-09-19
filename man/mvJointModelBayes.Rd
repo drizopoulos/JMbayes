@@ -131,8 +131,8 @@ mvJointModelBayes(mvglmerObject, survObject, timeVar,
 }
 
 \details{
-
-** to fill in ** 
+The mathematical details regarding the definition of the multivariate joint model, and
+the capabilities of the package can be found in the vignette in the \code{doc} directory.
 }
 
 \value{
