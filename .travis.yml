@@ -24,8 +24,4 @@ repos:
   CRAN: http://cran.rstudio.com
   
 r_packages:
-  - covr
   - rjags
-
-after_success:
-- travis_wait 20 Rscript -e 'covr::codecov()'
