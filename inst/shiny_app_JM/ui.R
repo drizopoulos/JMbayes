@@ -18,7 +18,9 @@ shinyUI(fluidPage(
         ),
         
         wellPanel(
-            uiOutput("modelChoose"),            
+            uiOutput("modelChoose"),
+            
+            uiOutput("outcomeChoose"),
             
             uiOutput("obsChoose"),
                         

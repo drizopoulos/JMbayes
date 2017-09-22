@@ -34,6 +34,19 @@ shinyServer(function(input, output) {
             get(objs[input$model])
         }
     })
+    
+    output$outcomeChoose <- renderUI({
+        if (!is.null(input$RDfile) && !is.null(input$model)) {
+            object <- loadObject()
+            if (inherits(object, "mvJMbayes")) {
+                components <- object$model_info$mvglmer_components
+                outcomes <- components[grep("respVar", names(components), fixed = TRUE)]
+                names(outcomes) <- unlist(outcomes, use.names = FALSE)
+                outcomes[] <- lapply(seq_along(outcomes), function (i) i)
+                selectInput("outcome", "Choose outcome:", outcomes, outcomes[1L])
+            }
+        }
+    })
         
     dataObject <- reactive({
         if (!is.null(input$RDfile) && !is.null(input$model)) {
@@ -68,10 +81,11 @@ shinyServer(function(input, output) {
                 tt <- try(inData <- read.csv(input$patientFile$datapath, sep = input$sep, 
                                              quote=input$quote, dec = input$dec), TRUE)
                 if (!inherits(tt, "try-error")) {
-                    inData <- cbind(inData, id = rep(1, nrow(inData)))
                     f <- function (f, l) factor(f, levels = l)
                     inData[namsFactors] <- mapply(f, inData[namsFactors], 
                                                   levelsF[namsFactors], SIMPLIFY = FALSE)
+                    inData <- inData[names(inData) %in% names(d)]
+                    inData$id <- rep(1, nrow(inData))
                     inData
                 }
             }
@@ -389,13 +403,24 @@ shinyServer(function(input, output) {
                     sfits. <- sfits()
                     nn <- if(is.na(input$obs)) length(sfits.) else input$obs
                     if (input$TypePlot == "surv") {
-                        plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, fill.area = TRUE, 
-                             include.y = TRUE, lwd = 2, ask = FALSE, cex = 2, main = "")                
+                        if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
+                            plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome))
+                        } else {
+                            plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 
+                                 fill.area = TRUE, include.y = TRUE, lwd = 2, ask = FALSE, 
+                                 cex = 2, main = "")                
+                        }
                     }
                     if (input$TypePlot == "cumInc") {
-                        plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, fill.area = TRUE, 
-                             include.y = TRUE, lwd = 2, ask = FALSE, cex = 2, main = "",
-                             fun = function (s) 1 - s, ylab = "Cumulative Incidence")                
+                        if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
+                            plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome),
+                                 fun = function (s) 1 - s)
+                        } else {
+                            plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 
+                                 fill.area = TRUE, include.y = TRUE, lwd = 2, ask = FALSE,
+                                 cex = 2, main = "", fun = function (s) 1 - s, 
+                                 ylab = "Cumulative Incidence")
+                        }
                     }
                     if (!is.na(input$windowTime) || !is.na(input$time)) {
                         object <- loadObject()
