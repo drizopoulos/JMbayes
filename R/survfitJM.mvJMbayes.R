@@ -127,9 +127,9 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     Bs_gammas <- postMeans[grep("^Bs.*gammas$", names(postMeans), fixed = FALSE)]
     invD <- postMeans[grep("inv_D", names(postMeans))]
     Formulas <- object$model_info$Formulas
-    nams_Formulas <- names(Formulas)
-    nams_Formulas <- gsub("_[^_]+$", "", nams_Formulas)
-    outcome <- match(nams_Formulas, respVars)
+    #nams_Formulas <- names(Formulas)
+    #nams_Formulas <- gsub("_[^_]+$", "", nams_Formulas)
+    outcome <- sapply(respVars, grep, x = names(Formulas), fixed = TRUE)
     indFixed <- lapply(Formulas, "[[", "indFixed")
     indRandom <- lapply(Formulas, "[[", "indRandom")
     RE_inds <- object$model_info$RE_inds
@@ -282,6 +282,8 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
                      "Pw" = survMats.last[[i]]$Pw, "trans_Funs" = trans_Funs, 
                      "wk" = wk, 
                      "idL3" = which(survMats.last[[i]]$idGK_fast) - 1)
+        if (is.null(Data$gammas))
+            Data$gammas <- numeric(0)
         ff <- function (b, Data) -log_post_RE_svft(b, Data = Data)
         gg <- function (b, Data) cd(b, ff, Data = Data, eps = 1e-03)
         start <- rep(0, ncol(D[[1]]))
@@ -348,6 +350,8 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
                          "links" = links, "sigmas" = sigma.new, "invD" = invD.new, 
                          "Pw" = survMats.last[[i]]$Pw, "trans_Funs" = trans_Funs, 
                          "wk" = wk, "idL3" = which(survMats.last[[i]]$idGK_fast) - 1)
+            if (is.null(Data$gammas))
+                Data$gammas <- numeric(0)
             a <- min(exp(log_post_RE_svft(p.b, Data = Data) + dmvt.old - 
                              log_post_RE_svft(b.old[i, ], Data = Data) - dmvt.prop), 1)
             ind <- runif(1) <= a
@@ -367,6 +371,8 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
                               "gammas" = gammas.new, "alphas" = alphas.new, 
                               "Pw" = survMats[[i]][[l]][["Pw"]], "trans_Funs" = trans_Funs, 
                               "wk" = wk)
+                if (is.null(Datal$gammas))
+                    Datal$gammas <- numeric(0)
                 logS.pred[l] <- survPred_svft_2(b.new[i, ], Data = Datal)
             }
             SS[[i]] <- if (log) logS.pred else exp(cumsum(logS.pred))

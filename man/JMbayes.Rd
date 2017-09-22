@@ -18,7 +18,7 @@ provided.
 Package: \tab JMbayes\cr
 Type: \tab Package\cr
 Version: \tab 0.8-67\cr
-Date: \tab 2017-09-22\cr
+Date: \tab 2017-09-25\cr
 License: \tab GPL (>=2)\cr
 }
 
