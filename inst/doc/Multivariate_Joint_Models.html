@@ -12,7 +12,7 @@
 
 <meta name="author" content="Dimitris Rizopoulos" />
 
-<meta name="date" content="2017-09-09" />
+<meta name="date" content="2017-09-23" />
 
 <title>Multivariate Joint Models</title>
 
@@ -70,9 +70,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Multivariate Joint Models</h1>
 <h4 class="author"><em>Dimitris Rizopoulos</em></h4>
-<h4 class="date"><em>2017-09-09</em></h4>
+<h4 class="date"><em>2017-09-23</em></h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#multivariate-joint-models---theory">Multivariate Joint Models - Theory</a><ul>
+<li><a href="#joint-model-specification">Joint Model Specification</a></li>
+<li><a href="#likelihood-and-priors">Likelihood and Priors</a></li>
+</ul></li>
+<li><a href="#multivariate-joint-models---practice">Multivariate Joint Models - Practice</a><ul>
+<li><a href="#the-basic-multivariate-joint-model">The basic multivariate joint model</a></li>
+<li><a href="#different-functional-forms">Different Functional Forms</a></li>
+<li><a href="#time-varying-effects">Time-varying Effects</a></li>
+<li><a href="#left-right-and-interval-censored-data">Left, Right and Interval Censored Data</a></li>
+</ul></li>
+</ul>
+</div>
 
 <div id="multivariate-joint-models---theory" class="section level1">
 <h1>Multivariate Joint Models - Theory</h1>
@@ -154,7 +168,7 @@ CoxFit &lt;-<span class="st"> </span><span class="kw">coxph</span>(<span class="
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 4.2 min</code></pre>
+## time: 3.3 min</code></pre>
 <p>To fit a multivariate joint model for multiple longitudinal outcomes, the only thing that needs to be adapted from the procedure described above, is the call to <code>mvglmer()</code>. For example, to fit a bivariate joint model for serum bilirubin and presence of spiders, we use the syntax:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">MixedModelFit2 &lt;-<span class="st"> </span><span class="kw">mvglmer</span>(<span class="kw">list</span>(<span class="kw">log</span>(serBilir) ~<span class="st"> </span>year +<span class="st"> </span>(year |<span class="st"> </span>id),
                                spiders ~<span class="st"> </span>year +<span class="st"> </span>(<span class="dv">1</span> |<span class="st"> </span>id)), <span class="dt">data =</span> pbc2,
@@ -201,7 +215,7 @@ JMFit2 &lt;-<span class="st"> </span><span class="kw">mvJointModelBayes</span>(M
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 6.6 min</code></pre>
+## time: 5.4 min</code></pre>
 </div>
 <div id="different-functional-forms" class="section level2">
 <h2>Different Functional Forms</h2>
@@ -258,7 +272,7 @@ JMFit3 &lt;-<span class="st"> </span><span class="kw">update</span>(JMFit2, <spa
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 6.2 min</code></pre>
+## time: 5.2 min</code></pre>
 <p>We further extend the previous model by including the interactions terms between the terms specified in <code>Formulas</code> and the randomized treatment indicator drug. The names specified in the list that defined the interaction factors should match with the names of the output from <code>JMFit3</code>. Because of the many association parameters we place thre shrinkage prior on the association coefficients described above. In particular:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Ints &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="st">&quot;log(serBilir)&quot;</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug, <span class="st">&quot;log(serBilir)_slope&quot;</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug,
              <span class="st">&quot;spiders_area&quot;</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug)
@@ -318,7 +332,7 @@ JMFit4 &lt;-<span class="st"> </span><span class="kw">update</span>(JMFit3, <spa
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 7.1 min</code></pre>
+## time: 5.7 min</code></pre>
 </div>
 <div id="time-varying-effects" class="section level2">
 <h2>Time-varying Effects</h2>
@@ -436,7 +450,7 @@ pbc2.id &lt;-<span class="st"> </span>pbc2[!<span class="kw">duplicated</span>(p
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 7 min</code></pre>
+## time: 5.9 min</code></pre>
 <p>As previously formulated in the Theory Section, even if the <code>survFit</code> provided to <code>mvJointModelBayes()</code> is an AFT model, the function internally specifies a relative risk model.</p>
 </div>
 </div>
