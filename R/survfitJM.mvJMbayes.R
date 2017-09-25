@@ -458,7 +458,8 @@ print.survfit.mvJMbayes <- function (x, ...) {
 ##########################################################################################
 
 plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, which_outcomes = NULL,
-                                    surv_in_all = TRUE, include.y = TRUE, fun = NULL, 
+                                    surv_in_all = TRUE, include.y = TRUE, fun = NULL,
+                                    abline = NULL,
                                     main = NULL, xlab = "Time", ylab = NULL, 
                                     zlab = "Event-Free Probability",
                                     include_CI = TRUE, fill_area_CI = TRUE, 
@@ -495,6 +496,8 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
         }
         lines(times, surv, lwd = lwd_lines, col = col_lines)
         abline(v = x$last.time[[i]], lty = 2)
+        if (!is.null(abline))
+            abline(v = abline$v, lty = abline$lty, lwd = abline$lwd, col = abline$col)
         if (xaxis) axis(1)
         axis(4)
         mtext(zlab, side = 4, line = 1.8, outer = outer)

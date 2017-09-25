@@ -1,5 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-JSSpaper
+^JSSpaper$
 README.md
 .travis.yml

@@ -19,7 +19,8 @@
     cex.axis.z = 1, cex.lab.z = 1, xlim = NULL)
     
 \method{plot}{survfit.mvJMbayes}(x, split = c(1, 1), which_subjects = NULL, 
-    which_outcomes = NULL, surv_in_all = TRUE, include.y = TRUE, fun = NULL, 
+    which_outcomes = NULL, surv_in_all = TRUE, include.y = TRUE, fun = NULL,
+    abline = NULL,
     main = NULL, xlab = "Time", ylab = NULL, zlab = "Event-Free Probability",
     include_CI = TRUE, fill_area_CI = TRUE, col_points = "black", 
     pch_points = 1, col_lines = "red", col_lines_CI = "black", 
@@ -45,6 +46,7 @@
   \item{surv_in_all}{logical; should the survival function be included in all panels.}
   \item{fun}{a vectorized function defining a transformation of the survival curve. For 
     example, with \code{fun=log} the log-survival curve is drawn.}
+  \item{abline}{a list with arguments to \code{abline()}.}
   \item{invlink}{a function to transform the fitted values of the longitudinal outcome.}
   \item{conf.int, include_CI}{logical; if \code{TRUE}, then a pointwise confidence 
     interval is included in the plot.}
