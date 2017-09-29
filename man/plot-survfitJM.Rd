@@ -25,7 +25,8 @@
     include_CI = TRUE, fill_area_CI = TRUE, col_points = "black", 
     pch_points = 1, col_lines = "red", col_lines_CI = "black", 
     col_fill_CI = "lightgrey", lwd_lines = 2, lty_lines_CI = 2, 
-    cex_xlab = 1, cex_ylab = 1, cex_zlab = 1, cex_main = 1, \dots)
+    cex_xlab = 1, cex_ylab = 1, cex_zlab = 1, cex_main = 1, 
+    cex_axis = 1, \dots)
 }
 
 \arguments{
@@ -78,7 +79,7 @@
   \item{legend}{logical; if \code{TRUE}, a legend is included in the plot.}
   \item{cex.axis.z, cex.lab.z}{the par \code{cex} argument for the axis at side 4, 
     when \code{include.y = TRUE}.}
-  \item{cex_xlab, cex_ylab, cex_zlab, cex_main}{the par \code{cex} argument for the axis
+  \item{cex_xlab, cex_ylab, cex_zlab, cex_main, cex_axis}{the par \code{cex} argument for the axis
    in side 1 (x-axis), side 2 (y-axis), side 4 (z-axis) and the title of the plot.}
   \item{xlim}{the par \code{xlim} argument.}
   \item{\dots}{extra graphical parameters passed to \code{plot()}.}

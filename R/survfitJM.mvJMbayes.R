@@ -468,7 +468,7 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
                                     col_fill_CI = "lightgrey",
                                     lwd_lines = 2, lty_lines_CI = 2, 
                                     cex_xlab = 1, cex_ylab = 1, cex_zlab = 1, cex_main = 1,
-                                    ...) {
+                                    cex_axis = 1, ...) {
     families <- x$families
     ylim <- NULL
     respVars <- x$respVars
@@ -500,8 +500,8 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
         abline(v = x$last.time[[i]], lty = 2)
         if (!is.null(abline))
             abline(v = abline$v, lty = abline$lty, lwd = abline$lwd, col = abline$col)
-        if (xaxis) axis(1)
-        axis(4)
+        if (xaxis) axis(1, cex.axis = cex_axis)
+        axis(4, cex.axis = cex_axis)
         mtext(zlab, side = 4, line = 1.8, outer = outer, cex = cex_zlab)
     }
     if (is.null(ylab))
@@ -544,8 +544,8 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
                      type = "n")
                 box()
                 points(obs_times, y, col = col_points, pch = pch_points)
-                if (fact_y) axis(2, at = 0:1, labels = lvy) else axis(2)
-                if (add_xaxis <- par()$mfcol[1L] == j) axis(1)
+                if (fact_y) axis(2, at = 0:1, labels = lvy, cex.axis = cex_axis) else axis(2, cex.axis = cex_axis)
+                if (add_xaxis <- par()$mfcol[1L] == j) axis(1, cex.axis = cex_axis)
                 lines(fitted_times, fitted_y, lwd = lwd_lines, col = col_lines)
                 abline(v = x$last.time[[i]], lty = 2)
                 mtext(ylab[j], side = 2, line = 1.8, cex = cex_ylab)
