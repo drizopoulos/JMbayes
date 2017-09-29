@@ -466,7 +466,9 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
                                     col_points = "black", pch_points = 1,
                                     col_lines = "red", col_lines_CI = "black", 
                                     col_fill_CI = "lightgrey",
-                                    lwd_lines = 2, lty_lines_CI = 2, ...) {
+                                    lwd_lines = 2, lty_lines_CI = 2, 
+                                    cex_xlab = 1, cex_ylab = 1, cex_zlab = 1, cex_main = 1,
+                                    ...) {
     families <- x$families
     ylim <- NULL
     respVars <- x$respVars
@@ -500,7 +502,7 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
             abline(v = abline$v, lty = abline$lty, lwd = abline$lwd, col = abline$col)
         if (xaxis) axis(1)
         axis(4)
-        mtext(zlab, side = 4, line = 1.8, outer = outer)
+        mtext(zlab, side = 4, line = 1.8, outer = outer, cex = cex_zlab)
     }
     if (is.null(ylab))
         ylab <- respVars
@@ -546,15 +548,15 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
                 if (add_xaxis <- par()$mfcol[1L] == j) axis(1)
                 lines(fitted_times, fitted_y, lwd = lwd_lines, col = col_lines)
                 abline(v = x$last.time[[i]], lty = 2)
-                mtext(ylab[j], side = 2, line = 1.8)
+                mtext(ylab[j], side = 2, line = 1.8, cex = cex_ylab)
                 ylim <- NULL
                 if (surv_in_all) {
                     par(new = TRUE)
                     add_surv(add_xaxis)
                 }
                 if (added_xlab <- all(par()$mfcol == c(1, 1))) {
-                    mtext(xlab, side = 1, line = 1.5, outer = TRUE)
-                    mtext(main[i], side = 3, line = 0.8, outer = TRUE)
+                    mtext(xlab, side = 1, line = 1.5, outer = TRUE, cex = cex_xlab)
+                    mtext(main[i], side = 3, line = 0.8, outer = TRUE, cex = cex_main)
                 }
             }
         }
@@ -562,8 +564,8 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
             add_surv(outer = FALSE)
         }
         if (!include.y || !added_xlab) {
-            mtext(xlab, side = 1,line = 1.5, outer = TRUE)
-            mtext(main[i], side = 3, line = 0.8, outer = TRUE)
+            mtext(xlab, side = 1,line = 1.5, outer = TRUE, cex = cex_xlab)
+            mtext(main[i], side = 3, line = 0.8, outer = TRUE, cex = cex_main)
         }
         par(opar)
     }

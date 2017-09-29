@@ -402,40 +402,42 @@ shinyServer(function(input, output) {
                 } else {
                     sfits. <- sfits()
                     nn <- if(is.na(input$obs)) length(sfits.) else input$obs
-                    if (input$TypePlot == "surv") {
-                        if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
-                            plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome))
-                        } else {
-                            plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 
-                                 fill.area = TRUE, include.y = TRUE, lwd = 2, ask = FALSE, 
-                                 cex = 2, main = "")                
-                        }
-                    }
-                    if (input$TypePlot == "cumInc") {
-                        if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
-                            plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome),
-                                 fun = function (s) 1 - s)
-                        } else {
-                            plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 
-                                 fill.area = TRUE, include.y = TRUE, lwd = 2, ask = FALSE,
-                                 cex = 2, main = "", fun = function (s) 1 - s, 
-                                 ylab = "Cumulative Incidence")
-                        }
-                    }
-                    if (!is.na(input$windowTime) || !is.na(input$time)) {
+                    target.time <- if (!is.na(input$windowTime) || !is.na(input$time)) {
                         object <- loadObject()
                         nd <- ND()
                         nr <- nrow(nd)
                         lastTimeUser <- input$lasttime
                         timeVar <- if (inherits(object, "JMbayes")) object$timeVar else object$model_info$timeVar
                         lastTimeData <- max(nd[1:nn, timeVar])
-                        target.time <- if (nn == nr && !is.na(lastTimeUser) && 
-                                               lastTimeUser > lastTimeData) {
+                        if (nn == nr && !is.na(lastTimeUser) && lastTimeUser > lastTimeData) {
                             if (!is.na(input$windowTime)) lastTimeUser + input$windowTime else input$time
                         } else {
                             if (!is.na(input$windowTime)) lastTimeData + input$windowTime else input$time
                         }
-                        abline(v = target.time, lty = 2, col = 2, lwd = 2)
+                    } else -10
+                    if (input$TypePlot == "surv") {
+                        if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
+                            plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome),
+                                 abline = list(v = target.time, lty = 2, col = 2, lwd = 2))
+                        } else {
+                            plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 
+                                 fill.area = TRUE, include.y = TRUE, lwd = 2, ask = FALSE, 
+                                 cex = 2, main = "")
+                            abline(v = target.time, lty = 2, col = 2, lwd = 2)
+                        }
+                    }
+                    if (input$TypePlot == "cumInc") {
+                        if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
+                            plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome),
+                                 fun = function (s) 1 - s, zlab = "Cumulative Incidence",
+                                 abline = list(v = target.time, lty = 2, col = 2, lwd = 2))
+                        } else {
+                            plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 
+                                 fill.area = TRUE, include.y = TRUE, lwd = 2, ask = FALSE,
+                                 cex = 2, main = "", fun = function (s) 1 - s, 
+                                 ylab = "Cumulative Incidence")
+                            abline(v = target.time, lty = 2, col = 2, lwd = 2)
+                        }
                     }
                 }
             } else {
