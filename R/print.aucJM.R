@@ -2,7 +2,7 @@ print.aucJM <-
 function (x, digits = 4, ...) {
     if (!inherits(x, "aucJM"))
         stop("Use only with 'aucJM' objects.\n")
-    if (x$class == "JMbayes") 
+    if (x$class == "JMbayes" || x$class == "mvJMbayes") 
         cat("\n\tTime-dependent AUC for the Joint Model",  x$nameObject)
     else
         cat("\n\tTime-dependent AUC for the Cox Model",  x$nameObject)
