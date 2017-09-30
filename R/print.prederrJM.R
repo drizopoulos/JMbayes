@@ -2,7 +2,7 @@ print.prederrJM <-
 function (x, digits = 4, ...) {
     if (!inherits(x, "prederrJM"))
         stop("Use only with 'prederrJM' objects.\n")
-    if (x$class == "JMbayes" || x$class == "jointModel" || x$class == "mvJMbayes")
+    if (x$classObject == "JMbayes" || x$classObject == "mvJMbayes")
         cat("\nPrediction Error for the Joint Model", x$nameObject)
     else
         cat("\nPrediction Error for the Cox model", x$nameObject)
