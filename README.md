@@ -90,7 +90,7 @@ Vignettes are available in the `doc` directory:
 * [Multivariate_Joint_Models.html](http://www.drizopoulos.com/vignettes/multivariate%20joint%20models) illustrates the
 basic capabilities of `mvJointModelBayes()`.
 
-* [Dynamic_Predictions.html](www.drizopoulos.com/vignettes/dynamic_predictions) illustrates how dynamic 
+* [Dynamic_Predictions.html](http://www.drizopoulos.com/vignettes/dynamic_predictions) illustrates how dynamic 
 predictions from multivariate joint models can be computed and evaluated.
 
 
