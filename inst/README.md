@@ -87,10 +87,10 @@ Vignettes
 ------------
 Vignettes are available in the `inst/doc` directory:
 
-* [Multivariate_Joint_Models.html](inst/doc/Multivariate_Joint_Models.html) illustrates the
+* [Multivariate_Joint_Models.html](./doc/Multivariate_Joint_Models.html) illustrates the
 basic capabilities of `mvJointModelBayes()`.
 
-* [Dynamic_Predictions.html](inst/doc/Dynamic_Predictions.html) illustrates how dynamic 
+* [Dynamic_Predictions.html](./doc/Dynamic_Predictions.html) illustrates how dynamic 
 predictions from multivariate joint models can be computed and evaluated.
 
 
