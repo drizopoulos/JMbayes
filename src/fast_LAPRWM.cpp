@@ -1138,7 +1138,7 @@ List lap_rwm_C_woRE_nogammas (List initials, List Data, List priors, List scales
     int total_it = n_iter + n_burnin;
     int its = ceil((double)total_it/n_block);
     int n_out = floor((double)n_iter/n_thin);
-    int start_cov_update = floor(n_burnin / n_block) - 1;
+    int start_cov_update = floor((double)n_burnin / n_block) - 1;
     uvec keep = seqC(n_burnin + 1, total_it, n_thin);
     // initial
     int n_Bs_gammas = Bs_gammas.n_rows;
