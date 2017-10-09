@@ -48,7 +48,7 @@ predict_eventTime.mvJMbayes <- function (object, newdata, cut_points, idVar = "i
         stop("'predict_eventTime()' currently works for a single subject in 'newdata'.\n")
     Time <- object$model_info$coxph_components$Time
     max_Time <- max(Time)
-    last_time <- max(ND[[object$model_info$timeVar]])
+    last_time <- max(newdata[[object$model_info$timeVar]])
     sfit <- survfitJM(object, newdata = ND, M = M, idVar = idVar,
                       survTimes = seq(last_time, max_Time, length.out = 225))
     sfit <- sfit$summaries[[1]][, c('times', 'Mean')]

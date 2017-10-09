@@ -47,6 +47,25 @@ shinyServer(function(input, output) {
             }
         }
     })
+    
+    load_cutpoints <- reactive({
+        if (!is.null(input$RDfile)) {
+            inFile <- input$RDfile
+            load(inFile$datapath)
+            objs <- ls()
+            if (any(which <- sapply(objs, function (o) class(get(o))) == "ROC_cutoff"))
+                get(objs[which])
+        }
+    })
+    
+    output$predictEventTime <- renderUI({
+        if (!is.null(input$RDfile)) {
+            inFile <- input$RDfile
+            load(inFile$datapath)
+            if (any(sapply(ls(), function (o) class(get(o))) == "ROC_cutoff"))
+                actionButton("predictEvent", label = "Predict Event Time", "success")
+        }
+    })
         
     dataObject <- reactive({
         if (!is.null(input$RDfile) && !is.null(input$model)) {
@@ -366,6 +385,21 @@ shinyServer(function(input, output) {
         sprobs()
     })
     
+    show_predEvent <- reactiveValues(show = FALSE)
+    
+    observeEvent(input$predictEvent, {
+        show_predEvent$show <- TRUE
+    })
+    
+   predictedTime <- reactive({
+        if (show_predEvent$show) {
+            object <- loadObject()
+            nd <- ND()
+            cpoints <- load_cutpoints()
+            predict_eventTime(object, nd, cpoints)
+        }
+    })
+    
     output$plot <- renderPlot({
         if (!is.null(input$patientFile)) {
             if (input$TypePlot != 'longitudinal') {
@@ -415,6 +449,10 @@ shinyServer(function(input, output) {
                             if (!is.na(input$windowTime)) lastTimeData + input$windowTime else input$time
                         }
                     } else -10
+                    if (show_predEvent$show) {
+                        pdEvTime <- predictedTime()
+                        target.time <- c(target.time, pdEvTime)
+                    }
                     if (input$TypePlot == "surv") {
                         if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
                             plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome),

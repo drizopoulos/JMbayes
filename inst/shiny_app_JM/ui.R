@@ -18,6 +18,10 @@ shinyUI(fluidPage(
         ),
         
         wellPanel(
+            uiOutput("predictEventTime")
+        ),
+        
+        wellPanel(
             uiOutput("modelChoose"),
             
             uiOutput("outcomeChoose"),
@@ -32,7 +36,6 @@ shinyUI(fluidPage(
                      column(4, numericInput("windowTime", "Target window time:", NULL)),
                      column(4,  numericInput("time", "Target horizon time:", NULL))),
             
-                  
             uiOutput("lastTime"),
             
             numericInput("M", "Monte Carlo samples:", 200),
