@@ -1,3 +1,11 @@
+Changes in version: JMbayes_0.8-6899
+
+  * corrected floor ambiguity in C++.
+  * added number of false positives and false negatives, as well as F1 score and Youden in
+  rocJM().
+
+---------------------------------------
+
 Changes in version: JMbayes_0.8-68
 
   * vignette in doc/ directory for dynamic predictions.

@@ -1,6 +1,7 @@
 JMbayes: Joint Models for Longitudinal and Survival Data under the Bayesian Approach
 ================
 [![Travis-CI Build Status](https://travis-ci.org/drizopoulos/JMbayes.svg?branch=master)](https://travis-ci.org/drizopoulos/JMbayes) [![CRAN status](http://www.r-pkg.org/badges/version/JMbayes)](https://cran.r-project.org/package=JMbayes) [![](https://cranlogs.r-pkg.org/badges/grand-total/JMbayes)](https://CRAN.R-project.org/package=JMbayes) [![Download counter](http://cranlogs.r-pkg.org/badges/JMbayes)](https://cran.r-project.org/package=JMbayes)
+[![Research software impact](http://depsy.org/api/package/cran/JMbayes/badge.svg)](http://depsy.org/package/r/JMbayes)
 
 Description
 ------------

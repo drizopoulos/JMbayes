@@ -68,8 +68,12 @@ rocJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
     }
     # calculate sensitivity and specificity
     thrs <- seq(0, 1, length = 101)
-    TP <- colSums(outer(pi.u.t, thrs, "<") * c(ind)) / sum(ind)
-    FP <- colSums(outer(pi.u.t, thrs, "<") * c(1 - ind)) / sum(1 - ind)
+    nTP <- colSums(outer(pi.u.t, thrs, "<") * c(ind)) 
+    nFN <- sum(ind) - nTP
+    TP <- nTP / sum(ind)
+    nFP <- colSums(outer(pi.u.t, thrs, "<") * c(1 - ind)) 
+    nTN <- sum(1 - ind) - nFP
+    FP <- nFP / sum(1 - ind)
     Q <- colMeans(outer(pi.u.t, thrs, "<"))
     Q. <- 1 - Q
     k.1.0 <- (TP - Q) / Q.
@@ -77,8 +81,12 @@ rocJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
     P <- mean(ind)
     P. <- 1 - P
     k.05.0 <- (P * Q. * k.1.0 + P. * Q * k.0.0) / (P * Q. + P. * Q)
-    out <- list(TP = TP, FP = FP, qSN = k.1.0, qSP = k.0.0, qOverall = k.05.0, 
+    F1score <- thrs[which.max(2 * nTP / (2 * nTP + nFN + nFP))]
+    Youden <- thrs[which.max(TP - FP)]
+    out <- list(TP = TP, FP = FP, nTP = nTP, nFN = nFN, nFP = nFP, nTN = nTN,
+                qSN = k.1.0, qSP = k.0.0, qOverall = k.05.0, 
                 thrs = thrs, 
+                F1score = F1score, Youden = Youden,
                 Tstart = Tstart, Thoriz = Thoriz, nr = length(unique(id)), 
                 classObject = class(object), nameObject = deparse(substitute(object)))
     class(out) <- "rocJM"
