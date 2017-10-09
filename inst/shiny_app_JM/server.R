@@ -59,14 +59,14 @@ shinyServer(function(input, output) {
     })
     
     output$predictEventTime <- renderUI({
-        if (!is.null(input$RDfile)) {
+        if (!is.null(input$RDfile) && !is.null(input$patientFile)) {
             inFile <- input$RDfile
             load(inFile$datapath)
             if (any(sapply(ls(), function (o) class(get(o))) == "ROC_cutoff"))
                 actionButton("predictEvent", label = "Predict Event Time", "success")
         }
     })
-        
+
     dataObject <- reactive({
         if (!is.null(input$RDfile) && !is.null(input$model)) {
             object <- loadObject()
@@ -449,19 +449,23 @@ shinyServer(function(input, output) {
                             if (!is.na(input$windowTime)) lastTimeData + input$windowTime else input$time
                         }
                     } else -10
+                    attr(target.time, "col") <- "red"
                     if (show_predEvent$show) {
                         pdEvTime <- predictedTime()
                         target.time <- c(target.time, pdEvTime)
+                        attr(target.time, "col") <- c("red", "blue")
                     }
                     if (input$TypePlot == "surv") {
                         if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
                             plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome),
-                                 abline = list(v = target.time, lty = 2, col = 2, lwd = 2))
+                                 abline = list(v = target.time, lty = 2, lwd = 2,
+                                               col = attr(target.time, "col")))
                         } else {
                             plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 
                                  fill.area = TRUE, include.y = TRUE, lwd = 2, ask = FALSE, 
                                  cex = 2, main = "")
-                            abline(v = target.time, lty = 2, col = 2, lwd = 2)
+                            abline(v = target.time, lty = 2, lwd = 2,
+                                   col = attr(target.time, "col"))
                         }
                     }
                     if (input$TypePlot == "cumInc") {
