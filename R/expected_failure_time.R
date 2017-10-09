@@ -33,5 +33,3 @@ expectedCondFailureTime <- function (object, newdata, idVar = "id", last.time = 
     means
 }
 
-
-expectedCondFailureTime(JMFit, pbc2[pbc2$id %in% c(81), ])
