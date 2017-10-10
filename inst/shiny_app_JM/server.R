@@ -400,6 +400,13 @@ shinyServer(function(input, output) {
         }
     })
     
+   
+   output$ws <- renderPrint({
+       if (!is.null(input$patientFile)) {
+           includeHTML("white_space.Rhtml")
+       }
+   })
+   
     output$plot <- renderPlot({
         if (!is.null(input$patientFile)) {
             if (input$TypePlot != 'longitudinal') {

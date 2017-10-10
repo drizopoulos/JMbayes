@@ -50,7 +50,7 @@ shinyUI(fluidPage(
         tabsetPanel(
             tabPanel("Data", tableOutput('contents'), uiOutput("message")),
             tabPanel("Event-free Probabilities", tableOutput('survprobs'), uiOutput("message2")),
-            tabPanel("Plot", plotOutput('plot')),
+            tabPanel("Plot", htmlOutput('ws'), plotOutput('plot')),
             tabPanel("Help", htmlOutput('help'))
         )
     )
