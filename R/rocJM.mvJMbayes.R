@@ -80,8 +80,10 @@ rocJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
     P <- mean(ind)
     P. <- 1 - P
     k.05.0 <- (P * Q. * k.1.0 + P. * Q * k.0.0) / (P * Q. + P. * Q)
-    F1score <- thrs[which.max(2 * nTP / (2 * nTP + nFN + nFP))]
-    Youden <- thrs[which.max(TP - FP)]
+    f1score <- 2 * nTP / (2 * nTP + nFN + nFP)
+    F1score <- median(thrs[f1score == max(f1score)])
+    youden <- TP - FP
+    Youden <- median(thrs[youden == max(youden)])
     out <- list(TP = TP, FP = FP, nTP = nTP, nFN = nFN, nFP = nFP, nTN = nTN,
                 qSN = k.1.0, qSP = k.0.0, qOverall = k.05.0, 
                 thrs = thrs, 
