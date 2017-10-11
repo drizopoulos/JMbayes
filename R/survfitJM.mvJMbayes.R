@@ -573,9 +573,12 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
         if (!include.y || !surv_in_all) {
             add_surv(outer = FALSE)
         }
-        if (!include.y || !added_xlab || length(which_outcomes) == 1) {
+        if ((!include.y || !added_xlab)) {
             mtext(xlab, side = 1,line = 1.5, outer = TRUE, cex = cex_xlab)
             mtext(main[i], side = 3, line = 0.8, outer = TRUE, cex = cex_main)
+        }
+        if (length(valid_outcomes) == 1) {
+            axis(1, cex.axis = cex_axis)
         }
         par(opar)
     }
