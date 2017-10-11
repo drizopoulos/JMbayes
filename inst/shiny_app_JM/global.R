@@ -1,7 +1,7 @@
 library("shiny")
 library("JMbayes")
 library("splines")
-options(shiny.maxRequestSize = 1000*1024^2)
+options(shiny.maxRequestSize = 3000*1024^2)
 
 actionButton <- function (inputId, label, style = "" , additionalClass = "") {
     if (style %in% c("primary","info","success","warning","danger","inverse","link")) {

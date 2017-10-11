@@ -129,7 +129,17 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     Formulas <- object$model_info$Formulas
     #nams_Formulas <- names(Formulas)
     #nams_Formulas <- gsub("_[^_]+$", "", nams_Formulas)
-    outcome <- sapply(respVars, grep, x = names(Formulas), fixed = TRUE)
+    #outcome <- match(nams_Formulas, respVars)
+    #outcome <- sapply(respVars, grep, x = names(Formulas), fixed = TRUE)
+    find_outcome <- function (nams_Formulas, repsVars) {
+        out <- numeric(length(nams_Formulas))
+        for (i in seq_along(respVars)) {
+            ind <- grep(respVars[i], nams_Formulas, fixed = TRUE)
+            out[ind] <- i
+        }
+        out
+    }
+    outcome <- find_outcome(names(Formulas), respVars)
     indFixed <- lapply(Formulas, "[[", "indFixed")
     indRandom <- lapply(Formulas, "[[", "indRandom")
     RE_inds <- object$model_info$RE_inds
