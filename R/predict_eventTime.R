@@ -14,7 +14,7 @@ find_thresholds.mvJMbayes <- function (object, newdata, Dt, idVar = "id", M = 20
     event <- object$model_info$coxph_components$event
     nevents <- sum(event)
     ss <- seq(0, 1, length.out = floor(nevents / 20) + 2)
-    times <- quantile(Time[event == 1], probs = tail(head(ss, -1), -1))
+    times <- quantile(Time[event == 1 | event == 3], probs = tail(head(ss, -1), -1))
     do_roc <- function (i, object, newdata, times, Dt, idVar, M) {
         roc <- rocJM(object, newdata = newdata, Tstart = times[i], Dt = Dt, 
                      idVar = idVar, M = M)
