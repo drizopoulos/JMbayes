@@ -2,8 +2,9 @@ find_thresholds <- function (object, newdata, Dt, ...) {
     UseMethod("find_thresholds")
 }
 
-find_thresholds.mvJMbayes <- function (object, newdata, Dt, idVar = "id", M = 200L, 
-                             n_cores =  max(1, parallel::detectCores() - 2), ...) {
+find_thresholds.mvJMbayes <- function (object, newdata, Dt, idVar = "id", M = 200L,
+                                       variability_threshold = NULL,
+                                       n_cores =  max(1, parallel::detectCores() - 2), ...) {
     if (!inherits(object, "mvJMbayes"))
         stop("Use only with 'mvJMbayes' objects.\n")
     if (!is.data.frame(newdata) || nrow(newdata) == 0L)
@@ -28,6 +29,9 @@ find_thresholds.mvJMbayes <- function (object, newdata, Dt, idVar = "id", M = 20
     out <- cbind(times, out)
     colnames(out) <- c("times", "F1score", "Youden")
     rownames(out) <- NULL
+    if (is.null(variability_threshold))
+        variability_threshold <- quantile(Time, 0.25)
+    out <- list(cut_points = out, variability_threshold = variability_threshold)
     class(out) <- "ROC_cutoff"
     out
 }
@@ -57,9 +61,10 @@ predict_eventTime.mvJMbayes <- function (object, newdata, cut_points, idVar = "i
     }
     low_time <- extract_time(sfit, 1 - low_percentile)
     median_time <- extract_time(sfit, 0.5)
-    if (median_time - low_time < quantile(Time, 0.25)) {
+    if (median_time - low_time < cut_points$variability_threshold) {
         median_time
     } else {
+        cpoints <- cut_points$cut_points
         cut_last_time <- cut_points[which.min(abs(cut_points[, 1] - last_time)), 2]
         extract_time(sfit, cut_last_time)
     }

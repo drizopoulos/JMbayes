@@ -111,6 +111,13 @@ shinyServer(function(input, output) {
         }
     })
     
+    ND_all <- reactive({
+        if (!is.null(input$RDfile) && !is.null(input$model) && !is.null(input$patientFile)) {
+            read.csv(input$patientFile$datapath, sep = input$sep, 
+                     quote=input$quote, dec = input$dec)[-1]
+        }
+    })
+    
     output$obsChoose <- renderUI({
         if (!is.null(input$patientFile)) {
             nr <- nrow(ND())
@@ -344,13 +351,9 @@ shinyServer(function(input, output) {
     
     output$contents <- renderTable({
         if (!is.null(input$RDfile)) {
-            nd <- ND()
             if (!is.null(input$patientFile)) {
-                tt <- try(nd[, head(1:ncol(nd), -1)], TRUE)
-                if (!inherits(tt, "try-error"))
-                    nd <- tt
+                ND_all()
             }
-            nd
         }
     })
     

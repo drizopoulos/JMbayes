@@ -6,6 +6,8 @@
 \alias{aucJM.mvJMbayes}
 \alias{rocJM.JMbayes}
 \alias{rocJM.mvJMbayes}
+\alias{find_thresholds}
+\alias{predict_eventTime}
 
 
 \title{Time-Dependent ROCs and AUCs for Joint Models}
@@ -40,7 +42,8 @@ predict_eventTime(object, newdata, cutpoints, \dots)
 find_thresholds(object, newdata, Dt, \dots)
 
 \method{find_thresholds}{mvJMbayes}(object, newdata, Dt, idVar = "id", 
-    M = 200L, n_cores =  max(1, parallel::detectCores() - 2), \ldots)
+    M = 200L, variability_threshold = NULL,
+    n_cores =  max(1, parallel::detectCores() - 2), \ldots)
 }
 
 \arguments{
@@ -61,6 +64,9 @@ find_thresholds(object, newdata, Dt, \dots)
   \item{M}{a numeric scalar denoting the number of Monte Carlo samples; see \code{\link{survfitJM}} for mote details.}
   \item{cut_points}{a numeric matrix with first column time-points followed by other columns of 
   optimal cut-points from an ROC curve.}
+  \item{variability_threshold}{numeric value denoting the treshold in the spread of the 
+  posterior distribution calculated from the 2.5\% percentile to the median. Default is
+  the 25\% percentile of the event times distribution.}
   \item{low_percentile}{a numeric value indicating the percentile based on which it will
   be judged whether the spread of the posterior predictive distribution is too large.}
   \item{n_cores}{an integer indicating the number of cores to use for parallel computing.}
