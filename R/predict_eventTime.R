@@ -65,7 +65,7 @@ predict_eventTime.mvJMbayes <- function (object, newdata, cut_points, idVar = "i
         median_time
     } else {
         cpoints <- cut_points$cut_points
-        cut_last_time <- cut_points[which.min(abs(cut_points[, 1] - last_time)), 2]
+        cut_last_time <- cpoints[which.min(abs(cpoints[, 1] - last_time)), 2]
         extract_time(sfit, cut_last_time)
     }
 }
