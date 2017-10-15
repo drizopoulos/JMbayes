@@ -510,7 +510,7 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
         abline(v = x$last.time[[i]], lty = 2)
         if (!is.null(abline)) {
             abline(v = abline$v, lty = abline$lty, lwd = abline$lwd, col = abline$col)
-            if (xaxis) axis(1, at = abline$v, col = abline$col, cex = cex_axis)
+            if (xaxis) axis(1, at = round(abline$v, 1), cex = cex_axis)
         }
         if (xaxis) axis(1, cex.axis = cex_axis)
         axis(4, cex.axis = cex_axis)
@@ -582,7 +582,7 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
         if (length(valid_outcomes) == 1) {
             axis(1, cex.axis = cex_axis)
             if (!is.null(abline)) 
-                axis(1, at = abline$v, col = abline$col, cex = cex_axis)
+                axis(1, at = round(abline$v, 1), cex = cex_axis)
         }
         par(opar)
     }
