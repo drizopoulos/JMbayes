@@ -18,8 +18,14 @@ rocJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
     TermsT <- object$model_info$coxph_components$Terms
     SurvT <- model.response(model.frame(TermsT, newdata)) 
     is_counting <- attr(SurvT, "type") == "counting"
+    is_interval <- attr(SurvT, "type") == "interval"
     Time <- if (is_counting) {
         ave(SurvT[, 2], id, FUN = function (x) tail(x, 1))
+    } else if (is_interval) {
+        Time1 <- SurvT[, "time1"]
+        Time2 <- SurvT[, "time2"]
+        Time <- Time1
+        Time[Time2 != 1] <- Time2[Time2 != 1]
     } else {
         SurvT[, 1]
     }
@@ -41,7 +47,14 @@ rocJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
         f <- factor(id, levels = unique(id))
         Time <- tapply(SurvT[, 2], f, tail, 1)
         event <- tapply(SurvT[, 3], f, tail, 1)
-    } else{
+    } else if (is_interval) {
+        Time1 <- SurvT[, "time1"]
+        Time2 <- SurvT[, "time2"]
+        Time <- Time1
+        Time[Time2 != 1] <- Time2[Time2 != 1]
+        Time <- Time[!duplicated(id)]
+        event <- SurvT[!duplicated(id), "status"]
+    } else {
         Time <- SurvT[!duplicated(id), 1]
         event <- SurvT[!duplicated(id), 2]
     }

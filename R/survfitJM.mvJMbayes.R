@@ -411,9 +411,11 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
         y[[i]] <- lapply(y., "[[", i)
     }
     newdata. <- do.call(rbind, mapply(function (d, t) {
-        d. <- rbind(d, d[nrow(d), ])
-        d.[[timeVar]][nrow(d.)] <- t
-        d.
+        if (d[[timeVar]][nrow(d)] < t) {
+            d. <- rbind(d, d[nrow(d), ])
+            d.[[timeVar]][nrow(d.)] <- t
+            d.
+        } else d
     }, split(newdata, id.), last.time, SIMPLIFY = FALSE))
     id. <- newdata.[[idVar]]
     id. <- match(id., unique(id.))
