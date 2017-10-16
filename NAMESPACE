@@ -24,7 +24,7 @@ importFrom("stats", "acf", "ar", "as.formula", "ave", "bw.SJ", "coef",
   "model.matrix.default", "model.response", "optim", "pnorm", "pt", "qt", 
   "quantile", "rWishart", "rchisq", "reformulate", "rexp", "rgamma", 
   "rnorm", "rt", "runif", "sd", "terms", "var", "vcov", "makepredictcall",
-  "model.offset", "complete.cases", ".getXlevels", "cov.wt", "terms.formula")
+  "model.offset", "complete.cases", ".getXlevels", "cov.wt", "terms.formula", "integrate")
 importFrom("utils", "as.relistable", "combn", "glob2rx", "head", "relist", 
   "setTxtProgressBar", "tail", "txtProgressBar", "object.size")
 importFrom("Rcpp", "evalCpp")

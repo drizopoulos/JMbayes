@@ -7,7 +7,9 @@
 \alias{rocJM.JMbayes}
 \alias{rocJM.mvJMbayes}
 \alias{find_thresholds}
+\alias{find_thresholds.mvJMbayes}
 \alias{predict_eventTime}
+\alias{predict_eventTime.mvJMbayes}
 
 
 \title{Time-Dependent ROCs and AUCs for Joint Models}
@@ -34,7 +36,7 @@ rocJM(object, newdata, Tstart, \dots)
 \method{rocJM}{mvJMbayes}(object, newdata, Tstart, Thoriz = NULL, 
     Dt = NULL, idVar = "id", M = 100, \dots)
     
-predict_eventTime(object, newdata, cutpoints, \dots)
+predict_eventTime(object, newdata, cut_points, \dots)
 
 \method{predict_eventTime}{mvJMbayes}(object, newdata, cut_points, 
     idVar = "id", M = 500L, low_percentile = 0.025, \ldots)

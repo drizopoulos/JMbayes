@@ -63,7 +63,7 @@ shinyServer(function(input, output) {
             inFile <- input$RDfile
             load(inFile$datapath)
             if (any(sapply(ls(), function (o) class(get(o))) == "ROC_cutoff"))
-                actionButton("predictEvent", label = "Predict Event Time", "success")
+                actionButton("predictEvent", label = "Plan Next Visit", "success")
         }
     })
 

@@ -21,8 +21,9 @@ find_thresholds.mvJMbayes <- function (object, newdata, Dt, idVar = "id", M = 20
                      idVar = idVar, M = M)
         c("F1score" = roc$F1score, "Youden" = roc$Youden)
     }
+    block <- seq_along(times)
     registerDoParallel(n_cores)
-    out <- foreach(i = seq_along(times), .packages = "JMbayes", .combine = rbind) %dopar% {
+    out <- foreach(i = block, .packages = "JMbayes", .combine = rbind) %dopar% {
         do_roc(i, object, newdata, times, Dt, idVar, M)
     }
     stopImplicitCluster()
@@ -36,7 +37,7 @@ find_thresholds.mvJMbayes <- function (object, newdata, Dt, idVar = "id", M = 20
     out
 }
 
-predict_eventTime <- function (object, newdata, cutpoints, ...) {
+predict_eventTime <- function (object, newdata, cut_points, ...) {
     UseMethod("predict_eventTime")
 }
 
