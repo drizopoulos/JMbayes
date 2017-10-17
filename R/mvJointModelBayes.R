@@ -9,7 +9,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 knots = NULL, ObsTimes.knots = TRUE,
                 lng.in.kn = 15L, ordSpline = 4L, diff = 2L, speed_factor = 0.6,
                 GQsurv = "GaussKronrod", GQsurv.k = 15L, seed = 1L,
-                n_cores = max(1, parallel::detectCores() - 1), update_RE = TRUE)
+                n_cores = max(1, parallel::detectCores() - 1), update_RE = TRUE,
+                light = FALSE)
     control <- c(control, list(...))
     namC <- names(con)
     con[(namc <- names(control))] <- control
@@ -784,6 +785,9 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                      get_fun = get_fun)
                 ),
                 control = con)
+    if (con$light) {
+        res$mcmc[["b"]] <- NULL
+    }
     class(res) <- "mvJMbayes"
     res
 }
