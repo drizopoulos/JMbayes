@@ -478,7 +478,7 @@ shinyServer(function(input, output) {
                                 surv_in_all <- TRUE
                             }
                             plot(sfits.[[nn]], split = sp, surv_in_all = surv_in_all,
-                                 which_outcomes = as.numeric(input$outcome),
+                                 which_outcomes = as.numeric(input$outcome), main = "",
                                  abline = list(v = target.time, lty = 2, lwd = 2,
                                                col = attr(target.time, "col")))
                         } else {
@@ -493,6 +493,7 @@ shinyServer(function(input, output) {
                         if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
                             plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome),
                                  fun = function (s) 1 - s, zlab = "Cumulative Incidence",
+                                 main = "",
                                  abline = list(v = target.time, lty = 2, col = 2, lwd = 2))
                         } else {
                             plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 

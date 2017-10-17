@@ -1,8 +1,9 @@
-Changes in version: JMbayes_0.8-6899
+Changes in version: JMbayes_0.8-69
 
   * corrected floor ambiguity in C++.
   * added number of false positives and false negatives, as well as F1 score and Youden in
   rocJM().
+  * several updates in the shiny app.
 
 ---------------------------------------
 
