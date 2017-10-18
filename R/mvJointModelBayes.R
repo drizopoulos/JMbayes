@@ -120,10 +120,6 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         stop("variable '", timeVar, "' not in the data.frame extracted from 'mvglmerObject'.\n")
     }
     dataL <- dataL[order(dataL[[idVar]], dataL[[timeVar]]), ]
-    last_rows <- function (data, ids) {
-        fidVar <- factor(ids, levels = unique(ids))
-        data[tapply(row.names(data), fidVar, tail, n = 1L), ]
-    }
     dataL.id <- last_rows(dataL, dataL[[idVar]])
     dataL.id[[timeVar]] <- Time
     if (typeSurvInf == "interval") {
@@ -134,14 +130,6 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     # for the specified Gaussian quadrature points use the rows from the original
     # longitudinal data set that correspond to these points; this is to account for
     # time-varying covariates in the longitudinal submodel
-    right_rows <- function (data, times, ids, Q_points) {
-        fids <- factor(ids, levels = unique(ids))
-        ind <- mapply(findInterval, split(Q_points, row(Q_points)), split(times, fids))
-        ind[ind < 1] <- 1
-        rownams_id <- split(row.names(data), fids)
-        ind <- mapply(`[`, rownams_id, split(ind, col(ind)))
-        data[c(ind), ]
-    }
     dataL.id2 <- right_rows(dataL, dataL[[timeVar]], dataL[[idVar]], st)
     dataL.id2[[timeVar]] <- c(t(st))
     if (typeSurvInf == "interval") {
@@ -266,15 +254,6 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     }
     TermsFormulas_fixed <- TermsFormulas(Formulas, dataL, "fixed")
     TermsFormulas_random <- TermsFormulas(Formulas, dataL, "random")
-    build_model_matrix <- function (input_terms, dataOrig, data, which) {
-        out <- vector("list", length(input_terms))
-        for (i in seq_along(input_terms)) {
-            MF <- model.frame.default(terms(input_terms[[i]][[which]]), dataOrig)
-            tr <- terms(MF)
-            out[[i]] <- model.matrix(tr, model.frame(tr, data = data, na.action = NULL))
-        }
-        out
-    }
     XX <- build_model_matrix(Formulas, dataL, dataL.id, "fixed")
     XXs <- build_model_matrix(Formulas, dataL, dataL.id2, "fixed")
     ZZ <- build_model_matrix(Formulas, dataL, dataL.id, "random")
@@ -356,47 +335,6 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     indRandom <- lapply(Formulas, "[[", "indRandom")
     RE_inds2 <- mapply(function (ind, select) ind[select], RE_inds[outcome], indRandom,
                        SIMPLIFY = FALSE)
-    Xbetas_calc <- function (X, betas, index = NULL, outcome) {
-        n <- length(X)
-        out <- vector("list", n)
-        for (i in seq_len(n)) {
-            out[[i]] <- if (is.null(index)) {
-                c(X[[i]] %*% betas[[i]])
-            } else {
-                betas_i <- betas[[outcome[i]]]
-                c(X[[i]] %*% betas_i[index[[i]]])
-            }
-        }
-        out
-    }
-    get_fun <- function (f) {
-        if (f == "identity") {
-            function (x) x 
-        } else if (f == "expit") {
-            function (x) exp(x) / (1 + exp(x))
-        } else get(f, mode = "function")
-    }
-    designMatLong <- function (X, betas, Z, b, id, outcome, indFixed, indRandom, U,
-                               trans_Funs) {
-        n <- length(X)
-        cols <- sapply(U, ncol)
-        cols_inds <- cbind(c(1, head(cumsum(cols) + 1, -1)), cumsum(cols))
-        n_out <- sum(cols)
-        col_inds_out <- vector("list", n)
-        out <- matrix(0, nrow(X[[1]]), n_out)
-        for (i in seq_len(n)) {
-            ii <- outcome[i]
-            iii <- col_inds_out[[i]] <- seq(cols_inds[i, 1], cols_inds[i, 2])
-            X_i <- X[[i]]
-            betas_i <- betas[[ii]][indFixed[[i]]]
-            Z_i <- Z[[i]]
-            b_i <- as.matrix(b[[ii]])[id[[ii]], indRandom[[i]], drop = FALSE]
-            Fun <- get_fun(trans_Funs[i])
-            out[, iii] <- U[[i]] * Fun(c(X_i %*% betas_i) + rowSums(Z_i * b_i))
-        }
-        attr(out, "col_inds") <- col_inds_out
-        out
-    }
     postMean_betas <- lapply(betas, colMeans, na.rm = TRUE)
     postMean_b <- lapply(b, function (m) apply(m, 2:3, mean, na.rm = TRUE))
     postMean_inv_D <- lapply(inv_D, function (m) apply(m, 2:3, mean, na.rm = TRUE))
@@ -777,12 +715,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                     coxph_components = list(data = dataS, Terms = Terms, Time = Time, 
                                             event = event, TermsU = TermsU,
                                             TermsFormulas_fixed = TermsFormulas_fixed,
-                                            TermsFormulas_random = TermsFormulas_random),
-                    functions = list(build_model_matrix = build_model_matrix,
-                                     last_rows = last_rows, right_rows = right_rows,
-                                     Xbetas_calc = Xbetas_calc, 
-                                     designMatLong = designMatLong,
-                                     get_fun = get_fun)
+                                            TermsFormulas_random = TermsFormulas_random)
                 ),
                 control = con)
     if (con$light) {
