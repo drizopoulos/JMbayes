@@ -23,6 +23,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     }
     dataS <- survObject$model
     Terms <- attr(dataS, "terms")
+    environment(Terms) <- NULL
     SurvInf <- model.response(dataS)
     typeSurvInf <- attr(SurvInf, "type")
     TimeVar <- all.vars(Terms)[1L]

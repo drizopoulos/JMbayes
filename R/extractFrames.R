@@ -66,6 +66,7 @@ extractFrames <- function (formula, data) {
             model.matrix(formYx, model.frame(TermsX, data = data.id))
         }
     }
+    environment(TermsX) <- environment(TermsZ) <- NULL
     # extract results
     list(N = nrow(Z), n = length(unique(id)), idVar = idVar, respVar = respVar,
          id = id, y = y, X = X, Z = Z, TermsX = TermsX,
