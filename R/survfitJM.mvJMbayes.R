@@ -18,6 +18,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     componentsL <- object$model_info$mvglmer_components
     componentsS <- object$model_info$coxph_components
     TermsL <- componentsL[grep("Terms", names(componentsL), fixed = TRUE)]
+    TermsL <- lapply(TermsL, function (x) {environment(x) <- .GlobalEnv; x})
     TermsFormulas_fixed <- object$model_info$coxph_components$TermsFormulas_fixed
     TermsFormulas_random <- object$model_info$coxph_components$TermsFormulas_random
     build_model_matrix <- function (Terms, data) {

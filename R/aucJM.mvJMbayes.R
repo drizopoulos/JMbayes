@@ -16,6 +16,7 @@ aucJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
     id <- newdata[[idVar]]
     id <- match(id, unique(id))
     TermsT <- object$model_info$coxph_components$Terms
+    environment(TermsT) <- .GlobalEnv
     SurvT <- model.response(model.frame(TermsT, newdata)) 
     is_counting <- attr(SurvT, "type") == "counting"
     Time <- if (is_counting) {
