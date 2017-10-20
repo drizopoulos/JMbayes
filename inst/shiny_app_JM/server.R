@@ -124,7 +124,7 @@ shinyServer(function(input, output) {
             if (!is.null(nr) && nr > 1) {
                 sliderInput("obs", "Number of observations to use in prediction:", 
                             min = 1, max = nr, value = 1, step = 1,
-                            animate = animationOptions(loop = TRUE))
+                            animate = animationOptions(loop = FALSE))
             }
         }
     })
@@ -135,8 +135,14 @@ shinyServer(function(input, output) {
             nd <- ND()
             times <- if (inherits(object, "JMbayes")) nd[[object$timeVar]] else nd[[object$model_info$timeVar]]
             if (!is.null(times))
-                numericInput("lasttime", "Last time point without event:", 
-                             round(max(times, na.rm = TRUE), 2))
+                numericInput("lasttime", "Last time point without event:", value = NA)
+        }
+    })
+    
+    output$ForceAfter <- renderUI({
+        if (!is.null(input$patientFile)) {
+            checkboxInput("force_after", label = "User time after last data time", 
+                          value = FALSE)
         }
     })
     
@@ -291,13 +297,16 @@ shinyServer(function(input, output) {
             object <- loadObject()
             nd <- ND()
             n <- nrow(nd)
+            timeVar <- if (inherits(object, "JMbayes")) object$timeVar else object$model_info$timeVar
             lastTimeUser <- input$lasttime
-            lastTimeData <- if (inherits(object, "JMbayes")) max(nd[[object$timeVar]]) 
-            else max(nd[[object$model_info$timeVar]])
             sfits <- vector("list", n)
             for (i in 1:n) {
-                lt <- if (i == n && !is.na(lastTimeUser)) 
-                    lastTimeUser else NULL
+                lastTimeData <- max(nd[1:i, timeVar])
+                #lt <- if (i == n && !is.na(lastTimeUser)) 
+                #    lastTimeUser else NULL
+                lt <- if (is.na(lastTimeUser)) lastTimeData else {
+                    if (input$force_after) lastTimeUser else min(lastTimeUser, lastTimeData)
+                }
                 sfits[[i]] <- survfitJM(object, newdata = nd[1:i, ], M = input$M, 
                                         last.time = lt)
             }
@@ -310,13 +319,16 @@ shinyServer(function(input, output) {
             object <- loadObject()
             nd <- ND()
             n <- nrow(nd)
+            timeVar <- if (inherits(object, "JMbayes")) object$timeVar else object$model_info$timeVar
             lastTimeUser <- input$lasttime
-            lastTimeData <- if (inherits(object, "JMbayes")) max(nd[[object$timeVar]]) 
-            else max(nd[[object$model_info$timeVar]])
             lfits <- vector("list", n)
             for (i in 1:n) {
-                lt <- if (i == n && !is.na(lastTimeUser)) 
-                    lastTimeUser else NULL
+                lastTimeData <- max(nd[1:i, timeVar])
+                #lt <- if (i == n && !is.na(lastTimeUser)) 
+                #    lastTimeUser else NULL
+                lt <- if (is.na(lastTimeUser)) lastTimeData else {
+                    if (input$force_after) lastTimeUser else min(lastTimeUser, lastTimeData)
+                }
                 lfits[[i]] <- predict(object, newdata = nd[1:i, ], M = input$M, 
                                       returnData = TRUE, type = "Subject", 
                                       interval = "prediction", last.time = lt)
@@ -330,14 +342,17 @@ shinyServer(function(input, output) {
             object <- loadObject()
             nd <- ND()
             n <- nrow(nd)
+            timeVar <- if (inherits(object, "JMbayes")) object$timeVar else object$model_info$timeVar
             lastTimeUser <- input$lasttime
             sfits <- vector("list", n)
             for (i in 1:n) {
-                timeVar <- if (inherits(object, "JMbayes")) object$timeVar else object$model_info$timeVar
                 lastTimeData <- max(nd[1:i, timeVar])
                 target.time <- if (!is.na(input$windowTime)) lastTimeData + input$windowTime else input$time
-                lt <- if (i == n && !is.na(lastTimeUser)) 
-                    lastTimeUser else NULL
+                #lt <- if (i == n && !is.na(lastTimeUser)) 
+                #    lastTimeUser else NULL
+                lt <- if (is.na(lastTimeUser)) lastTimeData else {
+                    if (input$force_after) lastTimeUser else min(lastTimeUser, lastTimeData)
+                }
                 if (i == n && !is.na(lastTimeUser) && !is.na(input$windowTime))
                     target.time <- lastTimeUser + input$windowTime
                 if (target.time > lastTimeData)
@@ -470,7 +485,7 @@ shinyServer(function(input, output) {
                     }
                     if (input$TypePlot == "surv") {
                         if (inherits(sfits.[[nn]], "survfit.mvJMbayes")) {
-                            if (lastTimeUser < lastTimeData) {
+                            if (!is.na(lastTimeUser) && lastTimeUser < lastTimeData) {
                                 sp <- c(2, 1) 
                                 surv_in_all <- FALSE
                             } else {
@@ -494,13 +509,15 @@ shinyServer(function(input, output) {
                             plot(sfits.[[nn]], which_outcomes = as.numeric(input$outcome),
                                  fun = function (s) 1 - s, zlab = "Cumulative Incidence",
                                  main = "",
-                                 abline = list(v = target.time, lty = 2, col = 2, lwd = 2))
+                                 abline = list(v = target.time, lty = 2, lwd = 2,
+                                               col = attr(target.time, "col")))
                         } else {
                             plot(sfits.[[nn]], estimator = "mean", conf.int = TRUE, 
                                  fill.area = TRUE, include.y = TRUE, lwd = 2, ask = FALSE,
                                  cex = 2, main = "", fun = function (s) 1 - s, 
                                  ylab = "Cumulative Incidence")
-                            abline(v = target.time, lty = 2, col = 2, lwd = 2)
+                            abline(v = target.time, lty = 2, lwd = 2,
+                                   col = attr(target.time, "col"))
                         }
                     }
                 }

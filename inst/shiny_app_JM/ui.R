@@ -36,7 +36,9 @@ shinyUI(fluidPage(
                      column(4, numericInput("windowTime", "Target window time:", NULL)),
                      column(4,  numericInput("time", "Target horizon time:", NULL))),
             
-            uiOutput("lastTime"),
+            
+            fluidRow(column(4, uiOutput("lastTime")),
+                     column(4, uiOutput("ForceAfter"))),
             
             numericInput("M", "Monte Carlo samples:", 200),
                    
