@@ -519,9 +519,9 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 indFixed <- data$indFixed
                 indRandom <- data$indRandom
                 data$Wlong <- designMatLong(data$XX, betas., data$ZZ, b., data$idT,
-                                            outcome, indFixed, indRandom, data$U)
+                                            outcome, indFixed, indRandom, data$U, trans_Funs)
                 data$Wlongs <- designMatLong(data$XXs, betas., data$ZZs, b., data$idTs,
-                                             outcome, indFixed, indRandom, data$Us)
+                                             outcome, indFixed, indRandom, data$Us, trans_Funs)
                 data$event_colSumsWlong <- colSums(data$event * data$Wlong)
                 LogLiks[i] <- marglogLik2(inits_Laplace, data, priors)
                 oo <- if (any_gammas) {
