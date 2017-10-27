@@ -210,13 +210,13 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
         }
     }
     # fix names
-    pat <- paste0("^X", paste(rep("[0-9]", nchar(as.character(n_outcomes))), collapse = ""))
-    Xnams <- lapply(components[grep(pat, names(components))], colnames)
+    #pat <- paste0("^X", paste(rep("[0-9]", nchar(as.character(n_outcomes))), collapse = ""))
+    Xnams <- lapply(components[grep("^X[0-9]", names(components))], colnames)
     for (i in seq_along(Xnams)) {
         colnames(out$mcmc[[paste0("betas", i)]]) <- Xnams[[i]]
     }
-    pat <- paste0("^Z", paste(rep("[0-9]", nchar(as.character(n_outcomes))), collapse = ""))
-    Znams <- lapply(components[grep(pat, names(components))], colnames)
+    #pat <- paste0("^Z", paste(rep("[0-9]", nchar(as.character(n_outcomes))), collapse = ""))
+    Znams <- lapply(components[grep("^Z[0-9]", names(components))], colnames)
     Znams <- unlist(mapply(paste0, Znams, seq_len(n_outcomes), SIMPLIFY = FALSE))
     dimnames(out$mcmc$D) <- dimnames(out$mcmc$inv_D) <- list(NULL, Znams, Znams)
     dimnames(out$mcmc$b) <- list(NULL, NULL, Znams)
