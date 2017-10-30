@@ -1,6 +1,6 @@
 Package: JMbayes
 Title: Joint Modeling of Longitudinal and Time-to-Event Data under a Bayesian Approach
-Version: 0.8-7
+Version: 0.8-70
 Date: 2017-10-30
 Author: Dimitris Rizopoulos <d.rizopoulos@erasmusmc.nl>
 Maintainer: Dimitris Rizopoulos <d.rizopoulos@erasmusmc.nl>
