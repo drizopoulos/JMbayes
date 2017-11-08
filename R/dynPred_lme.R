@@ -22,6 +22,7 @@ extract_lmeComponents <- function (lmeObject, timeVar) {
 
 IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
                           interval = c("confidence", "prediction"),
+                          all_times = FALSE,
                           level = 0.95, return_data = FALSE, seed = 1L) {
     if (!inherits(lmeObject, "lme") && !inherits(lmeObject, "lmeComponents"))
         stop("Use only with 'lme' or 'lmeComponents' objects.\n")
@@ -86,7 +87,8 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
     }
     newdata_pred <- newdata[tapply(row.names(newdata), id, tail, n = 1), ]
     last_time <- newdata_pred[[timeVar]]
-    times_to_pred <- lapply(last_time, function (t) times[times > t])
+    times_to_pred <- lapply(last_time, function (t) 
+        if (all_times) times else times[times > t])
     id_pred <- rep(seq_len(n), sapply(times_to_pred, length))
     newdata_pred <- newdata_pred[id_pred, ]
     newdata_pred[[timeVar]] <- unlist(times_to_pred)

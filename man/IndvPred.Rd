@@ -11,8 +11,8 @@
 
 \usage{
 IndvPred_lme(lmeObject, newdata, timeVar, times = NULL, M = 200L,
-    interval = c("confidence", "prediction"), level = 0.95, 
-    return_data = FALSE, seed = 1L)
+    interval = c("confidence", "prediction"), all_times = FALSE,
+    level = 0.95, return_data = FALSE, seed = 1L)
     
 extract_lmeComponents(lmeObject, timeVar)
 }
@@ -23,6 +23,8 @@ extract_lmeComponents(lmeObject, timeVar)
   \item{timeVar}{a character string specifying the time variable in the linear mixed 
         model.}
   \item{interval}{a character string indicating what type of intervals should be computed.}
+  \item{all_times}{logical; should predictions be calculated at all \code{times} or only 
+  at the ones that are after the last observed time of each subject.}
   \item{level}{a numeric scalar denoting the tolerance/confidence level.}
   \item{times}{a numeric vector denoting the time points for which we wish to compute the 
         subject-specific predictions after the last available measurement provided in 
