@@ -19,8 +19,14 @@ aucJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
     environment(TermsT) <- .GlobalEnv
     SurvT <- model.response(model.frame(TermsT, newdata)) 
     is_counting <- attr(SurvT, "type") == "counting"
+    is_interval <- attr(SurvT, "type") == "interval"
     Time <- if (is_counting) {
         ave(SurvT[, 2], id, FUN = function (x) tail(x, 1))
+    } else if (is_interval) {
+        Time1 <- SurvT[, "time1"]
+        Time2 <- SurvT[, "time2"]
+        Time <- Time1
+        Time[Time2 != 1] <- Time2[Time2 != 1]
     } else {
         SurvT[, 1]
     }
@@ -43,7 +49,14 @@ aucJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
         f <- factor(id, levels = unique(id))
         Time <- tapply(SurvT[, 2], f, tail, 1)
         event <- tapply(SurvT[, 3], f, tail, 1)
-    } else{
+    } else if (is_interval) {
+        Time1 <- SurvT[, "time1"]
+        Time2 <- SurvT[, "time2"]
+        Time <- Time1
+        Time[Time2 != 1] <- Time2[Time2 != 1]
+        Time <- Time[!duplicated(id)]
+        event <- SurvT[!duplicated(id), "status"]
+    } else {
         Time <- SurvT[!duplicated(id), 1]
         event <- SurvT[!duplicated(id), 2]
     }
@@ -61,10 +74,10 @@ aucJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
         dj <- event[pairs[2, ]]
         pi.u.t.i <- pi.u.t[pairs[1, ]]
         pi.u.t.j <- pi.u.t[pairs[2, ]]
-        ind1 <- (Ti <= Thoriz & di == 1) & Tj > Thoriz
-        ind2 <- (Ti <= Thoriz & di == 0) & Tj > Thoriz
-        ind3 <- (Ti <= Thoriz & di == 1) & (Tj <= Thoriz & dj == 0)
-        ind4 <- (Ti <= Thoriz & di == 0) & (Tj <= Thoriz & dj == 0)
+        ind1 <- (Ti <= Thoriz & (di == 1 | di == 3)) & Tj > Thoriz
+        ind2 <- (Ti <= Thoriz & (di == 0 | di == 2)) & Tj > Thoriz
+        ind3 <- (Ti <= Thoriz & (di == 1 | di == 3)) & (Tj <= Thoriz & (dj == 0 | dj == 2))
+        ind4 <- (Ti <= Thoriz & (di == 0 | di == 2)) & (Tj <= Thoriz & (dj == 0 | dj == 2))
         names(ind1) <- names(ind2) <- names(ind3) <- names(ind4) <- paste(names(Ti), names(Tj), sep = "_")
         ind <- ind1 | ind2 | ind3 | ind4
         if (any(ind2)) {

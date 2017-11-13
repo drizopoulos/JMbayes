@@ -19,27 +19,40 @@ prederrJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz, lossFun = c("s
     environment(TermsT) <- .GlobalEnv
     SurvT <- model.response(model.frame(TermsT, newdata)) 
     is_counting <- attr(SurvT, "type") == "counting"
+    is_interval <- attr(SurvT, "type") == "interval"
     Time <- if (is_counting) {
         ave(SurvT[, 2], id, FUN = function (x) tail(x, 1))
+    } else if (is_interval) {
+        Time1 <- SurvT[, "time1"]
+        Time2 <- SurvT[, "time2"]
+        Time <- Time1
+        Time[Time2 != 1] <- Time2[Time2 != 1]
     } else {
         SurvT[, 1]
     }
     timeVar <- object$model_info$timeVar
     newdata2 <- newdata[Time > Tstart, ]
+    id2 <- newdata2[[idVar]]
     SurvT <- model.response(model.frame(TermsT, newdata2))
     if (is_counting) {
-        id2 <- newdata2[[idVar]]
         f <- factor(id2, levels = unique(id2))
-        Time <- ave(SurvT[, 2], f, FUN = function (x) tail(x, 1))
-        delta <- ave(SurvT[, 3], f, FUN = function (x) tail(x, 1))
+        Time <- tapply(SurvT[, 2], f, tail, 1)
+        event <- tapply(SurvT[, 3], f, tail, 1)
+    } else if (is_interval) {
+        Time1 <- SurvT[, "time1"]
+        Time2 <- SurvT[, "time2"]
+        Time <- Time1
+        Time[Time2 != 1] <- Time2[Time2 != 1]
+        Time <- Time[!duplicated(id2)]
+        event <- SurvT[!duplicated(id2), "status"]
     } else {
-        Time <- SurvT[, 1]
-        delta <- SurvT[, 2]
+        Time <- SurvT[!duplicated(id2), 1]
+        event <- SurvT[!duplicated(id2), 2]
     }
     timesInd <- newdata2[[timeVar]] <= Tstart
     aliveThoriz <- newdata2[Time > Thoriz & timesInd, ]
     deadThoriz <- newdata2[Time <= Thoriz & (delta == 1 | delta == 3) & timesInd, ]
-    indCens <- Time < Thoriz & delta == 0 & timesInd
+    indCens <- Time < Thoriz & (delta == 0 | delta == 2) & timesInd
     censThoriz <- newdata2[indCens, ]
     nr <- length(unique(newdata2[[idVar]]))
     idalive <- unique(aliveThoriz[[idVar]])
