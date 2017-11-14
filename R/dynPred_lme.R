@@ -54,22 +54,26 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
         V <- lmeObject$V
         times_orig <- lmeObject$times_orig
     }
-    mfX_new <- model.frame(TermsX, data = newdata)
+    # drop missing values from newdata
+    all_vars <- unique(c(all.vars(TermsX), all.vars(TermsZ)))
+    newdata_nomiss <- newdata[complete.cases(newdata[all_vars]), ]
+    mfX_new <- model.frame(TermsX, data = newdata_nomiss)
     X_new <- model.matrix(formYx, mfX_new)
-    mfZ_new <- model.frame(TermsZ, data = newdata)
+    mfZ_new <- model.frame(TermsZ, data = newdata_nomiss)
     Z_new <- model.matrix(formYz, mfZ_new)
+    na_ind <- attr(mfX_new, "na.action")
     y_new <- model.response(mfX_new, "numeric")
     if (length(idVar) > 1)
         stop("the current version of the function only works with a single grouping variable.\n")
     if (is.null(newdata[[idVar]]))
         stop("subject id variable not in newdata.")
-    id <- match(newdata[[idVar]], unique(newdata[[idVar]]))
-    n <- length(unique(id))
+    id_nomiss <- match(newdata_nomiss[[idVar]], unique(newdata_nomiss[[idVar]]))
+    n <- length(unique(id_nomiss))
     ######################################################################################
     modes <- matrix(0.0, n, ncol(Z_new))
     post_vars <- DZtVinv <- vector("list", n)
     for (i in seq_len(n)) {
-        id_i <- id == i
+        id_i <- id_nomiss == i
         X_new_id <- X_new[id_i, , drop = FALSE]
         Z_new_id <- Z_new[id_i, , drop = FALSE]
         Vi_inv <- solve(Z_new_id %*% tcrossprod(D, Z_new_id) + sigma^2 * diag(sum(id_i)))
@@ -80,11 +84,12 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
             crossprod(X_new_id, Vi_inv) %*% Z_new_id %*% D
         post_vars[[i]] <- D - t1 + t2
     }
-    fitted_y <- c(X_new %*% betas) + rowSums(Z_new * modes[id, , drop = FALSE])
+    fitted_y <- c(X_new %*% betas) + rowSums(Z_new * modes[id_nomiss, , drop = FALSE])
     ######################################################################################
     if (is.null(times) || !is.numeric(times)) {
         times <- seq(min(times_orig), max(times_orig), length.out = 100)
     }
+    id <- match(newdata[[idVar]], unique(newdata[[idVar]]))
     newdata_pred <- newdata[tapply(row.names(newdata), id, tail, n = 1), ]
     last_time <- newdata_pred[[timeVar]]
     times_to_pred <- lapply(last_time, function (t) 
@@ -101,7 +106,7 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
     set.seed(seed)
     betas_M <- MASS::mvrnorm(M, betas, V)
     modes_fun <- function (betas) {
-        t(mapply("%*%", DZtVinv, split(y_new - X_new %*% betas, id)))
+        t(mapply("%*%", DZtVinv, split(y_new - X_new %*% betas, id_nomiss)))
     }
     modes_M <- lapply(split(betas_M, row(betas_M)), modes_fun)
     matrix_row <- function (m, i) m[i, , drop = FALSE]
@@ -118,7 +123,7 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
         mean_m <- c(X_new_pred %*% betas_m) + 
             rowSums(Z_new_pred * b_m[id_pred, , drop = FALSE])
         sampled_y[, m] <- if (interval == "confidence") mean_m 
-            else rnorm(n_pred, mean_m, lmeObject$sigma)
+        else rnorm(n_pred, mean_m, lmeObject$sigma)
     }
     low <- apply(sampled_y, 1, quantile, probs = (1 - level) / 2)
     upp <- apply(sampled_y, 1, quantile, probs = 1 - (1 - level) / 2)
