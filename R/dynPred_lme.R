@@ -97,9 +97,9 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
     id_pred <- rep(seq_len(n), sapply(times_to_pred, length))
     newdata_pred <- newdata_pred[id_pred, ]
     newdata_pred[[timeVar]] <- unlist(times_to_pred)
-    mfX_new_pred <- model.frame(TermsX, data = newdata_pred)
+    mfX_new_pred <- model.frame(TermsX, data = newdata_pred, na.action = NULL)
     X_new_pred <- model.matrix(formYx, mfX_new_pred)
-    mfZ_new_pred <- model.frame(TermsZ, data = newdata_pred)
+    mfZ_new_pred <- model.frame(TermsZ, data = newdata_pred, na.action = NULL)
     Z_new_pred <- model.matrix(formYz, mfZ_new_pred)
     predicted_y <- c(X_new_pred %*% betas) + 
         rowSums(Z_new_pred * modes[id_pred, , drop = FALSE])
@@ -113,7 +113,7 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
     modes_M <- lapply(seq_len(n), function (i) t(sapply(modes_M, matrix_row, i = i)))
     b_M <- modes_M
     for (i in seq_len(n)) {
-        b_M[[i]] <- t(apply(modes_M[[i]], 1, mvrnorm, n = 1, Sigma = post_vars[[i]]))
+        b_M[[i]] <- t(apply(modes_M[[i]], 1, MASS::mvrnorm, n = 1, Sigma = post_vars[[i]]))
     }
     n_pred <- length(predicted_y)
     sampled_y <- matrix(0.0, n_pred, M)
