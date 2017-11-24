@@ -27,6 +27,7 @@ rocJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
         Time2 <- SurvT[, "time2"]
         Time <- Time1
         Time[Time2 != 1] <- Time2[Time2 != 1]
+        Time
     } else {
         SurvT[, 1]
     }
