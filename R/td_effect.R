@@ -9,7 +9,7 @@ tve <- function (x, df = NULL, knots = NULL, ord = 3) {
         dx <- (max_x - min_x) / df
         knots <- seq(min_x - (ord-1) * dx, max_x + (ord-1) * dx, by = dx)
     }
-    out <- splineDesign(knots, x, ord = ord)
+    out <- splines::splineDesign(knots, x, ord = ord, outer.ok = TRUE)
     attr(out, 'knots') <- knots
     attr(out, 'ord') <- ord
     attr(out, "class") <- c("tve", "basis", "matrix")
