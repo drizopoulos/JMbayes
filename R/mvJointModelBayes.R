@@ -282,11 +282,11 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     Interactions <- c(Interactions, Interactions_ns)
     Interactions <- Interactions[order(match(names(Interactions), names(Formulas)))]
     Interactions <- Interactions[!sapply(Interactions, is.null)]
-    Interactions <- lapply(Interactions, function (x) {environment(x) <- NULL; x})
     TermsU <- lapply(Interactions, function (form) {
         MF <- model.frame.default(terms(form), data = dataLS.id)
         terms(MF)
     })
+    Interactions <- lapply(Interactions, function (x) {environment(x) <- NULL; x})
     U <- lapply(TermsU, function (term) {
         model.matrix(term, data = dataLS.id)
     })
