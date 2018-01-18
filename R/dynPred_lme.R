@@ -90,12 +90,12 @@ IndvPred_lme <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
         times <- seq(min(times_orig), max(times_orig), length.out = 100)
     }
     id <- match(newdata[[idVar]], unique(newdata[[idVar]]))
-    newdata_pred <- newdata[tapply(row.names(newdata), id, tail, n = 1), ]
-    last_time <- newdata_pred[[timeVar]]
+    last_time <- tapply(newdata[[timeVar]], id, max)
     times_to_pred <- lapply(last_time, function (t) 
         if (all_times) times else times[times > t])
     id_pred <- rep(seq_len(n), sapply(times_to_pred, length))
-    newdata_pred <- newdata_pred[id_pred, ]
+    #newdata_pred <- newdata_pred[id_pred, ]
+    newdata_pred <- right_rows(newdata, newdata[[timeVar]], id, times_to_pred)
     newdata_pred[[timeVar]] <- unlist(times_to_pred)
     mfX_new_pred <- model.frame(TermsX, data = newdata_pred, na.action = NULL)
     X_new_pred <- model.matrix(formYx, mfX_new_pred)

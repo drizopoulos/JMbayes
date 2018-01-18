@@ -15,7 +15,9 @@ last_rows <- function (data, ids) {
 
 right_rows <- function (data, times, ids, Q_points) {
     fids <- factor(ids, levels = unique(ids))
-    ind <- mapply(findInterval, split(Q_points, row(Q_points)), split(times, fids))
+    if (!is.list(Q_points))
+        Q_points <- split(Q_points, row(Q_points))
+    ind <- mapply(findInterval, Q_points, split(times, fids))
     ind[ind < 1] <- 1
     rownams_id <- split(row.names(data), fids)
     ind <- mapply(`[`, rownams_id, split(ind, col(ind)))
