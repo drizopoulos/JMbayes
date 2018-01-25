@@ -52,8 +52,8 @@ prederrJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz, lossFun = c("s
     }
     timesInd <- newdata2[[timeVar]] <= Tstart
     aliveThoriz <- newdata2[Time > Thoriz & timesInd, ]
-    deadThoriz <- newdata2[Time <= Thoriz & (delta == 1 | delta == 3) & timesInd, ]
-    indCens <- Time < Thoriz & (delta == 0 | delta == 2) & timesInd
+    deadThoriz <- newdata2[Time <= Thoriz & (event == 1 | event == 3) & timesInd, ]
+    indCens <- Time < Thoriz & (event == 0 | event == 2) & timesInd
     censThoriz <- newdata2[indCens, ]
     nr <- length(unique(newdata2[[idVar]]))
     idalive <- unique(aliveThoriz[[idVar]])
