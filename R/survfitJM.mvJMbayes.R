@@ -439,7 +439,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     y[] <- lapply(y, function (x, nam) {names(x) <- nam; x}, nam = respVars)
     fitted.y[] <- lapply(fitted.y, function (x, nam) {names(x) <- nam; x}, nam = respVars)
     names(families) <- respVars
-    res <- list(summaries = res, survTimes = survTimes, last.time = last.time, 
+    res <- list(summaries = res, full.results = out, survTimes = survTimes, last.time = last.time, 
                 obs.times = obs.times, y = y, M = M, families = families, respVars = respVars,
                 fitted.times = fitted.times, 
                 fitted.y = fitted.y, ry = lapply(componentsL[grep("y", names(componentsL))], FUN = range, na.rm = TRUE), 
