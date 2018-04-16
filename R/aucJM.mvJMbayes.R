@@ -63,7 +63,7 @@ aucJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL,
     }
     names(Time) <- names(event) <- as.character(unique(id))
     if (any(dupl <- duplicated(Time))) {
-        Time[dupl] <- Time[dupl] + 1e-07
+        Time[dupl] <- Time[dupl] + runif(length(Time[dupl]), 1e-07, 1e-06)
     }
     if (!all(names(pi.u.t) == names(Time)))
         stop("mismatch between 'Time' variable names and survival probabilities names.")

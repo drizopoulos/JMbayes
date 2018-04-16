@@ -172,7 +172,7 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_eff
         td_alphas_low <- lapply(td_cols, extract_alphas, alphas = x$statistics$CIs$alphas[1, ])
         td_alphas_upp <- lapply(td_cols, extract_alphas, alphas = x$statistics$CIs$alphas[2, ])
         exract_terms <- function (x, data = data) {
-            environment(x) <- .GlobalEnv
+            environment(x) <- parent.frame()#.GlobalEnv
             terms.formula(x, data = data)
         }
         TD_terms <- lapply(x$model_info$Interactions, exract_terms, data = Data_surv)

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Dimitris Rizopoulos" />
 
-<meta name="date" content="2017-10-02" />
+<meta name="date" content="2018-04-16" />
 
 <title>Dynamic Predictions from Multivariate Joint Models</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Dynamic Predictions from Multivariate Joint Models</h1>
 <h4 class="author"><em>Dimitris Rizopoulos</em></h4>
-<h4 class="date"><em>2017-10-02</em></h4>
+<h4 class="date"><em>2018-04-16</em></h4>
 
 
 <div id="TOC">
@@ -123,16 +123,16 @@ w_i(t), b_{ki}, \alpha_{kl} \} \biggr],
 <h2>Examples</h2>
 <p>We will illustrate the calculation of dynamic predictions using package <strong>JMbayes</strong> from a bivariate joint model fitted to the PBC dataset for the longitudinal outcomes <code>prothrombin</code> time (continuous) and <code>hepatomegaly</code> (dichotomous). We start by fit the bivariate mixed models using function <code>mvglmer()</code>. For both outcomes we only include the time effect in both the fixed and random effects. The code is:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;JMbayes&quot;</span>)
-MixedModelFit &lt;-<span class="st"> </span><span class="kw">mvglmer</span>(<span class="kw">list</span>(prothrombin ~<span class="st"> </span>year *<span class="st"> </span>sex +<span class="st"> </span>(year |<span class="st"> </span>id),
-                              hepatomegaly ~<span class="st"> </span>year *<span class="st"> </span>sex +<span class="st"> </span>(year |<span class="st"> </span>id)), <span class="dt">data =</span> pbc2,
+MixedModelFit &lt;-<span class="st"> </span><span class="kw">mvglmer</span>(<span class="kw">list</span>(prothrombin <span class="op">~</span><span class="st"> </span>year <span class="op">*</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>(year <span class="op">|</span><span class="st"> </span>id),
+                              hepatomegaly <span class="op">~</span><span class="st"> </span>year <span class="op">*</span><span class="st"> </span>sex <span class="op">+</span><span class="st"> </span>(year <span class="op">|</span><span class="st"> </span>id)), <span class="dt">data =</span> pbc2,
                          <span class="dt">families =</span> <span class="kw">list</span>(gaussian, binomial))</code></pre></div>
 <p>Following, we fit the Cox model for the time to either transplantation or death. The first line defined the composite event indicator, and the second fits the Cox model in which we have also included the baseline covariates <code>drug</code> and <code>age</code>; note that we also need to set <code>model = TRUE</code> in the call to <code>coxph()</code>. The code is:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pbc2.id$event &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(pbc2.id$status !=<span class="st"> &quot;alive&quot;</span>)
-CoxFit &lt;-<span class="st"> </span><span class="kw">coxph</span>(<span class="kw">Surv</span>(years, event) ~<span class="st"> </span>drug +<span class="st"> </span>age, <span class="dt">data =</span> pbc2.id, <span class="dt">model =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pbc2.id<span class="op">$</span>event &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(pbc2.id<span class="op">$</span>status <span class="op">!=</span><span class="st"> &quot;alive&quot;</span>)
+CoxFit &lt;-<span class="st"> </span><span class="kw">coxph</span>(<span class="kw">Surv</span>(years, event) <span class="op">~</span><span class="st"> </span>drug <span class="op">+</span><span class="st"> </span>age, <span class="dt">data =</span> pbc2.id, <span class="dt">model =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <p>The joint model is fitted with the following call to <code>mvJointModelBayes()</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">JMFit &lt;-<span class="st"> </span><span class="kw">mvJointModelBayes</span>(MixedModelFit, CoxFit, <span class="dt">timeVar =</span> <span class="st">&quot;year&quot;</span>)</code></pre></div>
 <p>We want to calculate predictions of the conditional survival probabilities for Patient 81. As first step, we extract the data of this patient in store them in the data.frame <code>ND</code> with the code:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ND &lt;-<span class="st"> </span>pbc2[pbc2$id ==<span class="st"> </span><span class="dv">81</span>, ]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ND &lt;-<span class="st"> </span>pbc2[pbc2<span class="op">$</span>id <span class="op">==</span><span class="st"> </span><span class="dv">81</span>, ]</code></pre></div>
 <p>The calculation of the conditional survival probabilities is implemented in function <code>survfitJM()</code>. The basic/required arguments of this function are the fitted joint model, and the data of the patient(s) for whom we want the predictions. Hence, based on our fitted bivariate joint models and for Patient 81, we calculate the predictions by:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sprobs &lt;-<span class="st"> </span><span class="kw">survfitJM</span>(JMFit, ND)
 sprobs</code></pre></div>
@@ -174,8 +174,8 @@ sprobs</code></pre></div>
 <p>To illustrate the concept of dynamic predictions, we calculate the conditional survival probabilities for Patient 81, starting from his first measurements and adding each time an extra measurement. We do this using a simple <code>for</code>-loop. The code is<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">N &lt;-<span class="st"> </span><span class="kw">nrow</span>(ND)
 dyn_sprobs &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="st">&quot;list&quot;</span>, N)
-for (i in <span class="kw">seq_len</span>(N)) {
-    dyn_sprobs[[i]] &lt;-<span class="st"> </span><span class="kw">survfitJM</span>(JMFit, ND[<span class="dv">1</span>:i, ], 
+<span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(N)) {
+    dyn_sprobs[[i]] &lt;-<span class="st"> </span><span class="kw">survfitJM</span>(JMFit, ND[<span class="dv">1</span><span class="op">:</span>i, ], 
                                  <span class="dt">survTimes =</span> <span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">14</span>, <span class="dt">length.out =</span> <span class="dv">85</span>))
     <span class="kw">plot</span>(dyn_sprobs[[i]], <span class="dt">split =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="dt">surv_in_all =</span> <span class="ot">TRUE</span>)
 }</code></pre></div>
@@ -203,7 +203,7 @@ for (i in <span class="kw">seq_len</span>(N)) {
 <h2>Examples</h2>
 <p>We will illustrate how the above defined predictive accuracy measures can be calculated for the fitted bivariate joint model <code>JMFit</code> using the capabilities of package <strong>JMbayes</strong>. The functions that we will use are <code>rocJM()</code>, which calculates the ROC curve for different thresholds <span class="math inline">\(c\)</span> in <span class="math inline">\([0, 1]\)</span>, <code>aucJM()</code>, which calculates the area under the ROC curve, and <code>prederrJM()</code>, which calculates the prediction error. The required arguments are the fitted joint model, <code>newdata</code> a data.frame based on which to do the calculations, <code>Tstart</code> up to which time point we the patients are event-free (i.e., <span class="math inline">\(t\)</span> in the definitions of <span class="math inline">\(\mbox{AUC}(t, \Delta t)\)</span> and <span class="math inline">\(\mbox{PE}(u \mid t)\)</span>), <code>Dt</code> the length of the medically relevant interval (i.e., <span class="math inline">\(\Delta t\)</span> in the definition of <span class="math inline">\(\mbox{AUC}(t, \Delta t)\)</span>), and <code>Thoriz</code> at which time we want to predict (i.e., <span class="math inline">\(u\)</span> in the definition of <span class="math inline">\(\mbox{PE}(u \mid t)\)</span>). To obtain objective estimates of the predictive accuracy measures we should calculate them in data that were not used to fit the model. However, in the following examples, and for the sake of simplicity, we calculate them in the PBC dataset what was also used to fit the model.</p>
 <p>We focus on time point <span class="math inline">\(t = 5\)</span> years and we are interested in transplantations and deaths occurring within a <span class="math inline">\(\Delta t = 3\)</span>-year interval. We start by calculating the ROC curve based on the bivariate joint model. The call to <code>rocJM()</code> is:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pbc2$event &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(pbc2$status !=<span class="st"> &quot;alive&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pbc2<span class="op">$</span>event &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(pbc2<span class="op">$</span>status <span class="op">!=</span><span class="st"> &quot;alive&quot;</span>)
 roc &lt;-<span class="st"> </span><span class="kw">rocJM</span>(JMFit, <span class="dt">newdata =</span> pbc2, <span class="dt">Tstart =</span> <span class="dv">5</span>, <span class="dt">Dt =</span> <span class="dv">3</span>)
 roc</code></pre></div>
 <pre><code>## 
