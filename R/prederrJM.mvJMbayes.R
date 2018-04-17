@@ -16,7 +16,7 @@ prederrJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz, lossFun = c("s
     id <- newdata[[idVar]]
     id <- match(id, unique(id))
     TermsT <- object$model_info$coxph_components$Terms
-    environment(TermsT) <- .GlobalEnv
+    environment(TermsT) <- parent.frame()#.GlobalEnv
     SurvT <- model.response(model.frame(TermsT, newdata)) 
     is_counting <- attr(SurvT, "type") == "counting"
     is_interval <- attr(SurvT, "type") == "interval"
