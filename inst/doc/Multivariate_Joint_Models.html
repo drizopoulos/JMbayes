@@ -12,7 +12,7 @@
 
 <meta name="author" content="Dimitris Rizopoulos" />
 
-<meta name="date" content="2018-04-16" />
+<meta name="date" content="2018-04-17" />
 
 <title>Multivariate Joint Models</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Multivariate Joint Models</h1>
 <h4 class="author"><em>Dimitris Rizopoulos</em></h4>
-<h4 class="date"><em>2018-04-16</em></h4>
+<h4 class="date"><em>2018-04-17</em></h4>
 
 
 <div id="TOC">
@@ -168,7 +168,7 @@ CoxFit &lt;-<span class="st"> </span><span class="kw">coxph</span>(<span class="
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 2.8 min</code></pre>
+## time: 2.6 min</code></pre>
 <p>To fit a multivariate joint model for multiple longitudinal outcomes, the only thing that needs to be adapted from the procedure described above, is the call to <code>mvglmer()</code>. For example, to fit a bivariate joint model for serum bilirubin and presence of spiders, we use the syntax:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">MixedModelFit2 &lt;-<span class="st"> </span><span class="kw">mvglmer</span>(<span class="kw">list</span>(<span class="kw">log</span>(serBilir) <span class="op">~</span><span class="st"> </span>year <span class="op">+</span><span class="st"> </span>(year <span class="op">|</span><span class="st"> </span>id),
                                spiders <span class="op">~</span><span class="st"> </span>year <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">|</span><span class="st"> </span>id)), <span class="dt">data =</span> pbc2,
@@ -189,27 +189,27 @@ JMFit2 &lt;-<span class="st"> </span><span class="kw">mvJointModelBayes</span>(M
 ## 
 ## Random-effects covariance matrix:
 ##       StdDev    Corr        
-## (I)1  1.0057  (Int)1   year1
-## yer1  0.1728  0.4104        
-## (I)2  3.0346  0.4745  0.4202
+## (I)1  1.0066  (Int)1   year1
+## yer1  0.1723  0.4135        
+## (I)2  3.0810  0.4736  0.4288
 ## 
 ## Survival Outcome:
 ##                     PostMean  StDev  StErr    2.5%  97.5%     P
-## drugD-penicil        -0.0996 0.1540 0.0042 -0.3811 0.2038 0.508
-## age                   0.0425 0.0078 0.0002  0.0276 0.0575 0.000
-## log(serBilir)_value   1.2707 0.0924 0.0022  1.0944 1.4559 0.000
-## spiders_value         0.0560 0.0443 0.0013 -0.0296 0.1414 0.216
+## drugD-penicil        -0.0985 0.1536 0.0035 -0.3728 0.2178 0.516
+## age                   0.0422 0.0079 0.0002  0.0267 0.0577 0.000
+## log(serBilir)_value   1.2678 0.0957 0.0024  1.0879 1.4629 0.000
+## spiders_value         0.0562 0.0435 0.0014 -0.0280 0.1376 0.188
 ## 
 ## Longitudinal Outcome: log(serBilir) (family = gaussian, link = identity)
 ##             PostMean  StDev  StErr   2.5%  97.5% P
-## (Intercept)   0.4939 0.0581 0.0018 0.3814 0.6118 0
-## year          0.1795 0.0131 0.0004 0.1553 0.2063 0
-## sigma         0.3493 0.0065 0.0002 0.3370 0.3622 0
+## (Intercept)   0.4967 0.0592 0.0019 0.3795 0.6094 0
+## year          0.1786 0.0129 0.0004 0.1533 0.2037 0
+## sigma         0.3495 0.0068 0.0002 0.3360 0.3649 0
 ## 
 ## Longitudinal Outcome: spiders (family = binomial, link = logit)
 ##             PostMean  StDev  StErr    2.5%   97.5% P
-## (Intercept)  -1.6439 0.2297 0.0199 -2.1327 -1.2226 0
-## year          0.1804 0.0318 0.0044  0.1212  0.2419 0
+## (Intercept)  -1.6716 0.2212 0.0150 -2.1535 -1.2896 0
+## year          0.1830 0.0303 0.0032  0.1234  0.2408 0
 ## 
 ## MCMC summary:
 ## iterations: 900 
@@ -245,34 +245,34 @@ JMFit3 &lt;-<span class="st"> </span><span class="kw">update</span>(JMFit2, <spa
 ## 
 ## Random-effects covariance matrix:
 ##       StdDev    Corr        
-## (I)1  1.0057  (Int)1   year1
-## yer1  0.1728  0.4104        
-## (I)2  3.0346  0.4745  0.4202
+## (I)1  1.0066  (Int)1   year1
+## yer1  0.1723  0.4135        
+## (I)2  3.0810  0.4736  0.4288
 ## 
 ## Survival Outcome:
 ##                     PostMean  StDev  StErr    2.5%  97.5%     P
-## drugD-penicil        -0.1124 0.1641 0.0039 -0.4273 0.2121 0.488
-## age                   0.0426 0.0081 0.0002  0.0266 0.0584 0.000
-## log(serBilir)_value   1.2233 0.1108 0.0035  0.9938 1.4288 0.000
-## log(serBilir)_slope   2.0475 0.9061 0.0264  0.2661 3.7509 0.022
-## spiders_area         -0.0075 0.0078 0.0002 -0.0222 0.0083 0.330
+## drugD-penicil        -0.1139 0.1677 0.0041 -0.4455 0.2137 0.490
+## age                   0.0430 0.0079 0.0002  0.0267 0.0583 0.000
+## log(serBilir)_value   1.2288 0.1106 0.0023  1.0125 1.4473 0.000
+## log(serBilir)_slope   2.0192 0.9277 0.0293  0.2282 3.8321 0.034
+## spiders_area         -0.0077 0.0078 0.0002 -0.0237 0.0072 0.306
 ## 
 ## Longitudinal Outcome: log(serBilir) (family = gaussian, link = identity)
 ##             PostMean  StDev  StErr   2.5%  97.5% P
-## (Intercept)   0.4939 0.0581 0.0018 0.3814 0.6118 0
-## year          0.1795 0.0131 0.0004 0.1553 0.2063 0
-## sigma         0.3493 0.0065 0.0002 0.3370 0.3622 0
+## (Intercept)   0.4967 0.0592 0.0019 0.3795 0.6094 0
+## year          0.1786 0.0129 0.0004 0.1533 0.2037 0
+## sigma         0.3495 0.0068 0.0002 0.3360 0.3649 0
 ## 
 ## Longitudinal Outcome: spiders (family = binomial, link = logit)
 ##             PostMean  StDev  StErr    2.5%   97.5% P
-## (Intercept)  -1.6439 0.2297 0.0199 -2.1327 -1.2226 0
-## year          0.1804 0.0318 0.0044  0.1212  0.2419 0
+## (Intercept)  -1.6716 0.2212 0.0150 -2.1535 -1.2896 0
+## year          0.1830 0.0303 0.0032  0.1234  0.2408 0
 ## 
 ## MCMC summary:
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 4.1 min</code></pre>
+## time: 4.2 min</code></pre>
 <p>We further extend the previous model by including the interactions terms between the terms specified in <code>Formulas</code> and the randomized treatment indicator drug. The names specified in the list that defined the interaction factors should match with the names of the output from <code>JMFit3</code>. Because of the many association parameters we place thre shrinkage prior on the association coefficients described above. In particular:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Ints &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="st">&quot;log(serBilir)&quot;</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug, <span class="st">&quot;log(serBilir)_slope&quot;</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug,
              <span class="st">&quot;spiders_area&quot;</span> =<span class="st"> </span><span class="er">~</span><span class="st"> </span>drug)
@@ -293,46 +293,46 @@ JMFit4 &lt;-<span class="st"> </span><span class="kw">update</span>(JMFit3, <spa
 ## 
 ## Random-effects covariance matrix:
 ##       StdDev    Corr        
-## (I)1  1.0057  (Int)1   year1
-## yer1  0.1728  0.4104        
-## (I)2  3.0346  0.4745  0.4202
+## (I)1  1.0066  (Int)1   year1
+## yer1  0.1723  0.4135        
+## (I)2  3.0810  0.4736  0.4288
 ## 
 ## Survival Outcome:
 ##                                   PostMean  StDev  StErr    2.5%  97.5%
-## drugD-penicil                      -0.1597 0.3400 0.0120 -0.8992 0.4855
-## age                                 0.0416 0.0063 0.0002  0.0291 0.0536
-## log(serBilir)_value                 1.2460 0.1160 0.0046  1.0220 1.4814
-## log(serBilir)_value:drugD-penicil   0.0035 0.1410 0.0048 -0.3087 0.2914
-## log(serBilir)_slope                 0.7960 0.8025 0.0627 -0.2202 2.4919
-## log(serBilir)_slope:drugD-penicil   0.3820 0.6702 0.0212 -0.3964 2.2532
-## spiders_area                       -0.0125 0.0102 0.0004 -0.0320 0.0074
-## spiders_area:drugD-penicil          0.0106 0.0134 0.0004 -0.0148 0.0378
+## drugD-penicil                      -0.1388 0.3267 0.0109 -0.8010 0.4682
+## age                                 0.0412 0.0065 0.0002  0.0281 0.0535
+## log(serBilir)_value                 1.2508 0.1168 0.0053  1.0251 1.4756
+## log(serBilir)_value:drugD-penicil  -0.0072 0.1352 0.0045 -0.2803 0.2643
+## log(serBilir)_slope                 0.7845 0.8128 0.0578 -0.1999 2.6384
+## log(serBilir)_slope:drugD-penicil   0.3660 0.6454 0.0204 -0.4409 2.2402
+## spiders_area                       -0.0126 0.0102 0.0003 -0.0323 0.0079
+## spiders_area:drugD-penicil          0.0110 0.0131 0.0004 -0.0159 0.0382
 ##                                       P
-## drugD-penicil                     0.648
+## drugD-penicil                     0.662
 ## age                               0.000
 ## log(serBilir)_value               0.000
-## log(serBilir)_value:drugD-penicil 0.948
-## log(serBilir)_slope               0.296
-## log(serBilir)_slope:drugD-penicil 0.596
-## spiders_area                      0.244
-## spiders_area:drugD-penicil        0.438
+## log(serBilir)_value:drugD-penicil 0.970
+## log(serBilir)_slope               0.312
+## log(serBilir)_slope:drugD-penicil 0.540
+## spiders_area                      0.232
+## spiders_area:drugD-penicil        0.374
 ## 
 ## Longitudinal Outcome: log(serBilir) (family = gaussian, link = identity)
 ##             PostMean  StDev  StErr   2.5%  97.5% P
-## (Intercept)   0.4939 0.0581 0.0018 0.3814 0.6118 0
-## year          0.1795 0.0131 0.0004 0.1553 0.2063 0
-## sigma         0.3493 0.0065 0.0002 0.3370 0.3622 0
+## (Intercept)   0.4967 0.0592 0.0019 0.3795 0.6094 0
+## year          0.1786 0.0129 0.0004 0.1533 0.2037 0
+## sigma         0.3495 0.0068 0.0002 0.3360 0.3649 0
 ## 
 ## Longitudinal Outcome: spiders (family = binomial, link = logit)
 ##             PostMean  StDev  StErr    2.5%   97.5% P
-## (Intercept)  -1.6439 0.2297 0.0199 -2.1327 -1.2226 0
-## year          0.1804 0.0318 0.0044  0.1212  0.2419 0
+## (Intercept)  -1.6716 0.2212 0.0150 -2.1535 -1.2896 0
+## year          0.1830 0.0303 0.0032  0.1234  0.2408 0
 ## 
 ## MCMC summary:
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 4.5 min</code></pre>
+## time: 4.6 min</code></pre>
 </div>
 <div id="time-varying-effects" class="section level2">
 <h2>Time-varying Effects</h2>
@@ -436,9 +436,9 @@ pbc2.id &lt;-<span class="st"> </span>pbc2[<span class="op">!</span><span class=
 ## 
 ## Survival Outcome:
 ##                     PostMean  StDev  StErr    2.5%  97.5%     P
-## drugD-penicil        -0.0700 0.1274 0.0037 -0.3161 0.1800 0.572
-## age                   0.0231 0.0064 0.0002  0.0109 0.0354 0.000
-## log(serBilir)_value   0.7906 0.0606 0.0016  0.6798 0.9205 0.000
+## drugD-penicil        -0.0508 0.1221 0.0026 -0.2823 0.2002 0.702
+## age                   0.0228 0.0063 0.0002  0.0109 0.0350 0.000
+## log(serBilir)_value   0.7072 0.0583 0.0018  0.5957 0.8221 0.000
 ## 
 ## Longitudinal Outcome: log(serBilir) (family = gaussian, link = identity)
 ##             PostMean  StDev  StErr   2.5%  97.5% P
@@ -450,7 +450,7 @@ pbc2.id &lt;-<span class="st"> </span>pbc2[<span class="op">!</span><span class=
 ## iterations: 900 
 ## burn-in: 600 
 ## thinning: 300 
-## time: 4.6 min</code></pre>
+## time: 5.3 min</code></pre>
 <p>As previously formulated in the Theory Section, even if the <code>survFit</code> provided to <code>mvJointModelBayes()</code> is an AFT model, the function internally specifies a relative risk model.</p>
 </div>
 </div>

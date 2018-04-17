@@ -47,8 +47,8 @@ prederrJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz, lossFun = c("s
         Time <- Time[!duplicated(id2)]
         event <- SurvT[!duplicated(id2), "status"]
     } else {
-        Time <- SurvT[!duplicated(id2), 1]
-        event <- SurvT[!duplicated(id2), 2]
+        Time <- SurvT[, 1]
+        event <- SurvT[, 2]
     }
     timesInd <- newdata2[[timeVar]] <= Tstart
     aliveThoriz <- newdata2[Time > Thoriz & timesInd, ]
