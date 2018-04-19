@@ -389,7 +389,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 A_tau_gammas = 0.1, B_tau_gammas = 0.1, rank_Tau_gammas = ncol(W2),
                 A_phi_gammas = 1, B_phi_gammas = 0.01, shrink_gammas = FALSE,
                 A_tau_alphas = 0.1, B_tau_alphas = 0.1, rank_Tau_alphas = ncol(Wlong),
-                A_phi_alphas = 1, B_phi_alphas = 0.01, shrink_alphas = FALSE)
+                A_phi_alphas = 1, B_phi_alphas = 0.01, shrink_alphas = FALSE, 
+                cauchy_alphas = FALSE)
     if (!is.null(priors)) {
         lngths <- lapply(prs[(nam.prs <- names(priors))], length)
         if (!is.list(priors) || !isTRUE(all.equal(lngths, lapply(priors, length)))) {
