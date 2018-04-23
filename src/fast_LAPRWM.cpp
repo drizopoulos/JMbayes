@@ -527,23 +527,19 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     double Apost_phi_gammas = A_phi_gammas + 0.5;
     //
     bool shrink_alphas = as<bool>(priors["shrink_alphas"]);
-    bool cauchy_alphas = as<bool>(priors["cauchy_alphas"]);
+    bool double_gamma_alphas = as<bool>(priors["double_gamma_alphas"]);
     double A_tau_alphas = as<double>(priors["A_tau_alphas"]);
     double B_tau_alphas = as<double>(priors["B_tau_alphas"]);
-    double Apost_tau_alphas = 0.0;
-    if (cauchy_alphas) {
-        Apost_tau_alphas = 0.5 * (as<double>(priors["rank_Tau_alphas"]) + 1);
-    } else {
-        Apost_tau_alphas = A_tau_alphas + 0.5 * as<double>(priors["rank_Tau_alphas"]);
-    }
+    double Apost_tau_alphas = A_tau_alphas + 0.5 * as<double>(priors["rank_Tau_alphas"]);
     double A_phi_alphas = as<double>(priors["A_phi_alphas"]);
     double B_phi_alphas = as<double>(priors["B_phi_alphas"]);
-    double Apost_phi_alphas = 0.0;
-    if (cauchy_alphas) {
-        Apost_phi_alphas = 1.0;
-    } else {
-        Apost_phi_alphas = A_phi_alphas + 0.5;
-    }
+    double Apost_phi_alphas = A_phi_alphas + 0.5;
+    double A_xi_alphas = as<double>(priors["A_xi_alphas"]);
+    double B_xi_alphas = as<double>(priors["B_xi_alphas"]);
+    double A_nu_alphas = as<double>(priors["A_nu_alphas"]);
+    double B_nu_alphas = as<double>(priors["B_nu_alphas"]);
+    double Apost_xi_alphas = A_xi_alphas + 0.5;
+    double Apost_nu_alphas = A_nu_alphas + 0.5;
     //
     List td_cols = as<List>(priors["td_cols"]);
     field<uvec> td_colsF = List2Field_uvec(td_cols);
@@ -787,7 +783,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             if (shrink_alphas) {
                 for (int k2 = 0; k2 < n_alphas; ++k2) {
                     double Bpost_phi_alphas = 0.0;
-                    if (cauchy_alphas) {
+                    if (double_gamma_alphas) {
                         Bpost_phi_alphas = nu_alphas.at(k2) + 0.5 * tau_alphas * pow(alphas.at(k2), 2);
                     } else {
                         Bpost_phi_alphas = B_phi_alphas + 0.5 * tau_alphas * pow(alphas.at(k2), 2);
@@ -797,18 +793,18 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                 }
                 Tau_alphas.diag() = phi_alphas;
                 double Bpost_tau_alphas = 0.0;
-                if (cauchy_alphas) {
+                if (double_gamma_alphas) {
                     Bpost_tau_alphas = xi_alphas + 0.5 * as_scalar(alphas.t() * Tau_alphas * alphas);
                 } else {
                     Bpost_tau_alphas = B_tau_alphas + 0.5 * as_scalar(alphas.t() * Tau_alphas * alphas);
                 }
                 tau_alphas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_tau_alphas, 1.0 / Bpost_tau_alphas)));
-                if (cauchy_alphas) {
+                if (double_gamma_alphas) {
                     for (int k2 = 0; k2 < n_alphas; ++k2) {
                         nu_alphas.at(k2) =  std::min(eps3,
-                            std::max(eps2, ::Rf_rgamma(Apost_phi_alphas, 1.0 / (1.0 + phi_alphas.at(k2)))));
+                            std::max(eps2, ::Rf_rgamma(Apost_nu_alphas, 1.0 / (B_nu_alphas + phi_alphas.at(k2)))));
                     }
-                    xi_alphas = std::min(eps3, std::max(eps2, ::Rf_rgamma(1.0, 1.0 / (1.0 + tau_alphas))));
+                    xi_alphas = std::min(eps3, std::max(eps2, ::Rf_rgamma(Apost_xi_alphas, 1.0 / (B_xi_alphas + tau_alphas))));
                 }
             }
             // store results

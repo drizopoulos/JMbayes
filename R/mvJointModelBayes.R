@@ -387,10 +387,11 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 rank_Tau_Bs_gammas = qr(Tau_Bs_gammas)$rank,
                 A_phi_Bs_gammas = 1, B_phi_Bs_gammas = 0.01, shrink_Bs_gammas = FALSE,
                 A_tau_gammas = 0.1, B_tau_gammas = 0.1, rank_Tau_gammas = ncol(W2),
-                A_phi_gammas = 1, B_phi_gammas = 0.01, shrink_gammas = FALSE,
-                A_tau_alphas = 0.1, B_tau_alphas = 0.1, rank_Tau_alphas = ncol(Wlong),
-                A_phi_alphas = 1, B_phi_alphas = 0.01, shrink_alphas = FALSE, 
-                cauchy_alphas = FALSE)
+                A_phi_gammas = 0.5, B_phi_gammas = 0.01, shrink_gammas = FALSE,
+                A_tau_alphas = 0.5, B_tau_alphas = 0.1, rank_Tau_alphas = ncol(Wlong),
+                shrink_alphas = FALSE, A_phi_alphas = 0.5, B_phi_alphas = 0.01, 
+                double_gamma_alphas = FALSE, A_nu_alphas = 0.5, B_nu_alphas = 1,
+                A_xi_alphas = 0.5, B_xi_alphas = 1)
     if (!is.null(priors)) {
         lngths <- lapply(prs[(nam.prs <- names(priors))], length)
         if (!is.list(priors) || !isTRUE(all.equal(lngths, lapply(priors, length)))) {
@@ -550,7 +551,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                     "tau_alphas" = do.call("rbind", out[nams == "tau_alphas"]),
                     "tau_td_alphas" = do.call("rbind", out[nams == "tau_td_alphas"]),
                     "phi_Bs_gammas" = do.call("rbind", out[nams == "phi_Bs_gammas"]),
-                    "phi_gammas" = if (any_gammas)do.call("rbind", out[nams == "phi_gammas"]),
+                    "phi_gammas" = if (any_gammas) do.call("rbind", out[nams == "phi_gammas"]),
                     "phi_alphas" = do.call("rbind", out[nams == "phi_alphas"]))
         out$LogLiks <- LogLiks
         nams <- names(scales)
