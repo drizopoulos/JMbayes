@@ -665,7 +665,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         out <- lapply(mcmc, function (x) {
             d <- dim(x)
             if (!is.null(d) && length(d) > 1) {
-                dd <- if (length(d) == 2) 2L else if (d[1L] > d[3L]) c(2L, 3L)
+                dd <- if (length(d) == 2) 2L else if (d[2L] == d[3L]) c(2L, 3L)
                 else c(1L, 2L)
                 apply(x, dd, fun, ...)
             } else if (!is.null(x)) {
