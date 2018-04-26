@@ -23,7 +23,7 @@ find_thresholds.mvJMbayes <- function (object, newdata, Dt, idVar = "id", M = 20
     }
     block <- seq_along(times)
     registerDoParallel(n_cores)
-    out <- foreach(i = block, .packages = "JMbayes", .combine = rbind) %dopar% {
+    out <- foreach(i = block, .packages = c("JMbayes", "splines"), .combine = rbind) %dopar% {
         do_roc(i, object, newdata, times, Dt, idVar, M)
     }
     stopImplicitCluster()
