@@ -116,7 +116,12 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     }
     postMeans <- object$statistics$postMeans
     betas <- postMeans[grep("betas", names(postMeans), fixed = TRUE)] 
-    sigma <- postMeans[grep("sigma", names(postMeans), fixed = TRUE)]
+    #sigma <- postMeans[grep("sigma", names(postMeans), fixed = TRUE)]
+    sigmas <- postmeans[grep("sigma", names(postmeans), fixed = TRUE)]
+    sigma <- vector("list", n_outcomes)
+    if (any(which_gaussian <- which(fams == "gaussian"))) {
+        sigma[which_gaussian] <- sigmas
+    }
     D <- postMeans[grep("^D", names(postMeans), fixed = FALSE)]
     gammas <- postMeans[grep("^gammas", names(postMeans), fixed = FALSE)]
     alphas <- postMeans[grep("^alphas", names(postMeans), fixed = FALSE)]
