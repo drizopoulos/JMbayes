@@ -117,8 +117,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     postMeans <- object$statistics$postMeans
     betas <- postMeans[grep("betas", names(postMeans), fixed = TRUE)] 
     #sigma <- postMeans[grep("sigma", names(postMeans), fixed = TRUE)]
-    sigmas <- postmeans[grep("sigma", names(postmeans), fixed = TRUE)]
-    sigma <- vector("list", n_outcomes)
+    sigmas <- lapply(seq_len(n_outcomes), c)
     if (any(which_gaussian <- which(fams == "gaussian"))) {
         sigma[which_gaussian] <- sigmas
     }
