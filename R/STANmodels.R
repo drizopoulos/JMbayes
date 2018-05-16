@@ -78,10 +78,10 @@ transformed_parameters <- function (families, colmns_HC, colmns_nHC, RE_inds) {
     colmns_HC2 <- unlist(colmns_HC, recursive = FALSE)
     nams <- names(colmns_HC2)
     ncols <- sapply(colmns_HC2, length)
-    HC_part <- function (outcome, columns, ncol, i) {
+    HC_part <- function (outcome, columns, nam, ncol, i) {
         if (ncol > 1) {
             paste0(myt(2), "mu_u[i, ", i,"] = dot_product(Xhc", outcome, 
-                   "[i, ", nams[outcome], "], betas", outcome, "[", nams[outcome], "]);\n")
+                   "[i, ", nam, "], betas", outcome, "[", nam, "]);\n")
         } else if (ncol == 1) {
             paste0(myt(2), "mu_u[i, ", i,"] = Xhc", outcome, 
                    "[i, ", columns, "] * betas", outcome, "[", columns, "];\n")
@@ -113,7 +113,7 @@ transformed_parameters <- function (families, colmns_HC, colmns_nHC, RE_inds) {
            myt(), "matrix[n, n_RE] mu_u;\n",
            myt(), "for (i in 1:n) {\n",
            paste0(mapply(HC_part, rep(outcomes, sapply(colmns_HC, length)), 
-                         colmns_HC2, ncols, seq_along(colmns_HC2)), collapse = ""),
+                         colmns_HC2, nams, ncols, seq_along(colmns_HC2)), collapse = ""),
            myt(), "}\n",
            paste0(mapply(linpred_part, outcomes, colmns_HC, colmns_nHC, RE_inds), collapse = ""),
            "}\n")
