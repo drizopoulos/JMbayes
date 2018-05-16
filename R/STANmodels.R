@@ -6,13 +6,26 @@ data_part <- function (families, ncolsZs, extraXs, n_RE, colmns_HC, colmns_nHC) 
                                     "binomial" = paste0("int<lower=0, upper=1> y", outcome, "[N", outcome, "]"),
                                     "poisson" = paste0("int<lower=0> y", outcome, "[N", outcome, "]")
         )
+        f <- function (colmns_HC_i, outcome) {
+            if (length(colmns_HC_i) > 1) {
+                out <- vector("character", length(colmns_HC_i))
+                for (k in seq_along(colmns_HC_i)) {
+                    ll <- length(colmns_HC_i[[k]])
+                    out[k] <- paste0(myt(), "int colmns_HC", outcome, k,
+                                     if (ll > 1) paste0("[", ll, "]"), ";\n")
+                }
+                paste(out, collapse = "")
+            } else {
+                ll <- length(colmns_HC_i)
+                paste0(myt(), "int colmns_HC", outcome,
+                       if (ll > 1) paste0("[", ll, "]"), ";\n")
+            }
+        }
         paste0(myt(), "int N", outcome, ";\n",
                myt(), "int ncx", outcome, ";\n",
                myt(), "int id", outcome, "[N", outcome, "];\n",
                myt(), "int RE_ind", outcome, if (ncolsZ > 1) paste0("[", ncolsZ, "]"), ";\n",
-               if (ll <- length(colmns_HC)) 
-                   paste0(myt(), "int colmns_HC", outcome, 
-                          if (ll > 1) paste0("[", ll, "]"), ";\n"),
+               f(colmns_HC, outcome),
                if (ll <- length(colmns_nHC)) 
                    paste0(myt(), "int colmns_nHC", outcome, 
                           if (ll > 1) paste0("[", ll, "]"), ";\n"),
@@ -63,12 +76,12 @@ transformed_parameters <- function (families, colmns_HC, colmns_nHC, RE_inds) {
         paste0(myt(), "vector[N", outcome, "] eta", outcome, ";\n")
     }
     colmns_HC2 <- unlist(colmns_HC, recursive = FALSE)
+    nams <- names(colmns_HC2)
     ncols <- sapply(colmns_HC2, length)
-    colmns_HC2[] <- lapply(colmns_HC2, paste0, collapse = ":")
     HC_part <- function (outcome, columns, ncol, i) {
         if (ncol > 1) {
             paste0(myt(2), "mu_u[i, ", i,"] = dot_product(Xhc", outcome, 
-                   "[i, colmns_HC", outcome, "], betas", outcome, "[colmns_HC", outcome, "]);\n")
+                   "[i, ", nams[outcome], "], betas", outcome, "[", nams[outcome], "]);\n")
         } else if (ncol == 1) {
             paste0(myt(2), "mu_u[i, ", i,"] = Xhc", outcome, 
                    "[i, ", columns, "] * betas", outcome, "[", columns, "];\n")
