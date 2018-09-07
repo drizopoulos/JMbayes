@@ -205,7 +205,12 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         stop("variable '", timeVar, "' not in the data.frame extracted from 'mvglmerObject'.\n")
     }
     dataL <- dataL[order(dataL[[idVar]], dataL[[timeVar]]), ]
-    dataL.id <- last_rows(dataL, dataL[[idVar]])
+    if (typeSurvInf == "counting" && multiState) {
+        dataL.id <- right_rows_mstate(dataL, dataL[[timeVar]], dataL[[idVar]], as.matrix(TimeR), idT)
+        dataL.id[[state.id]] <- data_MultiState$trans
+    } else {
+        dataL.id <- last_rows(dataL, dataL[[idVar]])
+    }
     dataL.id[[timeVar]] <- Time
     if (typeSurvInf == "interval") {
         dataL_int.id <- dataL.id
