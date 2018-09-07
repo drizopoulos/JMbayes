@@ -65,6 +65,33 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         Terms <- drop.terms(Terms, attr(Terms,"specials")$cluster - 1,
                             keep.response = TRUE)
     }
+    if (typeSurvInf == "counting" && multiState) {
+        if (class(survObject) == 'survreg') {
+            stop("Please refit the survival submodel using coxph(). \n")
+        }
+        if (is.null(survObject$model$cluster)) {
+            stop("you need to refit the Cox and include in the right hand side of the ", 
+                 "formula the 'cluster()' function using as its argument the subjects' ", 
+                 "id indicator. These ids need to be the same as the ones used in the ", 
+                 "data_MultiState dataset. \n")
+        }
+        con$lng.in.kn <- con$lng.in.kn.multiState
+        idT <- survObject$model$cluster
+        LongFormat <- length(idT) > length(unique(idT))
+        TimeL <- TimeLl <- SurvInf[, "start"]
+        fidT <- factor(idT, levels = unique(idT))
+        anyLeftTrunc <- any(TimeL > 1e-07)
+        TimeR <- SurvInf[, "stop"]
+        nT <- length(unique(fidT))
+        nT.long <- length(idT)
+        event <- eventLong <- SurvInf[, "status"]
+        nRisks <- length(unique(survObject$strata))
+        Terms <- drop.terms(Terms, attr(Terms, "specials")$cluster - 1, 
+                            keep.response = TRUE)
+        state.id <- gsub("^strata*\\((.*)\\).*", "\\1", 
+                         colnames(dataS)[grep("^strata", colnames(dataS))])
+        state.id2 <- colnames(dataS)[grep("^strata", colnames(dataS))]
+    }
     if (typeSurvInf == "interval") {
         Time1 <- SurvInf[, "time1"]
         Time2 <- SurvInf[, "time2"]
