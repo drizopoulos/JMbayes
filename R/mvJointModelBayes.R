@@ -12,7 +12,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 lng.in.kn = 15L, ordSpline = 4L, diff = 2L, speed_factor = 0.6,
                 GQsurv = "GaussKronrod", GQsurv.k = 15L, seed = 1L,
                 n_cores = max(1, parallel::detectCores() - 1), update_RE = TRUE,
-                light = FALSE, equal.strata.knots = FALSE)
+                light = FALSE, equal.strata.knots = FALSE, lng.in.kn.multiState = 3L)
     control <- c(control, list(...))
     namC <- names(con)
     con[(namc <- names(control))] <- control
