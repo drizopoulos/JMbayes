@@ -117,7 +117,9 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     } else {
         P <- Time / 2
     }
-    st <- if (typeSurvInf == "counting") {
+    st <- if (typeSurvInf == "counting" && !multiState) {
+        outer(P, sk) + c(Time + TimeL) / 2
+    } else if (typeSurvInf == "counting" && multiState) {
         outer(P, sk) + c(Time + TimeL) / 2
     } else {
         outer(P, sk + 1)
