@@ -40,7 +40,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         LongFormat <- FALSE
         TimeLl <- rep(0.0, length(Time))
     }
-    if (typeSurvInf == "counting") {
+    if (typeSurvInf == "counting" && !multiState) {
         if (class(survObject) == 'survreg') {
             stop("Please refit the survival submodel using coxph().\n")
         }
