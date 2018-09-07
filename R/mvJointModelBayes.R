@@ -1,6 +1,8 @@
 mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                Formulas = list(NULL), Interactions = list(NULL),
-                               transFuns = NULL, priors = NULL, control = NULL, ...) {
+                               transFuns = NULL, priors = NULL, multiState = FALSE, 
+                               data_MultiState = NULL, idVar_MultiState = "id", 
+                               control = NULL, ...) {
     cl <- match.call()
     # control values
     con <- list(temps = 1.0, n_iter = 300, n_burnin = 1000,
