@@ -128,8 +128,21 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         P_int <- TimeL / 2
         st_int <- outer(P_int, sk + 1)
     }
-    idGK <- rep(seq_len(nT), each = K)
-    idGK_fast <- c(idGK[-length(idGK)] != idGK[-1L], TRUE)
+    if (typeSurvInf == "counting" && multiState) {
+        idGK <- rep(seq_along(TimeR), each = K)
+        strat <- survObject$strata
+        n.strat <- length(levels(strat))
+        split.TimeR <- split(TimeR, strat)
+        split.TimeL <- split(TimeL, strat)
+        ind.t <- unlist(tapply(idT, idT, 
+                               FUN = function(x) 
+                                   c(as.logical(data_MultiState[data_MultiState[, idVar_MultiState] %in% x, "status"]))))
+        Time <- TimeR
+        idGK_fast <- c(idGK[-length(idGK)] != idGK[-1L], TRUE)
+    } else {
+        idGK <- rep(seq_len(nT), each = K)
+        idGK_fast <- c(idGK[-length(idGK)] != idGK[-1L], TRUE)
+    }
     # knots baseline hazard
     kn <- if (is.null(con$knots)) {
         tt <- if (con$ObsTimes.knots) Time else Time[event == 1]
