@@ -143,17 +143,51 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         idGK <- rep(seq_len(nT), each = K)
         idGK_fast <- c(idGK[-length(idGK)] != idGK[-1L], TRUE)
     }
-    # knots baseline hazard
-    kn <- if (is.null(con$knots)) {
-        tt <- if (con$ObsTimes.knots) Time else Time[event == 1]
-        pp <- quantile(tt, c(0.05, 0.95), names = FALSE)
-        tail(head(seq(pp[1L], pp[2L], length.out = con$lng.in.kn), -1L), -1L)
+    if (typeSurvInf == "counting" && multiState) {
+        kn <- if (con$equal.strata.knots) {
+            kk <- if (is.null(con$knots)) {
+                tt <- if (con$ObsTimes.knots) Time else Time[ind.t]
+                pp <- quantile(tt, c(0.05, 0.95), names = FALSE)
+                tail(head(seq(pp[1L], pp[2L], length.out = con$lng.in.kn), -1L), -1L)
+            } else {
+                con$knots
+            }
+            kk <- kk[kk < max(Time)]
+            rr <- rep(list(sort(c(rep(range(Time, st), con$ordSpline), kk))), n.strat)
+            names(rr) <- names(split.TimeR)
+            con$knots <- rr
+        } else {
+            sptt <- if (con$ObsTimes.knots) {
+                split.TimeR
+            } else {
+                mapply(function(x, y) {x[y]}, split.TimeR, split(ind.t, strat))
+            }
+            rr <- lapply(sptt, function(t) {
+                kk <- if (is.null(con$knots)) {
+                    pp <- quantile(t, c(0.05, 0.95), names = FALSE)
+                    tail(head(seq(pp[1L], pp[2L], length.out = con$lng.in.kn), -1L), -1L)
+                } else {
+                    con$knots
+                }
+                kk <- kk[kk < max(t)]
+                sort(c(rep(range(Time, st), con$ordSpline), kk))
+            })
+            names(rr) <- names(split.TimeR)
+            con$knots <- rr
+        }
     } else {
-        con$knots
+        # knots baseline hazard
+        kn <- if (is.null(con$knots)) {
+            tt <- if (con$ObsTimes.knots) Time else Time[event == 1]
+            pp <- quantile(tt, c(0.05, 0.95), names = FALSE)
+            tail(head(seq(pp[1L], pp[2L], length.out = con$lng.in.kn), -1L), -1L)
+        } else {
+            con$knots
+        }
+        kn <- kn[kn < max(Time)]
+        rr <- sort(c(rep(range(Time, st), con$ordSpline), kn))
+        con$knots <- rr
     }
-    kn <- kn[kn < max(Time)]
-    rr <- sort(c(rep(range(Time, st), con$ordSpline), kn))
-    con$knots <- rr
     # build desing matrices for longitudinal process
     dataL <- mvglmerObject$data
     components <- mvglmerObject$components
