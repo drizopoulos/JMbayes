@@ -509,7 +509,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     vec phi_alphas = as<vec>(initials["phi_alphas"]);
     vec nu_alphas = as<vec>(initials["phi_alphas"]);
     vec tau_td_alphas = as<vec>(initials["tau_td_alphas"]);
-    double tau_Bs_gammas = as<double>(initials["tau_Bs_gammas"]);
+    vec tau_Bs_gammas = as<vec>(initials["tau_Bs_gammas"]);
     double tau_gammas = as<double>(initials["tau_gammas"]);
     double tau_alphas = as<double>(initials["tau_alphas"]);
     double xi_alphas = as<double>(initials["tau_alphas"]);
