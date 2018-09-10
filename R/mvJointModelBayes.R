@@ -682,7 +682,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         })
     }
     runParallel <- function (block, betas, b, sigmas, inv_D, inits, data, priors,
-                             scales, Covs, control, interval_cens) {
+                             scales, Covs, control, interval_cens, multiState) {
         M <- length(block)
         LogLiks <- numeric(M)
         out <- vector("list", M)
