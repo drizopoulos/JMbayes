@@ -659,6 +659,9 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     inits2 <- marglogLik2(inits[c("Bs_gammas", "gammas", "alphas", "tau_Bs_gammas")],
                           Data, prs, fixed_tau_Bs_gammas = TRUE)
     inits[names(attr(inits2, "inits"))] <- attr(inits2, "inits")
+    if (multiState) {
+        inits$tau_Bs_gammas <- rep(inits$tau_Bs_gammas, nRisks)
+    }
     Cvs <- attr(inits2, "Covs")
     nRE <- sum(sapply(Z, ncol))
     Cvs$b <- array(0.0, c(nRE, nRE, nT))
