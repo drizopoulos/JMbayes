@@ -810,7 +810,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         registerDoParallel(con$n_cores)
         out1 <- foreach(i = block1, .packages = "JMbayes", .combine = c) %dopar% {
             runParallel(i, betas, b, sigmas, inv_D, inits, Data, prs, scales, Cvs, con,
-                        typeSurvInf == "interval")
+                        typeSurvInf == "interval", multiState)
         }
         #stopCluster(cluster)
         stopImplicitCluster()
@@ -837,7 +837,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         registerDoParallel(con$n_cores)
         out <- foreach(i = blocks, .packages = "JMbayes", .combine = c) %dopar% {
             runParallel(i, betas, b, sigmas, inv_D, inits, Data, prs, new_scales, Cvs, 
-                        con, typeSurvInf == "interval")
+                        con, typeSurvInf == "interval", multiState)
         }
         #stopCluster(cluster)
         stopImplicitCluster()
