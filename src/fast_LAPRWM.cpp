@@ -486,6 +486,9 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     field<uvec> rows_wlongF = List2Field_uvec(rows_wlong);
     List rows_wlongs = as<List>(Data["rows_wlongs"]);
     field<uvec> rows_wlongsF = List2Field_uvec(rows_wlongs);
+    double nRisks = as<double>(Data["nRisks"]);
+    vec kn_strat_last = as<vec>(Data["kn_strat_last"]);
+    vec kn_strat_first = as<vec>(Data["kn_strat_first"]);
     // interval censoring extras
     LogicalVector Levent1 = as<LogicalVector>(Data["Levent1"]);
     LogicalVector Levent01 = as<LogicalVector>(Data["Levent01"]);
