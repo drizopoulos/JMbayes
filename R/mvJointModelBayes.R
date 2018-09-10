@@ -627,7 +627,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                      ZZs = ZZs, P = P[ids[[1]]], w = rep(wk, nT),
                      Pw = P[ids[[1]]] * rep(wk, nT), idT = id[outcome], idTs = ids[outcome],
                      outcome = outcome, indFixed = indFixed, indRandom = indRandom,
-                     trans_Funs = trans_Funs)
+                     trans_Funs = trans_Funs, nRisks = 1, 
+                     idT_rsum = idT_rsum, idT2 = id[outcome], idT2s = ids[outcome])
     }
     if (typeSurvInf == "interval") {
         Data <- c(Data, list(Levent1 = event == 1, 
