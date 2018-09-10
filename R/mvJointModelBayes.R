@@ -534,7 +534,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                indFixed, indRandom, U, trans_Funs)
         Wlongs <- designMatLong(XXs, postMean_betas, ZZs, postMean_b, ids, outcome,
                                 indFixed, indRandom, Us, trans_Funs)
-        idT_rsum <- NULL
+        idT_rsum <- 0
     }
     if (typeSurvInf == "interval") {
         Wlongs_int <- designMatLong(XXs_int, postMean_betas, ZZs_int, postMean_b, ids, 
@@ -591,22 +591,44 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                   sapply(betas, ncol)))
     }
     prs$priorK_D <- mvglmerObject$priors$priorK_D
-    # Data passed to the MCMC
-    Data <- list(y = y, Xbetas = Xbetas, X = X, Z = Z, RE_inds = RE_inds,
-                 RE_inds2 = RE_inds2, idL = idL, idL2 = idL2, sigmas = postMean_sigmas,
-                 invD = postMean_inv_D[[1]], fams = fams, links = links, Time = Time,
-                 event = event, idGK_fast = which(idGK_fast) - 1, W1 = W1, W1s = W1s,
-                 event_colSumsW1 = colSums(event * W1), W2 = W2, W2s = W2s,
-                 event_colSumsW2 = if (ncol(W2)) colSums(event * W2),
-                 Wlong = Wlong, Wlongs = Wlongs,
-                 event_colSumsWlong = colSums(event * Wlong),
-                 U = U, Us = Us, col_inds = attr(Wlong, "col_inds"),
-                 row_inds_U = seq_len(nrow(Wlong)), row_inds_Us = seq_len(nrow(Wlongs)),
-                 XXbetas = XXbetas, XXsbetas = XXsbetas, XX = XX, XXs = XXs, ZZ = ZZ,
-                 ZZs = ZZs, P = P[ids[[1]]], w = rep(wk, nT),
-                 Pw = P[ids[[1]]] * rep(wk, nT), idT = id[outcome], idTs = ids[outcome],
-                 outcome = outcome, indFixed = indFixed, indRandom = indRandom,
-                 trans_Funs = trans_Funs)
+    if (typeSurvInf == "counting" && multiState) {
+        Data <- list(y = y, Xbetas = Xbetas, X = X, Z = Z, RE_inds = RE_inds, 
+                     RE_inds2 = RE_inds2, idL = idL, idL2 = idL2, sigmas = postMean_sigmas, 
+                     invD = postMean_inv_D[[1]], fams = fams, links = links, Time = Time, 
+                     event = event, idGK_fast = which(idGK_fast) - 1, W1 = W1, W1s = W1s, 
+                     event_colSumsW1 = colSums(event * W1), W2 = W2, W2s = W2s, 
+                     event_colSumsW2 = if (ncol(W2)) colSums(event * W2), 
+                     Wlong = Wlong, Wlongs = Wlongs, 
+                     event_colSumsWlong = colSums(event * Wlong), 
+                     U = U, Us = Us, col_inds = attr(Wlong, "col_inds"), 
+                     row_inds_U = seq_len(nrow(Wlong)), row_inds_Us = seq_len(nrow(Wlongs)), 
+                     XXbetas = XXbetas, XXsbetas = XXsbetas, XX = XX, XXs = XXs, ZZ = ZZ, 
+                     ZZs = ZZs, P = P[ids[[1]]], w = rep(wk, nT.long), 
+                     Pw = P[ids[[1]]] * rep(wk, nT.long), idT = id[outcome], idTs = ids[outcome], 
+                     idT2 = idT.list[outcome], idT2s = idTs.list[outcome], idT_rsum = idT_rsum, 
+                     outcome = outcome, indFixed = indFixed, indRandom = indRandom, 
+                     trans_Funs = trans_Funs, nRisks = nRisks, 
+                     kn_strat_last = cumsum(knots_strat) - 1, 
+                     kn_strat_first = cumsum(knots_strat) - knots_strat, 
+                     rows_wlong = rows_wlong, rows_wlongs = rows_wlongs)
+    } else {
+        # Data passed to the MCMC
+        Data <- list(y = y, Xbetas = Xbetas, X = X, Z = Z, RE_inds = RE_inds,
+                     RE_inds2 = RE_inds2, idL = idL, idL2 = idL2, sigmas = postMean_sigmas,
+                     invD = postMean_inv_D[[1]], fams = fams, links = links, Time = Time,
+                     event = event, idGK_fast = which(idGK_fast) - 1, W1 = W1, W1s = W1s,
+                     event_colSumsW1 = colSums(event * W1), W2 = W2, W2s = W2s,
+                     event_colSumsW2 = if (ncol(W2)) colSums(event * W2),
+                     Wlong = Wlong, Wlongs = Wlongs,
+                     event_colSumsWlong = colSums(event * Wlong),
+                     U = U, Us = Us, col_inds = attr(Wlong, "col_inds"),
+                     row_inds_U = seq_len(nrow(Wlong)), row_inds_Us = seq_len(nrow(Wlongs)),
+                     XXbetas = XXbetas, XXsbetas = XXsbetas, XX = XX, XXs = XXs, ZZ = ZZ,
+                     ZZs = ZZs, P = P[ids[[1]]], w = rep(wk, nT),
+                     Pw = P[ids[[1]]] * rep(wk, nT), idT = id[outcome], idTs = ids[outcome],
+                     outcome = outcome, indFixed = indFixed, indRandom = indRandom,
+                     trans_Funs = trans_Funs)
+    }
     if (typeSurvInf == "interval") {
         Data <- c(Data, list(Levent1 = event == 1, 
                              Levent01 = event == 1 | event == 0,
