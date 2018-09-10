@@ -707,7 +707,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                 }
                 data$sigmas <- sampl(sigmas, ii)
                 data$invD <- as.matrix(sampl(inv_D, ii)[[1]])
-                oo <- lap_rwm_C(inits, data, priors, scales, Covs, control, interval_cens)
+                oo <- lap_rwm_C(inits, data, priors, scales, Covs, control, interval_cens, multiState)
                 current_betas <- unlist(betas., use.names = FALSE)
                 n_betas <- length(current_betas)
                 pr_betas <- c(dmvnorm2(rbind(current_betas), rep(0, n_betas),
