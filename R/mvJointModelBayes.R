@@ -312,12 +312,42 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                 by = "id2merge", sort = FALSE, all = FALSE)
         dataLS_int.id2[[TimeVar]] <- dataLS_int.id2[[timeVar]]
     }
-    # design matrices for the survival submodel, W1 is for the baseline hazard,
-    # W2 for the baseline and external time-varying covariates
-    W1 <- splines::splineDesign(con$knots, Time, ord = con$ordSpline)
-    W1s <- splines::splineDesign(con$knots, c(t(st)), ord = con$ordSpline)
-    W2 <- model.matrix(Terms, data = dataS.id)[, -1, drop = FALSE]
-    W2s <- model.matrix(Terms, data = dataS.id2)[, -1, drop = FALSE]
+    if (typeSurvInf == "counting" && multiState) {
+        W1 <- mapply(FUN = function (x, y) splines::splineDesign(x, y, ord = con$ordSpline), 
+                     con$knots, split.TimeR, SIMPLIFY = FALSE)
+        W1 <- mapply(FUN = function (w1, ind) {
+            out <- matrix(0, length(Time), ncol(w1))
+            out[strat == ind, ] <- w1
+            out
+        }, W1, levels(strat), SIMPLIFY = FALSE)
+        knots_strat <- lapply(W1, ncol)
+        knots_strat <- do.call(c, knots_strat)
+        W1 <- do.call(cbind, W1)
+        strat_GQ <- rep(strat, each = con$GQsurv.k)
+        split.TimeR_GQ <- split(c(t(st)), strat_GQ)
+        W1s <- mapply(FUN = function (x, y) splines::splineDesign(x, y, ord = con$ordSpline), 
+                      con$knots, split.TimeR_GQ, SIMPLIFY = FALSE)
+        W1s <- mapply(FUN = function (w1s, ind) {
+            out <- matrix(0, length(Time) * con$GQsurv.k, ncol(w1s))
+            out[strat_GQ == ind, ] <- w1s
+            out
+        }, W1s, levels(strat), SIMPLIFY = FALSE)
+        knots_strat_GQ <- lapply(W1s, ncol)
+        knots_strat_GQ <- do.call(c, knots_strat_GQ)
+        W1s <- do.call(cbind, W1s)
+        dataS.id.clone <- dataS
+        Terms <- drop.terms(Terms, attr(Terms, "specials")$strata - 1, 
+                            keep.response = TRUE)
+        W2 <- model.matrix(Terms, data = dataS.id.clone)[, -1, drop = FALSE]
+        W2s <- model.matrix(Terms, data = dataS.id2)[, -1, drop = FALSE]
+    } else {
+        # design matrices for the survival submodel, W1 is for the baseline hazard,
+        # W2 for the baseline and external time-varying covariates
+        W1 <- splines::splineDesign(con$knots, Time, ord = con$ordSpline)
+        W1s <- splines::splineDesign(con$knots, c(t(st)), ord = con$ordSpline)
+        W2 <- model.matrix(Terms, data = dataS.id)[, -1, drop = FALSE]
+        W2s <- model.matrix(Terms, data = dataS.id2)[, -1, drop = FALSE]
+    }
     if (typeSurvInf == "interval") {
         W1_int <- splines::splineDesign(con$knots, TimeL, ord = con$ordSpline, 
                                         outer.ok = TRUE)
