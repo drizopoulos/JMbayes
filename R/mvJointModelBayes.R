@@ -519,10 +519,23 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         x <- c(x[-length(x)] != x[-1L], TRUE)
         which(x) - 1
     })
-    Wlong <- designMatLong(XX, postMean_betas, ZZ, postMean_b, id, outcome,
-                           indFixed, indRandom, U, trans_Funs)
-    Wlongs <- designMatLong(XXs, postMean_betas, ZZs, postMean_b, ids, outcome,
-                            indFixed, indRandom, Us, trans_Funs)
+    if (typeSurvInf == "counting" && multiState) {
+        idT.list <- list(idT)
+        Wlong <- designMatLong(XX, postMean_betas, ZZ, postMean_b, idT.list, outcome, 
+                               indFixed, indRandom, U, trans_Funs)
+        idTs <- rep(idT, each = K)
+        idTs.list <- list(idTs)
+        Wlongs <- designMatLong(XXs, postMean_betas, ZZs, postMean_b, idTs.list, outcome, 
+                                indFixed, indRandom, Us, trans_Funs)
+        idT_rsum <- c(idT[ilength(idT)] != idT[-1L], TRUE)
+        idT_rsum <- which(idT_rsum) - 1
+    } else {
+        Wlong <- designMatLong(XX, postMean_betas, ZZ, postMean_b, id, outcome,
+                               indFixed, indRandom, U, trans_Funs)
+        Wlongs <- designMatLong(XXs, postMean_betas, ZZs, postMean_b, ids, outcome,
+                                indFixed, indRandom, Us, trans_Funs)
+        idT_rsum <- NULL
+    }
     if (typeSurvInf == "interval") {
         Wlongs_int <- designMatLong(XXs_int, postMean_betas, ZZs_int, postMean_b, ids, 
                                     outcome, indFixed, indRandom, Us_int, trans_Funs)
