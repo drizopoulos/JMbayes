@@ -216,12 +216,17 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         dataL_int.id <- dataL.id
         dataL_int.id[[timeVar]] <- TimeL
     }
-    # create the data set used for the calculation of the cumulative hazard
-    # for the specified Gaussian quadrature points use the rows from the original
-    # longitudinal data set that correspond to these points; this is to account for
-    # time-varying covariates in the longitudinal submodel
-    dataL.id2 <- right_rows(dataL, dataL[[timeVar]], dataL[[idVar]], st)
-    dataL.id2[[timeVar]] <- c(t(st))
+    if (typeSurvInf == "counting" && multiState) {
+        dataL.id2 <- right_rows_mstate(dataL, dataL[[timeVar]], dataL[[idVar]], st, idT)
+        dataL.id2[[timeVar]] <- c(t(st))
+    } else {
+        # create the data set used for the calculation of the cumulative hazard
+        # for the specified Gaussian quadrature points use the rows from the original
+        # longitudinal data set that correspond to these points; this is to account for
+        # time-varying covariates in the longitudinal submodel
+        dataL.id2 <- right_rows(dataL, dataL[[timeVar]], dataL[[idVar]], st)
+        dataL.id2[[timeVar]] <- c(t(st))
+    }
     if (typeSurvInf == "interval") {
         dataL_int.id2 <- right_rows(dataL, dataL[[timeVar]], dataL[[idVar]], st_int)
         dataL_int.id2[[timeVar]] <- c(t(st_int))
