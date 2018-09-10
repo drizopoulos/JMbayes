@@ -243,19 +243,60 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         }
         dataS[[idVar]] <- idT
     }
-    dataS.id <- last_rows(dataS, dataS[[idVar]])
-    dataS.id2 <- right_rows(dataS, TimeLl, idT, st)
-    survVars_notin_long <- survVars_notin_long2 <- !names(dataS) %in% names(dataL)
-    survVars_notin_long[names(dataS) == idVar] <- TRUE
-    dataLS <- merge(dataL, dataS.id[survVars_notin_long], all = TRUE, sort = FALSE)
-    dataLS.id <- merge(dataL.id, dataS.id[survVars_notin_long], by = idVar,
-                       all = TRUE, sort = FALSE)
-    dataLS.id[[TimeVar]] <- dataLS.id[[timeVar]]
-    dataS.id2[["id2merge"]] <- paste(dataS.id2[[idVar]], round(c(t(st)), 8), sep = ":")
-    dataL.id2[["id2merge"]] <- paste(dataL.id2[[idVar]], round(c(t(st)), 8), sep = ":")
-    dataLS.id2 <- merge(dataL.id2, dataS.id2[survVars_notin_long2], by = "id2merge",
-                        sort = FALSE, all = FALSE)
-    dataLS.id2[[TimeVar]] <- dataLS.id2[[timeVar]]
+    if (typeSurvInf == "counting" & multiState) {
+        dataS.id <- data_MultiState
+        dataS.split <- split(dataS, strat)
+        st.strat.split <- split(rownames(st), strat)
+        dataS.id.long <- NULL
+        for (i in 1:n.strat) {
+            dataS.id.long[[i]] <- right_rows(dataS.split[[i]], split.TimeL[[i]], dataS.split[[i]][[idVar_MultiState]], 
+                                             st[st.strat.split[[i]], ]) 
+        }
+        dataS.id2 <- do.call(rbind, dataS.id.long)
+        dataS.id2 <- dataS.id2[order(dataS.id2[[idVar_MultiState]]), ]
+        survVars_notin_long <- survVars_notin_long2 <- !names(dataS) %in% names(dataL)
+        survVars_notin_long[names(dataS) == idVar] <- TRUE
+        dataS.id.long2 <- lapply(dataS.split, FUN = function (x) x[survVars_notin_long])
+        dataL.id.split <- split(dataL.id, dataL.id[[state.id]])
+        dataLS.id <- mapply(merge, dataL.id.split, dataS.id.long2, by = idVar, 
+                            all = FALSE, SIMPLIFY = FALSE, sort = FALSE)
+        dataLS.id <- do.call(rbind, dataLS.id)
+        dataLS.id <- dataLS.id[order(dataLS.id[[idVar]]), ]
+        dataLS.id[[TimeVar]] <- dataLS.id[[timeVar]]
+        dataS.id2[["id2merge"]] <- paste(dataS.id2[[idVar]], round(c(t(st)), 8), sep = ":")
+        dataL.id2[["id2merge"]] <- paste(dataL.id2[[idVar]], round(c(t(st)), 8), sep = ":")
+        dataS.id2.split <- split(dataS.id2, dataS.id2[[state.id2]])
+        dataS.id2.split <- lapply(dataS.id2.split, FUN = function (x) x[survVars_notin_long])
+        dataL.id2[[state.id2]] <- rep(dataS.id[[state.id]], each = K)
+        dataL.id2.split <- split(dataL.id2, dataL.id2[[state.id2]])
+        dataLS.id2 <- mapply(merge, dataL.id2.split, dataS.id2.split, by = "id2merge", 
+                             all = FALSE, SIMPLIFY = FALSE, sort = FALSE)
+        dataLS.id2 <- do.call(rbind, dataLS.id2)
+        col.rm1 <- colnames(dataLS.id2)[grep(paste0(state.id2, "*"), colnames(dataLS.id2))]
+        col.rm2 <- colnames(dataLS.id2)[grep(paste0(idVar, ".", "[x | y]"), colnames(dataLS.id2))]
+        col.rm.x <- c(col.rm1[grep("*.x", col.rm1)], col.rm2[grep("*.x", col.rm2)])
+        col.rm.y <- c(col.rm1[grep("*.y", col.rm1)], col.rm2[grep("*.y", col.rm2)])
+        col.rm <- unname(sapply(col.rm, FUN = function (x) gsub(".y", "", x)))
+        dataLS.id2 <- dataLS.id2[, !colnames(dataLS.id2) %in% col.rm.x]
+        colnames(dataLS.id2)[colnames(dataLS.id2) %in% col.rm.y] <- col.rm
+        dataLS.id2 <- dataLS.id2[order(dataLS.id2[[idVar]]), ]
+        colnames(dataLS.id2) <- gsub("^strata*\\((.*)\\).*", "\\1", colnames(dataLS.id2))
+        dataLS.id2[[TimeVar]] <- dataLS.id2[[timeVar]]
+    } else {
+        dataS.id <- last_rows(dataS, dataS[[idVar]])
+        dataS.id2 <- right_rows(dataS, TimeLl, idT, st)
+        survVars_notin_long <- survVars_notin_long2 <- !names(dataS) %in% names(dataL)
+        survVars_notin_long[names(dataS) == idVar] <- TRUE
+        dataLS <- merge(dataL, dataS.id[survVars_notin_long], all = TRUE, sort = FALSE)
+        dataLS.id <- merge(dataL.id, dataS.id[survVars_notin_long], by = idVar,
+                           all = TRUE, sort = FALSE)
+        dataLS.id[[TimeVar]] <- dataLS.id[[timeVar]]
+        dataS.id2[["id2merge"]] <- paste(dataS.id2[[idVar]], round(c(t(st)), 8), sep = ":")
+        dataL.id2[["id2merge"]] <- paste(dataL.id2[[idVar]], round(c(t(st)), 8), sep = ":")
+        dataLS.id2 <- merge(dataL.id2, dataS.id2[survVars_notin_long2], by = "id2merge",
+                            sort = FALSE, all = FALSE)
+        dataLS.id2[[TimeVar]] <- dataLS.id2[[timeVar]] 
+    }
     # corresponding dataset for interval censoring data
     if (typeSurvInf == "interval") {
         dataS_int.id <- last_rows(dataS, dataS[[idVar]])
