@@ -429,7 +429,7 @@ mat bounds_Cov (mat Sigma, double eps2, double eps3) {
 
 // [[Rcpp::export]]
 List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
-                List control, bool interval_cens) {
+                List control, bool interval_cens, bool multiState) {
     // Data
     List y = as<List>(Data["y"]);
     field<vec> yF = List2Field_vec(y);
