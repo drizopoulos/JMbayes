@@ -517,8 +517,16 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     double tau_alphas = as<double>(initials["tau_alphas"]);
     double xi_alphas = as<double>(initials["tau_alphas"]);
     int n = b.n_rows;
+    int nT = event.n_elem;
+    if (multiState) {
+        n = n;
+        nT = nT;
+    } else {
+        n = n;
+        nT = n;
+    }
     int ns = Pw.n_rows;
-    int n_quadpoints = round(ns / n);
+    int n_quadpoints = round(ns / nT);
     // Priors
     vec mean_Bs_gammas = as<vec>(priors["mean_Bs_gammas"]);
     mat Tau_Bs_gammas = as<mat>(priors["Tau_Bs_gammas"]);
