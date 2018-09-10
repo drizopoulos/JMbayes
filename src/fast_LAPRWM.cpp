@@ -452,6 +452,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     CharacterVector trans_Funs = as<CharacterVector>(Data["trans_Funs"]);
     vec event = as<vec>(Data["event"]);
     uvec idGK = as<uvec>(Data["idGK_fast"]);
+    uvec idT_rsum = as<uvec>(Data["idT_rsum"]);
     mat W1 = as<mat>(Data["W1"]);
     mat W1s = as<mat>(Data["W1s"]);
     mat W2 = as<mat>(Data["W2"]);
@@ -476,7 +477,15 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     field<uvec> idTF = List2Field_uvec(idT);
     List idTs = as<List>(Data["idTs"]);
     field<uvec> idTsF = List2Field_uvec(idTs);
+    List idT2 = as<List>(Data["idT2"]);
+    field<uvec> idT2F = List2Field_uvec(idT2);
+    List idT2s = as<List>(Data["idT2s"]);
+    field<uvec> idT2sF = List2Field_uvec(idT2s);
     vec Pw = as<vec>(Data["Pw"]);
+    List rows_wlong = as<List>(Data["rows_wlong"]);
+    field<uvec> rows_wlongF = List2Field_uvec(rows_wlong);
+    List rows_wlongs = as<List>(Data["rows_wlongs"]);
+    field<uvec> rows_wlongsF = List2Field_uvec(rows_wlongs);
     // interval censoring extras
     LogicalVector Levent1 = as<LogicalVector>(Data["Levent1"]);
     LogicalVector Levent01 = as<LogicalVector>(Data["Levent01"]);
