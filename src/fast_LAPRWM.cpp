@@ -666,7 +666,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
         for (int i = 0; i < n_block; ++i) {
             int iter = it * n_block + i;
             // sample random effects
-            vec current_logpost_RE = current_log_pyb + current_log_ptb + current_log_pb;
+            vec current_logpost_RE = current_log_pyb + rowsum(current_log_ptb, idT_rsum) + current_log_pb;
             new_b = b + extract_b(rand_b, i);
             field<vec> new_eta = lin_predF(XbetasF, ZF, new_b, RE_indsF, idLF);
             vec new_log_pyb = log_longF(yF, new_eta, fams, links, sigmas, idL2F, n);
