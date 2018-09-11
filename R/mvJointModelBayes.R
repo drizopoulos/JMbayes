@@ -345,6 +345,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         # W2 for the baseline and external time-varying covariates
         W1 <- splines::splineDesign(con$knots, Time, ord = con$ordSpline)
         W1s <- splines::splineDesign(con$knots, c(t(st)), ord = con$ordSpline)
+        knots_strat <- ncol(W1)
         W2 <- model.matrix(Terms, data = dataS.id)[, -1, drop = FALSE]
         W2s <- model.matrix(Terms, data = dataS.id2)[, -1, drop = FALSE]
     }
@@ -633,6 +634,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                      Pw = P[ids[[1]]] * rep(wk, nT), idT = id[outcome], idTs = ids[outcome],
                      outcome = outcome, indFixed = indFixed, indRandom = indRandom,
                      trans_Funs = trans_Funs, nRisks = 1, 
+                     kn_strat_last = cumsum(knots_strat) - 1, 
+                     kn_strat_first = cumsum(knots_strat) - knots_strat,
                      idT_rsum = idT_rsum, idT2 = id[outcome], idT2s = ids[outcome], 
                      rows_wlong = rows_wlong, rows_wlongs = rows_wlongs)
     }
