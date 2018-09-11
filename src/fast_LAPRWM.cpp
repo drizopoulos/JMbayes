@@ -619,14 +619,14 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     field<vec> current_eta = lin_predF(XbetasF, ZF, b, RE_indsF, idLF);
     vec current_log_pyb = log_longF(yF, current_eta, fams, links, sigmas, idL2F, n);
     vec current_log_pb = - 0.5 * sum((b * invD) % b, 1);
-    mat current_Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idTF,
-                                      col_indsF, row_inds_U, n, n_alphas, trans_Funs);
+    mat current_Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idT2F,
+                                      col_indsF, row_inds_U, nT, n_alphas, trans_Funs);
     mat current_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idTsF,
                                        col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
     mat current_Wlongs_int = current_Wlongs;
     if (interval_cens) {
         current_Wlongs_int = lin_pred_matF(XXsbetasF_int, ZZsF_int, b, UsF_int, RE_inds2F,
-                                           idTsF, col_indsF, row_inds_Us, ns, n_alphas, 
+                                           idT2sF, col_indsF, row_inds_Us, ns, n_alphas, 
                                            trans_Funs);
     }
     vec current_log_h = W1 * Bs_gammas + W2 * gammas + current_Wlong * alphas;
