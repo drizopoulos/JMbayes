@@ -604,7 +604,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     mat out_Bs_gammas(n_Bs_gammas, n_out, fill::zeros);
     mat out_gammas(n_gammas, n_out, fill::zeros);
     mat out_alphas(n_alphas, n_out, fill::zeros);
-    vec out_tau_Bs_gammas(n_out, fill::zeros);
+    mat out_tau_Bs_gammas(nRisks, n_out, fill::zeros);
     vec out_tau_gammas(n_out, fill::zeros);
     vec out_tau_alphas(n_out, fill::zeros);
     mat out_phi_gammas(n_gammas, n_out, fill::zeros);
