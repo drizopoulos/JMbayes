@@ -671,9 +671,9 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             field<vec> new_eta = lin_predF(XbetasF, ZF, new_b, RE_indsF, idLF);
             vec new_log_pyb = log_longF(yF, new_eta, fams, links, sigmas, idL2F, n);
             vec new_log_pb = - 0.5 * sum((new_b * invD) % new_b, 1);
-            mat new_Wlong = lin_pred_matF(XXbetasF, ZZF, new_b, UF, RE_inds2F, idTF,
-                                              col_indsF, row_inds_U, n, n_alphas, trans_Funs);
-            mat new_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, new_b, UsF, RE_inds2F, idTsF,
+            mat new_Wlong = lin_pred_matF(XXbetasF, ZZF, new_b, UF, RE_inds2F, idT2F,
+                                              col_indsF, row_inds_U, nT, n_alphas, trans_Funs);
+            mat new_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, new_b, UsF, RE_inds2F, idT2sF,
                                            col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
             mat new_Wlongs_int = new_Wlongs;
             if (interval_cens) {
