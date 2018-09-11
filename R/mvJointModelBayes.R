@@ -537,6 +537,9 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         Wlongs <- designMatLong(XXs, postMean_betas, ZZs, postMean_b, ids, outcome,
                                 indFixed, indRandom, Us, trans_Funs)
         idT_rsum <- 0
+        idTs <- rep(idT, each = K)
+        rows_wlong <- tapply(which(idT == idT), idT, c)
+        rows_wlongs <- tapply(which(idTs == idTs, idTs, c))
     }
     if (typeSurvInf == "interval") {
         Wlongs_int <- designMatLong(XXs_int, postMean_betas, ZZs_int, postMean_b, ids, 
