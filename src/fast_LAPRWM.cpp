@@ -708,19 +708,19 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                     b.row(m) = new_b.row(m);
                     current_log_pyb.at(m) = new_log_pyb.at(m);
                     current_log_pb.at(m) = new_log_pb.at(m);
-                    current_Wlong.row(m) = new_Wlong.row(m);
+                    current_Wlong.rows(rows_wlongF.at(m)) = new_Wlong.rows(rows_wlongF.at(m));
                     int first = m * n_quadpoints;
                     int last = first + n_quadpoints - 1;
-                    current_Wlongs.rows(first, last) = new_Wlongs.rows(first, last);
+                    current_Wlongs.rows(rows_wlongsF.at(m)) = new_Wlongs.rows(rows_wlongsF.at(m));
                     if (interval_cens) {
                         current_Wlongs_int.rows(first, last) = new_Wlongs_int.rows(first, last);
                     }
-                    current_log_h.at(m) = new_log_h.at(m);
-                    current_H.at(m) = new_H.at(m);
+                    current_log_h.elem(rows_wlongF.at(m)) = new_log_h.elem(rows_wlongF.at(m));
+                    current_H.elem(rows_wlongF.at(m)) = new_H.elem(rows_wlongF.at(m));
                     if (interval_cens) {
                         current_HL.at(m) = new_HL.at(m);
                     }
-                    current_log_ptb.at(m) = new_log_ptb.at(m);
+                    current_log_ptb.elem(rows_wlongF.at(m)) = new_log_ptb.elem(rows_wlongF.at(m));
                 }
             }
             // sample survival
