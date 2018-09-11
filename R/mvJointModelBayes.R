@@ -276,7 +276,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         col.rm2 <- colnames(dataLS.id2)[grep(paste0(idVar, ".", "[x | y]"), colnames(dataLS.id2))]
         col.rm.x <- c(col.rm1[grep("*.x", col.rm1)], col.rm2[grep("*.x", col.rm2)])
         col.rm.y <- c(col.rm1[grep("*.y", col.rm1)], col.rm2[grep("*.y", col.rm2)])
-        col.rm <- unname(sapply(col.rm, FUN = function (x) gsub(".y", "", x)))
+        col.rm <- unname(sapply(col.rm.y, FUN = function (x) gsub(".y", "", x)))
         dataLS.id2 <- dataLS.id2[, !colnames(dataLS.id2) %in% col.rm.x]
         colnames(dataLS.id2)[colnames(dataLS.id2) %in% col.rm.y] <- col.rm
         dataLS.id2 <- dataLS.id2[order(dataLS.id2[[idVar]]), ]
