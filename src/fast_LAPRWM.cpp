@@ -700,7 +700,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             } else {
                 new_log_ptb = (event % new_log_h) - new_H;
             }
-            vec new_logpost_RE = new_log_pyb + new_log_ptb + new_log_pb;
+            vec new_logpost_RE = new_log_pyb + rowsum(new_log_ptb, idT_rsum) + new_log_pb;
             vec lRatio_RE = new_logpost_RE - current_logpost_RE;
             for (int m = 0; m < n; ++m) {
                 if (log_us_RE.at(m, iter) < lRatio_RE[m]) {
