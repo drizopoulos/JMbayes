@@ -724,8 +724,17 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                 }
             }
             // sample survival
+            vec log_priors(nRisks, fill::zeros);
+            for (int ij = 0; ij < nRisks; ++ij); {
+                log_priors.at(ij) = logPrior(Bs_gammas.subvec(kn_strat_first.at(ij), kn_strat_last.at(ij)), 
+                              mean_Bs_gammas.subvec(kn_strat_first.at(ij), kn_strat_last.at(ij)), 
+                              Tau_Bs_gammas.submat(kn_strat_first.at(ij), kn_strat_first.at(ij), 
+                                                   kn_strat_last.at(ij), kn_strat_last.at(ij)), 
+                                                   tau_Bs_gammas.at(ij));
+            }
+          double log_priors_sum = sum(log_priors);
           double current_logpost_surv = sum(current_log_ptb) + 
-                logPrior(Bs_gammas, mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas) +
+                log_priors_sum +
                 logPrior(gammas, mean_gammas, Tau_gammas, tau_gammas) +
                 logPrior(alphas, mean_alphas, Tau_alphas, tau_alphas);
             new_Bs_gammas = Bs_gammas + rand_Bs_gammas.col(i);
