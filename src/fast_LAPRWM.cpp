@@ -725,7 +725,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             }
             // sample survival
             vec log_priors(nRisks, fill::zeros);
-            for (int ij = 0; ij < nRisks; ++ij); {
+            for (int ij = 0; ij < nRisks; ++ij) {
                 log_priors.at(ij) = logPrior(Bs_gammas.subvec(kn_strat_first.at(ij), kn_strat_last.at(ij)), 
                               mean_Bs_gammas.subvec(kn_strat_first.at(ij), kn_strat_last.at(ij)), 
                               Tau_Bs_gammas.submat(kn_strat_first.at(ij), kn_strat_first.at(ij), 
