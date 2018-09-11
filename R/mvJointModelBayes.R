@@ -537,7 +537,8 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                indFixed, indRandom, U, trans_Funs)
         Wlongs <- designMatLong(XXs, postMean_betas, ZZs, postMean_b, ids, outcome,
                                 indFixed, indRandom, Us, trans_Funs)
-        idT_rsum <- 0
+        idT_rsum <- c(idT[-length(idT)] != idT[-1L], TRUE)
+        idT_rsum <- which(idT_rsum) - 1
         idTs <- rep(idT, each = K)
         rows_wlong <- tapply(which(idT == idT), idT, c)
         rows_wlongs <- tapply(which(idTs == idTs), idTs, c)
