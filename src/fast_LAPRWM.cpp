@@ -760,7 +760,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             }
             vec log_priors_new(nRisks, fill::zeros);
             for (int ijk = 0; ijk < nRisks; ++ijk) {
-                log_priors_new.at(ijk) = logPrior(Bs_gammas.subvec(kn_strat_first.at(ijk), kn_strat_last.at(ijk)), 
+                log_priors_new.at(ijk) = logPrior(new_Bs_gammas.subvec(kn_strat_first.at(ijk), kn_strat_last.at(ijk)), 
                                   mean_Bs_gammas.subvec(kn_strat_first.at(ijk), kn_strat_last.at(ijk)), 
                                   Tau_Bs_gammas.submat(kn_strat_first.at(ijk), kn_strat_first.at(ijk), 
                                                        kn_strat_last.at(ijk), kn_strat_last.at(ijk)), 
