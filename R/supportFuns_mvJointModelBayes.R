@@ -24,6 +24,19 @@ right_rows <- function (data, times, ids, Q_points) {
     data[c(ind), ]
 }
 
+right_rows_mstate <- function(data, times, ids, Q_points, idT) {
+    fids <- factor(ids, levels = unique(ids))
+    ind <- mapply(findInterval, split(Q_points, row(Q_points)), 
+                  split(times, fids)[idT])
+    ind[ind < 1] <- 1
+    if (!is.matrix(ind)) {
+        ind <- rbind(ind)
+    }
+    rownams_id <- split(row.names(data), fids)[idT]
+    ind <- mapply(`[`, rownams_id, split(ind, col(ind)))
+    data[c(ind), ]
+}
+
 Xbetas_calc <- function (X, betas, index = NULL, outcome) {
     n <- length(X)
     out <- vector("list", n)

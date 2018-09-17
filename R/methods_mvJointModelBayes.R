@@ -135,7 +135,11 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_eff
             colnames(x$mcmc$D) <- paste0("D[", dnams[, 1], ", ", dnams[, 2], "]")
         }
         if (any(param == "tau_Bs_gammas")) {
-            colnames(x$mcmc$tau_Bs_gammas) <- "tau_Bs_gammas"
+            if (!x$model_info$multiState) {
+                colnames(x$mcmc$tau_Bs_gammas) <- "tau_Bs_gammas"
+            } else {
+                colnames(x$mcmc$tau_Bs_gammas) <- c(paste0("tau_Bs_Gammas", "(trans = ", seq_len(ncol(x$mcmc$tau_Bs_gammas)), ")"))
+            }
         }
         which_parms <- unlist(sapply(param,
                                      function (pat) grep(paste0("^", pat), names(x$mcmc))),

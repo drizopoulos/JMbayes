@@ -429,7 +429,7 @@ mat bounds_Cov (mat Sigma, double eps2, double eps3) {
 
 // [[Rcpp::export]]
 List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
-                List control, bool interval_cens) {
+                List control, bool interval_cens, bool multiState) {
     // Data
     List y = as<List>(Data["y"]);
     field<vec> yF = List2Field_vec(y);
@@ -452,6 +452,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     CharacterVector trans_Funs = as<CharacterVector>(Data["trans_Funs"]);
     vec event = as<vec>(Data["event"]);
     uvec idGK = as<uvec>(Data["idGK_fast"]);
+    uvec idT_rsum = as<uvec>(Data["idT_rsum"]);
     mat W1 = as<mat>(Data["W1"]);
     mat W1s = as<mat>(Data["W1s"]);
     mat W2 = as<mat>(Data["W2"]);
@@ -476,7 +477,18 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     field<uvec> idTF = List2Field_uvec(idT);
     List idTs = as<List>(Data["idTs"]);
     field<uvec> idTsF = List2Field_uvec(idTs);
+    List idT2 = as<List>(Data["idT2"]);
+    field<uvec> idT2F = List2Field_uvec(idT2);
+    List idT2s = as<List>(Data["idT2s"]);
+    field<uvec> idT2sF = List2Field_uvec(idT2s);
     vec Pw = as<vec>(Data["Pw"]);
+    List rows_wlong = as<List>(Data["rows_wlong"]);
+    field<uvec> rows_wlongF = List2Field_uvec(rows_wlong);
+    List rows_wlongs = as<List>(Data["rows_wlongs"]);
+    field<uvec> rows_wlongsF = List2Field_uvec(rows_wlongs);
+    double nRisks = as<double>(Data["nRisks"]);
+    vec kn_strat_last = as<vec>(Data["kn_strat_last"]);
+    vec kn_strat_first = as<vec>(Data["kn_strat_first"]);
     // interval censoring extras
     LogicalVector Levent1 = as<LogicalVector>(Data["Levent1"]);
     LogicalVector Levent01 = as<LogicalVector>(Data["Levent01"]);
@@ -500,13 +512,21 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     vec phi_alphas = as<vec>(initials["phi_alphas"]);
     vec nu_alphas = as<vec>(initials["phi_alphas"]);
     vec tau_td_alphas = as<vec>(initials["tau_td_alphas"]);
-    double tau_Bs_gammas = as<double>(initials["tau_Bs_gammas"]);
+    vec tau_Bs_gammas = as<vec>(initials["tau_Bs_gammas"]);
     double tau_gammas = as<double>(initials["tau_gammas"]);
     double tau_alphas = as<double>(initials["tau_alphas"]);
     double xi_alphas = as<double>(initials["tau_alphas"]);
     int n = b.n_rows;
+    int nT = event.n_elem;
+    if (multiState) {
+        n = n;
+        nT = nT;
+    } else {
+        n = n;
+        nT = n;
+    }
     int ns = Pw.n_rows;
-    int n_quadpoints = round(ns / n);
+    int n_quadpoints = round(ns / nT);
     // Priors
     vec mean_Bs_gammas = as<vec>(priors["mean_Bs_gammas"]);
     mat Tau_Bs_gammas = as<mat>(priors["Tau_Bs_gammas"]);
@@ -584,7 +604,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     mat out_Bs_gammas(n_Bs_gammas, n_out, fill::zeros);
     mat out_gammas(n_gammas, n_out, fill::zeros);
     mat out_alphas(n_alphas, n_out, fill::zeros);
-    vec out_tau_Bs_gammas(n_out, fill::zeros);
+    mat out_tau_Bs_gammas(nRisks, n_out, fill::zeros);
     vec out_tau_gammas(n_out, fill::zeros);
     vec out_tau_alphas(n_out, fill::zeros);
     mat out_phi_gammas(n_gammas, n_out, fill::zeros);
@@ -599,14 +619,14 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     field<vec> current_eta = lin_predF(XbetasF, ZF, b, RE_indsF, idLF);
     vec current_log_pyb = log_longF(yF, current_eta, fams, links, sigmas, idL2F, n);
     vec current_log_pb = - 0.5 * sum((b * invD) % b, 1);
-    mat current_Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idTF,
-                                      col_indsF, row_inds_U, n, n_alphas, trans_Funs);
-    mat current_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idTsF,
+    mat current_Wlong = lin_pred_matF(XXbetasF, ZZF, b, UF, RE_inds2F, idT2F,
+                                      col_indsF, row_inds_U, nT, n_alphas, trans_Funs);
+    mat current_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, b, UsF, RE_inds2F, idT2sF,
                                        col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
     mat current_Wlongs_int = current_Wlongs;
     if (interval_cens) {
         current_Wlongs_int = lin_pred_matF(XXsbetasF_int, ZZsF_int, b, UsF_int, RE_inds2F,
-                                           idTsF, col_indsF, row_inds_Us, ns, n_alphas, 
+                                           idT2sF, col_indsF, row_inds_Us, ns, n_alphas, 
                                            trans_Funs);
     }
     vec current_log_h = W1 * Bs_gammas + W2 * gammas + current_Wlong * alphas;
@@ -646,14 +666,14 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
         for (int i = 0; i < n_block; ++i) {
             int iter = it * n_block + i;
             // sample random effects
-            vec current_logpost_RE = current_log_pyb + current_log_ptb + current_log_pb;
+            vec current_logpost_RE = current_log_pyb + rowsum(current_log_ptb, idT_rsum) + current_log_pb;
             new_b = b + extract_b(rand_b, i);
             field<vec> new_eta = lin_predF(XbetasF, ZF, new_b, RE_indsF, idLF);
             vec new_log_pyb = log_longF(yF, new_eta, fams, links, sigmas, idL2F, n);
             vec new_log_pb = - 0.5 * sum((new_b * invD) % new_b, 1);
-            mat new_Wlong = lin_pred_matF(XXbetasF, ZZF, new_b, UF, RE_inds2F, idTF,
-                                              col_indsF, row_inds_U, n, n_alphas, trans_Funs);
-            mat new_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, new_b, UsF, RE_inds2F, idTsF,
+            mat new_Wlong = lin_pred_matF(XXbetasF, ZZF, new_b, UF, RE_inds2F, idT2F,
+                                              col_indsF, row_inds_U, nT, n_alphas, trans_Funs);
+            mat new_Wlongs = lin_pred_matF(XXsbetasF, ZZsF, new_b, UsF, RE_inds2F, idT2sF,
                                            col_indsF, row_inds_Us, ns, n_alphas, trans_Funs);
             mat new_Wlongs_int = new_Wlongs;
             if (interval_cens) {
@@ -680,7 +700,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             } else {
                 new_log_ptb = (event % new_log_h) - new_H;
             }
-            vec new_logpost_RE = new_log_pyb + new_log_ptb + new_log_pb;
+            vec new_logpost_RE = new_log_pyb + rowsum(new_log_ptb, idT_rsum) + new_log_pb;
             vec lRatio_RE = new_logpost_RE - current_logpost_RE;
             for (int m = 0; m < n; ++m) {
                 if (log_us_RE.at(m, iter) < lRatio_RE[m]) {
@@ -688,24 +708,33 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                     b.row(m) = new_b.row(m);
                     current_log_pyb.at(m) = new_log_pyb.at(m);
                     current_log_pb.at(m) = new_log_pb.at(m);
-                    current_Wlong.row(m) = new_Wlong.row(m);
+                    current_Wlong.rows(rows_wlongF.at(m)) = new_Wlong.rows(rows_wlongF.at(m));
                     int first = m * n_quadpoints;
                     int last = first + n_quadpoints - 1;
-                    current_Wlongs.rows(first, last) = new_Wlongs.rows(first, last);
+                    current_Wlongs.rows(rows_wlongsF.at(m)) = new_Wlongs.rows(rows_wlongsF.at(m));
                     if (interval_cens) {
                         current_Wlongs_int.rows(first, last) = new_Wlongs_int.rows(first, last);
                     }
-                    current_log_h.at(m) = new_log_h.at(m);
-                    current_H.at(m) = new_H.at(m);
+                    current_log_h.elem(rows_wlongF.at(m)) = new_log_h.elem(rows_wlongF.at(m));
+                    current_H.elem(rows_wlongF.at(m)) = new_H.elem(rows_wlongF.at(m));
                     if (interval_cens) {
                         current_HL.at(m) = new_HL.at(m);
                     }
-                    current_log_ptb.at(m) = new_log_ptb.at(m);
+                    current_log_ptb.elem(rows_wlongF.at(m)) = new_log_ptb.elem(rows_wlongF.at(m));
                 }
             }
             // sample survival
-          double current_logpost_surv = sum(current_log_ptb) + 
-                logPrior(Bs_gammas, mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas) +
+            vec log_priors(nRisks, fill::zeros);
+            for (int ij = 0; ij < nRisks; ++ij) {
+                log_priors.at(ij) = logPrior(Bs_gammas.subvec(kn_strat_first.at(ij), kn_strat_last.at(ij)), 
+                              mean_Bs_gammas.subvec(kn_strat_first.at(ij), kn_strat_last.at(ij)), 
+                              Tau_Bs_gammas.submat(kn_strat_first.at(ij), kn_strat_first.at(ij), 
+                                                   kn_strat_last.at(ij), kn_strat_last.at(ij)), 
+                                                   tau_Bs_gammas.at(ij));
+            }
+          double log_priors_sum = sum(log_priors);
+          double current_logpost_surv = sum(rowsum(current_log_ptb, idT_rsum)) + 
+                log_priors_sum +
                 logPrior(gammas, mean_gammas, Tau_gammas, tau_gammas) +
                 logPrior(alphas, mean_alphas, Tau_alphas, tau_alphas);
             new_Bs_gammas = Bs_gammas + rand_Bs_gammas.col(i);
@@ -729,8 +758,17 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             } else {
                 new_log_ptb = (event % new_log_h) - new_H;
             }
-            double new_logpost_surv = sum(new_log_ptb) + 
-                logPrior(new_Bs_gammas, mean_Bs_gammas, Tau_Bs_gammas, tau_Bs_gammas) +
+            vec log_priors_new(nRisks, fill::zeros);
+            for (int ijk = 0; ijk < nRisks; ++ijk) {
+                log_priors_new.at(ijk) = logPrior(new_Bs_gammas.subvec(kn_strat_first.at(ijk), kn_strat_last.at(ijk)), 
+                                  mean_Bs_gammas.subvec(kn_strat_first.at(ijk), kn_strat_last.at(ijk)), 
+                                  Tau_Bs_gammas.submat(kn_strat_first.at(ijk), kn_strat_first.at(ijk), 
+                                                       kn_strat_last.at(ijk), kn_strat_last.at(ijk)), 
+                                                       tau_Bs_gammas.at(ijk));
+            }
+            double log_priors_new_sum = sum(log_priors_new);
+            double new_logpost_surv = sum(rowsum(new_log_ptb, idT_rsum)) + 
+                log_priors_new_sum +
                 logPrior(new_gammas, mean_gammas, Tau_gammas, tau_gammas) +
                 logPrior(new_alphas, mean_alphas, Tau_alphas, tau_alphas);
             double lRatio = new_logpost_surv - current_logpost_surv;
@@ -751,10 +789,13 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
             block_gammas.col(i) = gammas;
             block_alphas.col(i) = alphas;
             // sample scales
-            double Bpost_tau_Bs_gammas = B_tau_Bs_gammas + 
-                0.5 * as_scalar(Bs_gammas.t() * Tau_Bs_gammas * Bs_gammas);
-            tau_Bs_gammas = std::min(eps3, std::max(eps2, 
-                        ::Rf_rgamma(Apost_tau_Bs_gammas, 1.0 / Bpost_tau_Bs_gammas)));
+            mat Bs_gammas_t = Bs_gammas.t();
+            for (int ijz = 0; ijz < nRisks; ++ijz) {
+                double Bpost_tau_Bs_gammas = B_tau_Bs_gammas + 
+                    0.5 * as_scalar(Bs_gammas_t.cols(kn_strat_first.at(ijz), kn_strat_last.at(ijz)) * Tau_Bs_gammas.submat(kn_strat_first.at(ijz), kn_strat_first.at(ijz), kn_strat_last.at(ijz), kn_strat_last.at(ijz)) * Bs_gammas.subvec(kn_strat_first.at(ijz), kn_strat_last.at(ijz)));
+                tau_Bs_gammas.at(ijz) = std::min(eps3, std::max(eps2, 
+                                                  ::Rf_rgamma(Apost_tau_Bs_gammas, 1.0 / Bpost_tau_Bs_gammas)));
+            }
             if (any_td_effects) {
                 for (int kk = 0; kk < n_td_effects; ++kk) {
                     vec td_alphas = alphas.elem(td_colsF.at(kk));
@@ -815,7 +856,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
                 out_alphas.col(keep_iterator) = alphas;
                 out_phi_gammas.col(keep_iterator) = phi_gammas;
                 out_phi_alphas.col(keep_iterator) = phi_alphas;
-                out_tau_Bs_gammas.at(keep_iterator) = tau_Bs_gammas;
+                out_tau_Bs_gammas.col(keep_iterator) = tau_Bs_gammas;
                 out_tau_gammas.at(keep_iterator) = tau_gammas;
                 out_tau_alphas.at(keep_iterator) = tau_alphas;
                 out_tau_td_alphas.col(keep_iterator) = tau_td_alphas;
