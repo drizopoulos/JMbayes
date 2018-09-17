@@ -5,8 +5,8 @@ dmvnorm2 <- function(x, mean, sigma, logd = FALSE) {
     .Call(`_JMbayes_dmvnorm2`, x, mean, sigma, logd)
 }
 
-lap_rwm_C <- function(initials, Data, priors, scales, Covs, control, interval_cens) {
-    .Call(`_JMbayes_lap_rwm_C`, initials, Data, priors, scales, Covs, control, interval_cens)
+lap_rwm_C <- function(initials, Data, priors, scales, Covs, control, interval_cens, multiState) {
+    .Call(`_JMbayes_lap_rwm_C`, initials, Data, priors, scales, Covs, control, interval_cens, multiState)
 }
 
 lap_rwm_C_woRE <- function(initials, Data, priors, scales, Covs, control) {

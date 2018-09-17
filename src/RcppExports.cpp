@@ -21,8 +21,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // lap_rwm_C
-List lap_rwm_C(List initials, List Data, List priors, List scales, List Covs, List control, bool interval_cens);
-RcppExport SEXP _JMbayes_lap_rwm_C(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP, SEXP interval_censSEXP) {
+List lap_rwm_C(List initials, List Data, List priors, List scales, List Covs, List control, bool interval_cens, bool multiState);
+RcppExport SEXP _JMbayes_lap_rwm_C(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP, SEXP interval_censSEXP, SEXP multiStateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -33,7 +33,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type Covs(CovsSEXP);
     Rcpp::traits::input_parameter< List >::type control(controlSEXP);
     Rcpp::traits::input_parameter< bool >::type interval_cens(interval_censSEXP);
-    rcpp_result_gen = Rcpp::wrap(lap_rwm_C(initials, Data, priors, scales, Covs, control, interval_cens));
+    Rcpp::traits::input_parameter< bool >::type multiState(multiStateSEXP);
+    rcpp_result_gen = Rcpp::wrap(lap_rwm_C(initials, Data, priors, scales, Covs, control, interval_cens, multiState));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -214,7 +215,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_JMbayes_dmvnorm2", (DL_FUNC) &_JMbayes_dmvnorm2, 4},
-    {"_JMbayes_lap_rwm_C", (DL_FUNC) &_JMbayes_lap_rwm_C, 7},
+    {"_JMbayes_lap_rwm_C", (DL_FUNC) &_JMbayes_lap_rwm_C, 8},
     {"_JMbayes_lap_rwm_C_woRE", (DL_FUNC) &_JMbayes_lap_rwm_C_woRE, 6},
     {"_JMbayes_lap_rwm_C_woRE_nogammas", (DL_FUNC) &_JMbayes_lap_rwm_C_woRE_nogammas, 6},
     {"_JMbayes_logPosterior", (DL_FUNC) &_JMbayes_logPosterior, 22},

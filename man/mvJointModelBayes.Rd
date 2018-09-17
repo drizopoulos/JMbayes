@@ -12,7 +12,9 @@ Fits multivariate shared parameter joint models for longitudinal and survival ou
 \usage{
 mvJointModelBayes(mvglmerObject, survObject, timeVar,
     Formulas = list(NULL), Interactions = list(NULL),
-    transFuns = NULL, priors = NULL, control = NULL, \dots)
+    transFuns = NULL, priors = NULL, multiState = FALSE, 
+    data_MultiState = NULL, idVar_MultiState = "id", 
+    control = NULL, \dots)
 }
 
 \arguments{
@@ -91,6 +93,12 @@ mvJointModelBayes(mvglmerObject, survObject, timeVar,
             Only relevant when \code{shrink_alphas = TRUE}.}
     }
   }
+  
+  \item{multiState}{logical; if \code{TRUE} then a joint model for longitudinal and 
+    multi-state survival data is fitted.}
+  \item{data_MultiState}{A data.frame that contains all the variables which were used to fit the multi-state model. This data.frame should be in long format and include one row for each transition for which a subject is at risk. A column called \code{trans} indicating the transition to which each row corresponds to, must be included in the data.frame. Function \code{msprep()} from package \bold{mstate} can be used to easily convert datasets from wide format (one row per subject) to long format while including the necessary 
+  \code{trans} column. For more information and examples see the documentation for function \code{msprep()} from package \bold{mstate}.}
+  \item{idVar_MultiState}{A character string indicating the id variable in \code{data_MultiState} for the multi-state model.}
   
   \item{control}{a list of control values with components:
     \describe{        

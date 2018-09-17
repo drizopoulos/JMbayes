@@ -1,3 +1,9 @@
+Changes in version: JMbayes_0.8-72
+
+  * Support for fitting multi-state joint models.
+
+---------------------------------------
+
 Changes in version: JMbayes_0.8-7
 
   * corrected several small bugs in the code.
