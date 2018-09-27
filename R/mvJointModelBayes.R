@@ -915,7 +915,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                     wStDev = summary_fun(wsd, weights = weights),
                     StErr = summary_fun(stdErr),
                     CIs = summary_fun(quantile, probs = c(0.025, 0.975)),
-                    wCIS = summary_fun(Hmisc::wtd.quantile, weights = weights, 
+                    wCIs = summary_fun(Hmisc::wtd.quantile, weights = weights, 
                                        probs = c(0.025, 0.975), type = "i/(n+1)", 
                                        na.rm = TRUE),
                     Pvalues = summary_fun(computeP)
