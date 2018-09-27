@@ -44,8 +44,7 @@ prederrJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz, lossFun = c("s
         Time2 <- SurvT[, "time2"]
         Time <- Time1
         Time[Time2 != 1] <- Time2[Time2 != 1]
-        Time <- Time[!duplicated(id2)]
-        event <- SurvT[!duplicated(id2), "status"]
+        event <- SurvT[, "status"]
     } else {
         Time <- SurvT[, 1]
         event <- SurvT[, 2]
