@@ -106,28 +106,32 @@ arma::vec log_longF_svft(const field<vec>& y, const field<vec>& eta,
         uvec id_i = id.at(i);
         vec y_i = y.at(i);
         vec eta_i = eta.at(i);
-        if (fams[i] == "gaussian") {
-            double sigma_i = as<double>(sigmas[i]);
-            vec log_dens = - 0.5 * pow((y_i - eta_i) / sigma_i, 2);
-            out += rowsum_svft(log_dens, id_i);
-        } else if (fams[i] == "binomial") {
-            if (links[i] == "logit") {
-                vec pr = exp(eta_i) / (1 + exp(eta_i));
-                vec log_dens = y_i % log(pr) + (1 - y_i) % log(1 - pr);
+        if (y_i.size() == 0) {
+            out += 0;
+        } else {
+            if (fams[i] == "gaussian") {
+                double sigma_i = as<double>(sigmas[i]);
+                vec log_dens = - 0.5 * pow((y_i - eta_i) / sigma_i, 2);
                 out += rowsum_svft(log_dens, id_i);
-            } else if (links[i] == "probit") {
-                vec pr = Vpnorm_svft(eta_i);
-                vec log_dens = y_i % log(pr) + (1 - y_i) % log(1 - pr);
-                out += rowsum_svft(log_dens, id_i);
-            } else if (links[i] == "cloglog") {
-                vec pr = - exp(- exp(eta_i)) + 1;
-                vec log_dens = y_i % log(pr) + (1 - y_i) % log(1 - pr);
+            } else if (fams[i] == "binomial") {
+                if (links[i] == "logit") {
+                    vec pr = exp(eta_i) / (1 + exp(eta_i));
+                    vec log_dens = y_i % log(pr) + (1 - y_i) % log(1 - pr);
+                    out += rowsum_svft(log_dens, id_i);
+                } else if (links[i] == "probit") {
+                    vec pr = Vpnorm_svft(eta_i);
+                    vec log_dens = y_i % log(pr) + (1 - y_i) % log(1 - pr);
+                    out += rowsum_svft(log_dens, id_i);
+                } else if (links[i] == "cloglog") {
+                    vec pr = - exp(- exp(eta_i)) + 1;
+                    vec log_dens = y_i % log(pr) + (1 - y_i) % log(1 - pr);
+                    out += rowsum_svft(log_dens, id_i);
+                }
+            } else if (fams[i] == "poisson") {
+                vec mu = exp(eta_i);
+                vec log_dens = y_i % log(mu) - mu;
                 out += rowsum_svft(log_dens, id_i);
             }
-        } else if (fams[i] == "poisson") {
-            vec mu = exp(eta_i);
-            vec log_dens = y_i % log(mu) - mu;
-            out += rowsum_svft(log_dens, id_i);
         }
     }
     return(out);
