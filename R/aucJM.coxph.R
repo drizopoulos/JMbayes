@@ -22,7 +22,12 @@ aucJM.coxph <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVa
     id <- match(id, unique(id))
     TermsT <- object$terms
     SurvT <- model.response(model.frame(TermsT, newdata)) 
-    Time <- SurvT[, 1]
+    is_counting <- attr(SurvT, "type") == "counting"
+    Time <- if (is_counting) {
+        ave(SurvT[, 2], id, FUN = function (x) tail(x, 1))
+    } else {
+        Time <- SurvT[, 1]
+    }
     ordTime <- order(Time)
     newdata2 <- newdata[ordTime, ]
     newdata2 <- dataLM(newdata2, Tstart, idVar, respVar, timeVar, evTimeVar, summary, 
@@ -31,8 +36,14 @@ aucJM.coxph <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVa
     # find comparable subjects
     id <- newdata2[[idVar]]
     SurvT <- model.response(model.frame(TermsT, newdata2)) 
-    Time <- SurvT[!duplicated(id), 1]
-    event <- SurvT[!duplicated(id), 2]
+    if (is_counting) {
+        f <- factor(id, levels = unique(id))
+        Time <- tapply(SurvT[, 2], f, tail, 1)
+        event <- tapply(SurvT[, 3], f, tail, 1)
+    } else {
+        Time <- SurvT[!duplicated(id), 1]
+        event <- SurvT[!duplicated(id), 2]
+    }
     names(pi.u.t) <- names(Time) <- names(event) <- as.character(unique(id))
     if (any(dupl <- duplicated(Time))) {
         Time[dupl] <- Time[dupl] + 1e-07

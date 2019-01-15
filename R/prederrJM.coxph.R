@@ -22,12 +22,24 @@ prederrJM.coxph <- function (object, newdata, Tstart, Thoriz, lossFun = c("absol
     id <- match(id, unique(id))
     TermsT <- object$terms
     SurvT <- model.response(model.frame(TermsT, newdata)) 
-    Time <- SurvT[, 1]
+    is_counting <- attr(SurvT, "type") == "counting"
+    Time <- if (is_counting) {
+        ave(SurvT[, 2], id, FUN = function (x) tail(x, 1))
+    } else {
+        Time <- SurvT[, 1]
+    }
     newdata2 <- dataLM(newdata, Tstart, idVar, respVar, timeVar, evTimeVar, summary, 
                        tranfFun)
     SurvT <- model.response(model.frame(TermsT, newdata2)) 
-    Time <- SurvT[, 1]
-    delta <- SurvT[, 2]
+    if (is_counting) {
+        id2 <- newdata2[[idVar]]
+        f <- factor(id2, levels = unique(id2))
+        Time <- ave(SurvT[, 2], f, FUN = function (x) tail(x, 1))
+        delta <- ave(SurvT[, 3], f, FUN = function (x) tail(x, 1))
+    } else {
+        Time <- SurvT[, 1]
+        delta <- SurvT[, 2]
+    }
     indCens <- Time < Thoriz & delta == 0
     nr <- nrow(newdata2)
     aliveThoriz.id <- newdata2[Time > Thoriz, ]
