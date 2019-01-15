@@ -6,20 +6,6 @@
 
 using namespace Rcpp;
 
-// dmvnorm2
-arma::vec dmvnorm2(const arma::mat& x, const arma::rowvec& mean, const arma::mat& sigma, bool logd);
-RcppExport SEXP _JMbayes_dmvnorm2(SEXP xSEXP, SEXP meanSEXP, SEXP sigmaSEXP, SEXP logdSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type mean(meanSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< bool >::type logd(logdSEXP);
-    rcpp_result_gen = Rcpp::wrap(dmvnorm2(x, mean, sigma, logd));
-    return rcpp_result_gen;
-END_RCPP
-}
 // lap_rwm_C
 List lap_rwm_C(List initials, List Data, List priors, List scales, List Covs, List control, bool interval_cens, bool multiState);
 RcppExport SEXP _JMbayes_lap_rwm_C(SEXP initialsSEXP, SEXP DataSEXP, SEXP priorsSEXP, SEXP scalesSEXP, SEXP CovsSEXP, SEXP controlSEXP, SEXP interval_censSEXP, SEXP multiStateSEXP) {
@@ -67,6 +53,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type Covs(CovsSEXP);
     Rcpp::traits::input_parameter< List >::type control(controlSEXP);
     rcpp_result_gen = Rcpp::wrap(lap_rwm_C_woRE_nogammas(initials, Data, priors, scales, Covs, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dmvnorm2
+arma::vec dmvnorm2(const arma::mat& x, const arma::rowvec& mean, const arma::mat& sigma, bool logd);
+RcppExport SEXP _JMbayes_dmvnorm2(SEXP xSEXP, SEXP meanSEXP, SEXP sigmaSEXP, SEXP logdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< bool >::type logd(logdSEXP);
+    rcpp_result_gen = Rcpp::wrap(dmvnorm2(x, mean, sigma, logd));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -214,10 +214,10 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_JMbayes_dmvnorm2", (DL_FUNC) &_JMbayes_dmvnorm2, 4},
     {"_JMbayes_lap_rwm_C", (DL_FUNC) &_JMbayes_lap_rwm_C, 8},
     {"_JMbayes_lap_rwm_C_woRE", (DL_FUNC) &_JMbayes_lap_rwm_C_woRE, 6},
     {"_JMbayes_lap_rwm_C_woRE_nogammas", (DL_FUNC) &_JMbayes_lap_rwm_C_woRE_nogammas, 6},
+    {"_JMbayes_dmvnorm2", (DL_FUNC) &_JMbayes_dmvnorm2, 4},
     {"_JMbayes_logPosterior", (DL_FUNC) &_JMbayes_logPosterior, 22},
     {"_JMbayes_logPosterior_nogammas", (DL_FUNC) &_JMbayes_logPosterior_nogammas, 17},
     {"_JMbayes_gradient_logPosterior", (DL_FUNC) &_JMbayes_gradient_logPosterior, 22},

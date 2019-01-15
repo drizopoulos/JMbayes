@@ -38,9 +38,9 @@ linear_predictor <- function (family, outcome, colmns_HC, colmns_nHC,
         }
     } else {
         right <- if (n_RE == 1) {
-            paste0(" <- u[id", i, ind(i), "] * ", "Z", i, ind(i))
+            paste0(" <- u[id", i, ind(i), "] * ", "Z", i, ind.(i))
         } else {
-            paste0(" <- u[id", i, ind(i), ", RE_ind", i, "] * ", "Z", i, ind(i))
+            paste0(" <- u[id", i, ind(i), ", RE_ind", i, "] * ", "Z", i, ind.(i))
         }
     }
     if (length(colmns_nHC)) {

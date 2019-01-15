@@ -1349,8 +1349,15 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
     list(mcmc = if (control$keepRE) mcmcOut else mcmcOut[indb], postMeans = postMeans,
          postModes = postModes,
          postVarsRE = postVarsRE,
-         StErr = lapply(mcmcOut[indb], stdErr),
-         EffectiveSize = lapply(mcmcOut[indb], effectiveSize),
+         StErr = lapply(mcmcOut[indb], function (x) {
+             tt <- try(stdErr(x), silent = TRUE)
+             if (!inherits(tt, "try-error")) tt else NA
+        }),
+         EffectiveSize = lapply(mcmcOut[indb], function (x) {
+                tt <- try(effectiveSize(x), silent = TRUE)
+                if (!inherits(tt, "try-error")) tt else NA
+             }
+        ),
          StDev = lapply(mcmcOut[indb], function (x) apply(as.matrix(x), 2L, sd)),
          CIs = lapply(mcmcOut[indb], function (x) 
              apply(as.matrix(x), 2L, quantile, probs = c(0.025, 0.975))),
