@@ -139,7 +139,7 @@ mvglmer <- function (formulas, data, families, engine = c("JAGS", "STAN"),
         ints
     }
     fit <- if (engine == "JAGS") {
-        jagsUI::jags(data = Data, inits = inits, parameters.to.save = params,
+        jags(data = Data, inits = inits, parameters.to.save = params,
                      model.file = file.path(con$working.directory, model_name),
                      parallel = con$n.processors > 1, n.chains = con$n.chains,
                      n.adapt = con$n.adapt, n.iter = con$n.iter, n.burnin = con$n.burnin,
