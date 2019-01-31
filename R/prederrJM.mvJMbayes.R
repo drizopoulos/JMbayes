@@ -38,7 +38,7 @@ prederrJM.mvJMbayes <- function (object, newdata, Tstart, Thoriz, lossFun = c("s
     if (is_counting) {
         f <- factor(id2, levels = unique(id2))
         Time <- ave(SurvT[, 2], f, FUN = function (x) tail(x, 1))
-        event <- ave(SurvT[, 2], f, FUN = function (x) tail(x, 1))
+        event <- ave(SurvT[, 3], f, FUN = function (x) tail(x, 1))
     } else if (is_interval) {
         Time1 <- SurvT[, "time1"]
         Time2 <- SurvT[, "time2"]
