@@ -1,12 +1,13 @@
 Package: JMbayes
 Title: Joint Modeling of Longitudinal and Time-to-Event Data under a Bayesian Approach
-Version: 0.8-76
-Date: 2019-01-20
+Version: 0.8-77
+Date: 2019-01-31
 Author: Dimitris Rizopoulos <d.rizopoulos@erasmusmc.nl>
 Maintainer: Dimitris Rizopoulos <d.rizopoulos@erasmusmc.nl>
 Description: Shared parameter models for the joint modeling of longitudinal and time-to-event data using MCMC; Dimitris Rizopoulos (2016) <doi:10.18637/jss.v072.i07>. 
 Depends: nlme, survival, doParallel, rstan
-Imports: MASS, foreach, Rcpp, xtable, shiny, splines, Hmisc
+Imports: MASS, foreach, Rcpp, jagsUI, xtable, shiny, splines, Hmisc
+SystemRequirements: JAGS (http://mcmc-jags.sourceforge.net)
 LinkingTo: Rcpp, RcppArmadillo
 LazyLoad: yes
 LazyData: yes
