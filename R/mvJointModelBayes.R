@@ -158,7 +158,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
             con$knots <- rr
         } else {
             sptt <- if (con$ObsTimes.knots) {
-                split.TimeR
+                split(TimeR[event == 1], strat[event == 1])
             } else {
                 mapply(function(x, y) {x[y]}, split.TimeR, split(ind.t, strat))
             }
