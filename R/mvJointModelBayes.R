@@ -572,8 +572,21 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
                                     outcome, indFixed, indRandom, Us_int, trans_Funs)
     }
     # priors
-    DD <- diag(ncol(W1))
-    Tau_Bs_gammas <- crossprod(diff(DD, differences = con$diff)) + 1e-06 * DD
+    if (typeSurvInf == "counting" && multiState) {
+        DD <- lapply(knots_strat, diag)
+        Tau_Bs_gammas.strt <- lapply(DD, FUN = function(x) {
+            crossprod(diff(x, differences = con$diff)) + 1e-06 * x
+        })
+        Tau_Bs_gammas <- matrix(0, nrow = sum(knots_strat), ncol = sum(knots_strat))
+        for (i in 1:length(knots_strat)) {
+            tmp.first <-  cumsum(knots_strat) - knots_strat + 1
+            tmp.last <- cumsum(knots_strat)
+            Tau_Bs_gammas[tmp.first[i]:tmp.last[i], tmp.first[i]:tmp.last[i]] <- Tau_Bs_gammas.strt[[i]]
+        }
+    } else {
+        DD <- diag(ncol(W1))
+        Tau_Bs_gammas <- crossprod(diff(DD, differences = con$diff)) + 1e-06 * DD
+    }
     find_td_cols <- function (x) grep('tve(', colnames(x), fixed = TRUE)
     td_cols <- lapply(U, find_td_cols)
     Tau_alphas <- lapply(U, function (x) 0.01 * diag(NCOL(x)))
