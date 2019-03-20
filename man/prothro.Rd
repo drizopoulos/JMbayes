@@ -33,9 +33,4 @@ Andersen, P. K., Borgan, O., Gill, R. D. and Keiding, N. (1993).
 
 }
 
-
-\examples{
-summary(prothros)
-}
-
 \keyword{datasets}

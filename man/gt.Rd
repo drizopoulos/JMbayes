@@ -42,9 +42,11 @@ rgt(n, mu = 0, sigma = 1, df = stop("no df arg"))
 \author{Dimitris Rizopoulos \email{d.rizopoulos@erasmusmc.nl}}
 
 \examples{
+\dontrun{
 x <- rnorm(10, mean = 10, sd = 3)
 dgt(x, mu = 10, sigma = 3, df = 4)
 rgt(10, mu = 10, sigma = 3, df = 4)
+}
 }
 
 \keyword{misc}

@@ -27,10 +27,5 @@ tve(x, df = NULL, knots = NULL, ord = 3)
 
 \author{Dimitris Rizopoulos \email{d.rizopoulos@erasmusmc.nl}}
 
-\examples{
-x <- rnorm(10)
-tve(x, df = 4)
-}
-
 \keyword{regression}
 

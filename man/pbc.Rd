@@ -53,9 +53,4 @@ The data frame \code{pbc2.id} contains the first measurement for each patient. T
 fit the survival model. 
 }
 
-
-\examples{
-summary(pbc2.id)
-}
-
 \keyword{datasets}

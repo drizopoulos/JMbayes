@@ -115,10 +115,6 @@ A list of class \code{mvglmer} with components:
 \item{call}{the matched call.}
 }
 
-\references{
-***
-}
-
 \author{
 Dimitris Rizopoulos \email{d.rizopoulos@erasmusmc.nl}
 }

@@ -46,11 +46,6 @@ ibs(x, df = NULL, knots = NULL, intercept = FALSE,
 
 \author{Dimitris Rizopoulos \email{d.rizopoulos@erasmusmc.nl}}
 
-\examples{
-x <- rnorm(10)
-dns(x, df = 4)
-ins(x, df = 4)
-}
 
 \keyword{regression}
 

@@ -28,11 +28,6 @@
   }
 }
 
-\source{
-  \url{http://www.biostat.umn.edu/~brad/data.html}, 
-  \url{http://www.biostat.umn.edu/~brad/software.html}
-}
-
 \references{
 Goldman, A., Carlin, B., Crane, L., Launer, C., Korvick, J., Deyton, L. and Abrams, D. (1996) Response of CD4+ and
 clinical consequences to treatment using ddI or ddC in patients with advanced HIV infection. \emph{Journal of Acquired
@@ -45,10 +40,6 @@ computer packages. \emph{The American Statistician} \bold{58}, 16--24.
 \note{
 The data frame \code{aids.id} contains the first CD4 cell count measurement for each patient. This data frame is used to 
 fit the survival model.
-}
-
-\examples{
-summary(aids.id)
 }
 
 \keyword{datasets}
