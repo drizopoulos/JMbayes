@@ -519,7 +519,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     int n = b.n_rows;
     int nT = event.n_elem;
     if (!multiState) {
-        int nT = n;
+        int nT = b.n_rows;
     }
     int ns = Pw.n_rows;
     int n_quadpoints = round(ns / nT);
