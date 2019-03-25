@@ -516,14 +516,14 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     double tau_gammas = as<double>(initials["tau_gammas"]);
     double tau_alphas = as<double>(initials["tau_alphas"]);
     double xi_alphas = as<double>(initials["tau_alphas"]);
-    int n = b.n_rows;
-    int nT = event.n_elem;
+    int n = 0;
+    int nT = 0;
     if (multiState) {
-        n = n;
-        nT = nT;
+        n = b.n_rows;
+        nT = event.n_elem;
     } else {
-        n = n;
-        nT = n;
+        n = b.n_rows;
+        nT = b.n_rows;
     }
     int ns = Pw.n_rows;
     int n_quadpoints = round(ns / nT);
