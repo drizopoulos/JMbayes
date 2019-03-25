@@ -523,7 +523,7 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
         nT = event.n_elem;
     } else {
         n = b.n_rows;
-        nT = b.n_rows
+        nT = b.n_rows;
     }
     int ns = Pw.n_rows;
     int n_quadpoints = round(ns / nT);
