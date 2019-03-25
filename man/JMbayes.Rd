@@ -17,8 +17,8 @@ provided.
 \tabular{ll}{
 Package: \tab JMbayes\cr
 Type: \tab Package\cr
-Version: \tab 0.8-82\cr
-Date: \tab 2019-03-20\cr
+Version: \tab 0.8-83\cr
+Date: \tab 2019-03-25\cr
 License: \tab GPL (>=2)\cr
 }
 
