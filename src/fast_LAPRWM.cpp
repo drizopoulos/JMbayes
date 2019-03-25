@@ -516,11 +516,9 @@ List lap_rwm_C (List initials, List Data, List priors, List scales, List Covs,
     double tau_gammas = as<double>(initials["tau_gammas"]);
     double tau_alphas = as<double>(initials["tau_alphas"]);
     double xi_alphas = as<double>(initials["tau_alphas"]);
-    if (multiState) {
-        int n = b.n_rows;
-        int nT = event.n_elem;
-    } else {
-        int n = b.n_rows;
+    int n = b.n_rows;
+    int nT = event.n_elem;
+    if (!multiState) {
         int nT = n;
     }
     int ns = Pw.n_rows;
