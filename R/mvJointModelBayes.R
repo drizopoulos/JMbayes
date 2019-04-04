@@ -544,11 +544,11 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         which(x) - 1
     })
     if (typeSurvInf == "counting" && multiState) {
-        idT.list <- list(idT)
+        idT.list <- rep(list(idT), times = n_outcomes)
         Wlong <- designMatLong(XX, postMean_betas, ZZ, postMean_b, idT.list, outcome, 
                                indFixed, indRandom, U, trans_Funs)
         idTs <- rep(idT, each = K)
-        idTs.list <- list(idTs)
+        idTs.list <- rep(list(idTs), times = n_outcomes)
         Wlongs <- designMatLong(XXs, postMean_betas, ZZs, postMean_b, idTs.list, outcome, 
                                 indFixed, indRandom, Us, trans_Funs)
         idT_rsum <- c(idT[-length(idT)] != idT[-1L], TRUE)
