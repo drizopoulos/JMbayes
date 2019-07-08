@@ -1,4 +1,4 @@
-aucJM.JMbayes2 <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id", 
+aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVar = "id", 
         simulate = FALSE, M = 100, ...) {
     if (!inherits(object, "JMbayes"))
         stop("Use only with 'JMbayes' objects.\n")
