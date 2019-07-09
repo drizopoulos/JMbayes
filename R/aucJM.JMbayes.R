@@ -67,64 +67,49 @@ aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
         ind4 <- (Ti <= Thoriz & di == 0) & (Tj <= Thoriz & dj == 0)
         names(ind1) <- names(ind2) <- names(ind3) <- names(ind4) <- paste(names(Ti), names(Tj), sep = "_")
         ind <- ind1 | ind2 | ind3 | ind4
-        if (any(ind2)) {
-            nams <- strsplit(names(ind2[ind2]), "_")
-            nams_i <- sapply(nams, "[", 1)
-            unq_nams_i <- unique(nams_i)
-            pi2 <- if (is_counting) {
-                survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], idVar = idVar, 
-                             last.time = Time[unq_nams_i], survTimes = Thoriz, 
-                             simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
+        
+        
+        ##### Generate future predictions for ind2, 3, 4 where some events occur after dThoriz
+        # Create indexes to organise and unpack predictions
+        # Note unlist prevents sapply retunrning a list when any index is zero
+        nams_pi2i <- unlist( sapply( strsplit(names(ind2[ind2]), "_"), "[", 1) )
+        nams_pi3j <- unlist( sapply( strsplit(names(ind3[ind3]), "_"), "[", 2) )
+        nams_pi4i <- unlist( sapply( strsplit(names(ind4[ind4]), "_"), "[", 1) )
+        nams_pi4j <- unlist( sapply( strsplit(names(ind4[ind4]), "_"), "[", 2) )
+        nams_to_pred <- unique( c(nams_pi2i, nams_pi3j, nams_pi4i, nams_pi4j))
+
+        # Predictions conditional observed events
+        if(length(nams_to_pred) > 0){
+            cond_preds <- if (is_counting) {
+                survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], idVar = idVar,
+                            last.time = Time[nams_to_pred], survTimes = Thoriz,
+                            simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
             } else {
-                survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], idVar = idVar, 
-                          last.time = Time[unq_nams_i], survTimes = Thoriz, 
+                survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], idVar = idVar,
+                          last.time = Time[nams_to_pred], survTimes = Thoriz,
                           simulate = simulate, M = M)
             }
-            pi2 <- 1 - sapply(pi2$summaries, "[", 1, 2)
-            ind[ind2] <- ind[ind2] * pi2[nams_i]
+        }
+        
+        if (any(ind2)) {
+            # Extract ind2 predictions
+            pi2 <- cond_preds$summaries[ match(nams_pi2i, names(cond_preds$summaries)) ]
+            pi2 <- 1 - sapply(pi2, "[", 1, 2)
+            ind[ind2] <- ind[ind2] * pi2
         }
         if (any(ind3)) {
-            nams <- strsplit(names(ind3[ind3]), "_")
-            nams_j <- sapply(nams, "[", 2)
-            unq_nams_j <- unique(nams_j)
-            pi3 <- if (is_counting) {
-                survfitJM(object, newdata = newdata2[id %in% unq_nams_j, ], idVar = idVar, 
-                          last.time = Time[unq_nams_j], survTimes = Thoriz, 
-                          simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
-            } else {
-                survfitJM(object, newdata = newdata2[id %in% unq_nams_j, ], idVar = idVar, 
-                          last.time = Time[unq_nams_j], survTimes = Thoriz, 
-                          simulate = simulate, M = M)
-            }
-            pi3 <- sapply(pi3$summaries, "[", 1, 2)
-            ind[ind3] <- ind[ind3] * pi3[nams_j]
+            # Extract ind3 predictions
+            pi3 <- cond_preds$summaries[ match(nams_pi3j, names(cond_preds$summaries)) ]
+            pi3 <- sapply(pi3, "[", 1, 2)
+            ind[ind3] <- ind[ind3] * pi3
         }
         if (any(ind4)) {
-            nams <- strsplit(names(ind4[ind4]), "_")
-            nams_i <- sapply(nams, "[", 1)
-            nams_j <- sapply(nams, "[", 2)
-            unq_nams_i <- unique(nams_i)
-            unq_nams_j <- unique(nams_j)
-            if (is_counting) {
-                pi4_i <- survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], 
-                                   idVar = idVar, last.time = Time[unq_nams_i], survTimes = Thoriz, 
-                                   simulate = simulate, M = M, 
-                                   LeftTrunc_var = all.vars(TermsT)[1L])
-                pi4_j <- survfitJM(object, newdata = newdata2[id %in% unq_nams_j, ], 
-                                   idVar = idVar, last.time = Time[unq_nams_j], survTimes = Thoriz, 
-                                   simulate = simulate, M = M, 
-                                   LeftTrunc_var = all.vars(TermsT)[1L])
-            } else {
-                pi4_i <- survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], 
-                                   idVar = idVar, last.time = Time[unq_nams_i], survTimes = Thoriz, 
-                                   simulate = simulate, M = M)
-                pi4_j <- survfitJM(object, newdata = newdata2[id %in% unq_nams_j, ], 
-                                   idVar = idVar, last.time = Time[unq_nams_j], survTimes = Thoriz, 
-                                   simulate = simulate, M = M)
-            }
-            pi4_i <- 1 - sapply(pi4_i$summaries, "[", 1, 2)
-            pi4_j <- sapply(pi4_j$summaries, "[", 1, 2)
-            ind[ind4] <- ind[ind4] * pi4_i[nams_i] * pi4_j[nams_j]
+            # Extract ind4 predictions
+            pi4_i <- cond_preds$summaries[ match(nams_pi4i, names(cond_preds$summaries)) ]
+            pi4_i <- 1 - sapply(pi4_i, "[", 1, 2)
+            pi4_j <- cond_preds$summaries[ match(nams_pi4j, names(cond_preds$summaries)) ]
+            pi4_j <- sapply(pi4_j, "[", 1, 2)
+            ind[ind4] <- ind[ind4] * pi4_i * pi4_j
         }
         sum((pi.u.t.i < pi.u.t.j) * c(ind), na.rm = TRUE) / sum(ind, na.rm = TRUE)
     } else {
