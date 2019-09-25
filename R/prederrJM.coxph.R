@@ -51,7 +51,11 @@ prederrJM.coxph <- function (object, newdata, Tstart, Thoriz, lossFun = c("absol
         if (sum(indCens) > 1) {
             censThoriz.id <- newdata2[indCens, ]
             Surv.censThoriz <- c(summary(survfit(object, newdata = censThoriz.id), times = Thoriz)$surv)
-            tt <- model.response(model.frame(TermsT, censThoriz.id))[, 1]
+            if (is_counting) {
+                tt <- model.response(model.frame(TermsT, censThoriz.id))[, 2]
+            } else {
+                tt <- model.response(model.frame(TermsT, censThoriz.id))[, 1]
+            }
             nn <- length(tt)
             weights <- numeric(nn)
             for (i in seq_len(nn)) {
