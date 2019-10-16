@@ -34,6 +34,9 @@ right_rows_mstate <- function(data, times, ids, Q_points, idT) {
     }
     rownams_id <- split(row.names(data), fids)[idT]
     ind <- mapply(`[`, rownams_id, split(ind, col(ind)))
+    if(is.list(ind)) {
+        ind <- do.call(c, ind)
+    }
     data[c(ind), ]
 }
 
