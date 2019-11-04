@@ -67,7 +67,11 @@ aucJM.coxph <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVa
             nams_i <- sapply(nams, "[", 1)
             unq_nams_i <- unique(nams_i)
             ND <- newdata2[id %in% unq_nams_i, ]
-            tt <- model.response(model.frame(TermsT, ND))[, 1]
+            if (is_counting) {
+                tt <- model.response(model.frame(TermsT, ND))[, 2]
+            } else {
+                tt <- model.response(model.frame(TermsT, ND))[, 1]
+            }
             pi2 <- numeric(nrow(ND))
             for (l in seq_along(pi2)) {
                 obj <- survfit(object, newdata = ND[l, ])
@@ -82,7 +86,11 @@ aucJM.coxph <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVa
             nams_j <- sapply(nams, "[", 2)
             unq_nams_j <- unique(nams_j)
             ND <- newdata2[id %in% unq_nams_j, ]
-            tt <- model.response(model.frame(TermsT, ND))[, 1]
+            if (is_counting) {
+                tt <- model.response(model.frame(TermsT, ND))[, 2]
+            } else {
+                tt <- model.response(model.frame(TermsT, ND))[, 1]
+            }
             pi3 <- numeric(nrow(ND))
             for (l in seq_along(pi3)) {
                 obj <- survfit(object, newdata = ND[l, ])
@@ -99,8 +107,16 @@ aucJM.coxph <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, idVa
             unq_nams_j <- unique(nams_j)
             ND_i <- newdata2[id %in% unq_nams_i, ]
             ND_j <- newdata2[id %in% unq_nams_j, ]
-            tt_i <- model.response(model.frame(TermsT, ND_i))[, 1]
-            tt_j <- model.response(model.frame(TermsT, ND_j))[, 1]
+            if (is_counting) {
+                tt_i <- model.response(model.frame(TermsT, ND_i))[, 2]
+            } else {
+                tt_i <- model.response(model.frame(TermsT, ND_i))[, 1]
+            }
+            if (is_counting) {
+                tt_j <- model.response(model.frame(TermsT, ND_j))[, 2]
+            } else {
+                tt_j <- model.response(model.frame(TermsT, ND_j))[, 1]
+            }
             pi4_i <- numeric(nrow(ND_i))
             for (l in seq_along(pi4_i)) {
                 obj <- survfit(object, newdata = ND_i[l, ])
