@@ -81,11 +81,11 @@ aucJM.JMbayes <- function (object, newdata, Tstart, Thoriz = NULL, Dt = NULL, id
         # Predictions conditional observed events
         if(length(nams_to_pred) > 0){
             cond_preds <- if (is_counting) {
-                survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], idVar = idVar,
+                survfitJM(object, newdata = newdata2[id %in% nams_to_pred, ], idVar = idVar,
                             last.time = Time[nams_to_pred], survTimes = Thoriz,
                             simulate = simulate, M = M, LeftTrunc_var = all.vars(TermsT)[1L])
             } else {
-                survfitJM(object, newdata = newdata2[id %in% unq_nams_i, ], idVar = idVar,
+                survfitJM(object, newdata = newdata2[id %in% nams_to_pred, ], idVar = idVar,
                           last.time = Time[nams_to_pred], survTimes = Thoriz,
                           simulate = simulate, M = M)
             }

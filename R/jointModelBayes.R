@@ -47,8 +47,8 @@ jointModelBayes <- function (lmeObject, survObject, timeVar,
         if (is.null(survObject$model))
             stop("\nplease refit the Cox model including in the ", 
                  "call to coxph() the argument 'model = TRUE'.")
-        idT <- if (!is.null(survObject$model$cluster)) {
-            as.vector(unclass(survObject$model$cluster))
+        idT <- if (!is.null(survObject$model$`(cluster)`)) {
+            as.vector(unclass(survObject$model$`(cluster)`))
         } else {
             seq_len(nrow(survObject$model))
         }
