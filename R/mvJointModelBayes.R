@@ -219,7 +219,7 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
     }
     # build desing matrices for longitudinal process
     if (multiState) {
-        ord_long_id <- gsub("^\\(*.*\\s\\|\\s(.*)\\)$", "\\1", chk)
+        ord_long_id <- gsub("^[l].*\\(.*\\s\\|\\s([^\\)]*).*", "\\1", mvglmerObject$call[2])
         mvglmerObject$data <- mvglmerObject$data[order(mvglmerObject$data[[ord_long_id]], mvglmerObject$data[[timeVar]]), ]
         mvglmerObject$data[[ord_long_id]] <- match(mvglmerObject$data[[ord_long_id]], unique(mvglmerObject$data[[ord_long_id]]))
         dataL <- mvglmerObject$data
