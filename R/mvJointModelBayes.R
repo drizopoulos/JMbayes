@@ -25,7 +25,13 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         stop("'survObject' must be a 'coxph' or 'survreg' object fitted with argument 'model'",
              " set to TRUE.\n")
     }
-    dataS <- survObject$model
+    if (multiState) { 
+        survObject$model <- survObject$model[order(survObject$model$`(cluster)`), ]
+        survObject$model$`(cluster)` <- match(survObject$model$`(cluster)`, unique(survObject$model$`(cluster)`))
+        dataS <- survObject$model
+    } else {
+        dataS <- survObject$model
+    }
     Terms <- attr(dataS, "terms")
     environment(Terms) <- NULL
     SurvInf <- model.response(dataS)
@@ -212,7 +218,14 @@ mvJointModelBayes <- function (mvglmerObject, survObject, timeVar,
         con$knots <- rr
     }
     # build desing matrices for longitudinal process
-    dataL <- mvglmerObject$data
+    if (multiState) {
+        ord_long_id <- gsub("^[l].*\\(.*\\s\\|\\s([^\\)]*).*", "\\1", mvglmerObject$call[2])
+        mvglmerObject$data <- mvglmerObject$data[order(mvglmerObject$data[[ord_long_id]], mvglmerObject$data[[timeVar]]), ]
+        mvglmerObject$data[[ord_long_id]] <- match(mvglmerObject$data[[ord_long_id]], unique(mvglmerObject$data[[ord_long_id]]))
+        dataL <- mvglmerObject$data
+    } else {
+        dataL <- mvglmerObject$data
+    }
     components <- mvglmerObject$components
     families <- mvglmerObject$families
     n_outcomes <- length(families)
