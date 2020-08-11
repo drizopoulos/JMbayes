@@ -1360,7 +1360,7 @@ MCMCfit <- function (y, x, param, extraForm, baseHaz, estimateWeightFun, initial
         ),
          StDev = lapply(mcmcOut[indb], function (x) apply(as.matrix(x), 2L, sd)),
          CIs = lapply(mcmcOut[indb], function (x) 
-             apply(as.matrix(x), 2L, quantile, probs = c(0.025, 0.975))),
+             apply(as.matrix(x), 2L, quantile, probs = c(0.025, 0.975), na.rm = TRUE)),
          Pvalues = lapply(mcmcOut[indb], function (x) apply(as.matrix(x), 2L, computeP)),
          vcov = if (ncZ > 1L) var(do.call(cbind, mcmcOut[indb])[, -keepD]) else var(do.call(cbind, mcmcOut[indb])),
          pD = pD, DIC = pD + D.bar, CPO = 1 / colMeans(exp(-res.logLik)),
