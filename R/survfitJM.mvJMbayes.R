@@ -318,7 +318,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     samples <- sample(nrow(mcmc$betas1), M)
     mcmc[] <- lapply(mcmc, function (x) {
         if (length(dim(x)) == 3) {
-            x[samples, , ]
+            x[samples, , , drop = FALSE]
         } else if (length(dim(x)) == 2) {
             x[samples, , drop = FALSE]
         } else if (all(is.null(dim(x)), length(x) > 0)) {
