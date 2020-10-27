@@ -318,7 +318,7 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
     samples <- sample(nrow(mcmc$betas1), M)
     mcmc[] <- lapply(mcmc, function (x) {
         if (length(dim(x)) == 3) {
-            x[samples, , ]
+            x[samples, , , drop = FALSE]
         } else if (length(dim(x)) == 2) {
             x[samples, , drop = FALSE]
         } else if (all(is.null(dim(x)), length(x) > 0)) {
@@ -340,6 +340,9 @@ survfitJM.mvJMbayes <- function (object, newdata, survTimes = NULL, idVar = "id"
             XXsbetas.new <- Xbetas_calc(survMats.last[[i]][["XXs"]], betas.new, indFixed, outcome)
             alphas.new <- mcmc$alphas[m, ]
             invD.new <- mcmc$inv_D[m, ,] 
+            if (length(invD.new) == 1) {
+                invD.new <- as.matrix(invD.new)
+            }
             Bs_gammas.new <- mcmc$Bs_gammas[m, ]
             gammas.new <- mcmc$gammas[m, ]
             sigma <- lapply(mcmc[grep("sigma", names(mcmc))], function (x) x[m])
