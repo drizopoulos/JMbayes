@@ -156,8 +156,8 @@ plot_survfit_mvJMbayes_hp <- function (x, split = c(1, 1), splitr = c(1,1), whic
 # plot_survfit_mvJMbayes_hp(sprobs, theinvlink = T, yexp=TRUE, ylab="PSA", main="")
 
 
-plot_survfit_mvJMbayes_hp(sprobs, split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="",
-                          ylab="PSA ng/mL", yexp = TRUE, which_subjects = c(2,1), splitr = c(2,1))
+# plot_survfit_mvJMbayes_hp(sprobs, split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="",
+#                           ylab="PSA ng/mL", yexp = TRUE, which_subjects = c(2,1), splitr = c(2,1))
 
 
 # N <- nrow(ND_182024_172024)
