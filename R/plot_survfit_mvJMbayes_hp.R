@@ -145,56 +145,56 @@ plot_survfit_mvJMbayes_hp <- function (x, split = c(1, 1), splitr = c(1,1), whic
 ##################################################
 ## Section: Testing plot
 ##################################################
-mvJMFit_tveffectN3071$model_info$mvglmer_components$data
+#mvJMFit_tveffectN3071$model_info$mvglmer_components$data
 # ND <- mvJMFit_tveffectN3071$model_info$mvglmer_components$data[mvJMFit_tveffectN3071$model_info$mvglmer_components$data$trialno %in% c(2, 25, 81), ]
-ND_182024_172024
-sprobs <- survfitJM(mvJMFit_tveffectN3071, ND_182024_172024)
-#class(sprobs) <- "survfit.JMbayes"
-plot(sprobs)
-plot_survfit_mvJMbayes_hp(sprobs)
-plot_survfit_mvJMbayes_hp(sprobs, theinvlink = T)
-plot_survfit_mvJMbayes_hp(sprobs, theinvlink = T, yexp=TRUE, ylab="PSA", main="")
+# ND_182024_172024
+# #sprobs <- survfitJM(mvJMFit_tveffectN3071, ND_182024_172024)
+# #class(sprobs) <- "survfit.JMbayes"
+# plot(sprobs)
+# plot_survfit_mvJMbayes_hp(sprobs)
+# plot_survfit_mvJMbayes_hp(sprobs, theinvlink = T)
+# plot_survfit_mvJMbayes_hp(sprobs, theinvlink = T, yexp=TRUE, ylab="PSA", main="")
 
 
 plot_survfit_mvJMbayes_hp(sprobs, split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="",
                           ylab="PSA ng/mL", yexp = TRUE, which_subjects = c(2,1), splitr = c(2,1))
 
 
-N <- nrow(ND_182024_172024)
-dyn_sprobs <- vector("list", N)
-dyn_sprobsA <- vector("list", 16)
-dyn_sprobsB <- vector("list", 16)
-
-par(mfrow=c(2,1))
-ND_172024 <- subset(ND_182024_172024, trialno == 172024)
-for (i in seq_len(16)) {
-  par(mfrow=c(2,1))
-  dyn_sprobsA[[i]] <- survfitJM(mvJMFit_tveffectN3071, ND_182024[1:i, ], 
-                               survTimes = seq(0, 10, length.out = 85))
-  #plot(dyn_sprobs[[i]], split = c(1, 1), surv_in_all = TRUE)
-  plot_survfit_mvJMbayes_hp(dyn_sprobsA[[i]], split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="Patient A",
-                            ylab="PSA ng/mL", yexp = TRUE, which_subjects = 1)
-  dyn_sprobsB[[i]] <- survfitJM(mvJMFit_tveffectN3071, ND_172024, 
-                               survTimes = seq(0, 10, length.out = 85))
-  plot_survfit_mvJMbayes_hp(dyn_sprobsB[[i]], split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="Patient B",
-                            ylab="PSA ng/mL", yexp = TRUE, which_subjects = 1)
-}
+# N <- nrow(ND_182024_172024)
+# dyn_sprobs <- vector("list", N)
+# dyn_sprobsA <- vector("list", 16)
+# dyn_sprobsB <- vector("list", 16)
+# 
+# par(mfrow=c(2,1))
+# ND_172024 <- subset(ND_182024_172024, trialno == 172024)
+# for (i in seq_len(16)) {
+#   par(mfrow=c(2,1))
+#   dyn_sprobsA[[i]] <- survfitJM(mvJMFit_tveffectN3071, ND_182024[1:i, ], 
+#                                survTimes = seq(0, 10, length.out = 85))
+#   #plot(dyn_sprobs[[i]], split = c(1, 1), surv_in_all = TRUE)
+#   plot_survfit_mvJMbayes_hp(dyn_sprobsA[[i]], split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="Patient A",
+#                             ylab="PSA ng/mL", yexp = TRUE, which_subjects = 1)
+#   dyn_sprobsB[[i]] <- survfitJM(mvJMFit_tveffectN3071, ND_172024, 
+#                                survTimes = seq(0, 10, length.out = 85))
+#   plot_survfit_mvJMbayes_hp(dyn_sprobsB[[i]], split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="Patient B",
+#                             ylab="PSA ng/mL", yexp = TRUE, which_subjects = 1)
+# }
 
 ##################################################
 ## Section: GIFs for DPs
 ##################################################
 
-animation::saveGIF(
-for (i in seq_len(16)) {
-  par(mfrow=c(2,1))
-  dyn_sprobsA[[i]] <- survfitJM(mvJMFit_tveffectN3071, ND_182024[1:i, ], 
-                                survTimes = seq(0, 10, length.out = 85))
-  #plot(dyn_sprobs[[i]], split = c(1, 1), surv_in_all = TRUE)
-  plot_survfit_mvJMbayes_hp(dyn_sprobsA[[i]], split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="Patient A",
-                            ylab="PSA ng/mL", yexp = TRUE, which_subjects = 1)
-  dyn_sprobsB[[i]] <- survfitJM(mvJMFit_tveffectN3071, ND_172024, 
-                                survTimes = seq(0, 10, length.out = 85))
-  plot_survfit_mvJMbayes_hp(dyn_sprobsB[[i]], split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="Patient B",
-                            ylab="PSA ng/mL", yexp = TRUE, which_subjects = 1)
-}
-, "dynamic_preds_mvJM.gif", ani.width=1000, ani.height=600)
+# animation::saveGIF(
+# for (i in seq_len(16)) {
+#   par(mfrow=c(2,1))
+#   dyn_sprobsA[[i]] <- survfitJM(mvJMFit_tveffectN3071, ND_182024[1:i, ], 
+#                                 survTimes = seq(0, 10, length.out = 85))
+#   #plot(dyn_sprobs[[i]], split = c(1, 1), surv_in_all = TRUE)
+#   plot_survfit_mvJMbayes_hp(dyn_sprobsA[[i]], split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="Patient A",
+#                             ylab="PSA ng/mL", yexp = TRUE, which_subjects = 1)
+#   dyn_sprobsB[[i]] <- survfitJM(mvJMFit_tveffectN3071, ND_172024, 
+#                                 survTimes = seq(0, 10, length.out = 85))
+#   plot_survfit_mvJMbayes_hp(dyn_sprobsB[[i]], split = c(2, 1), surv_in_all = TRUE, xlab="Time (years)", main="Patient B",
+#                             ylab="PSA ng/mL", yexp = TRUE, which_subjects = 1)
+# }
+# , "dynamic_preds_mvJM.gif", ani.width=1000, ani.height=600)

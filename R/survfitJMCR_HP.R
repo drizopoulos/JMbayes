@@ -1,5 +1,5 @@
 # inspired by 'JM:::survfitJM.jointModel'
-object=JMCR_nverskgrp_notstartME_fit5_nophase_V5_STRATA
+#object=JMCR_nverskgrp_notstartME_fit5_nophase_V5_STRATA
 
 
 HPsurvfitJMCR.jointModel <- 
