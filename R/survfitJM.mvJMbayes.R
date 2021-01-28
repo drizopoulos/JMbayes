@@ -478,7 +478,7 @@ print.survfit.mvJMbayes <- function (x, ...) {
 
 plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, which_outcomes = NULL,
                                     surv_in_all = TRUE, include.y = TRUE, fun = NULL,
-                                    abline = NULL,
+                                    abline = NULL, yexp = FALSE, 
                                     main = NULL, xlab = "Time", ylab = NULL, 
                                     zlab = "Event-Free Probability",
                                     include_CI = TRUE, fill_area_CI = TRUE, 
@@ -553,14 +553,14 @@ plot.survfit.mvJMbayes <- function (x, split = c(1, 1), which_subjects = NULL, w
         if (include.y) {
             for (j in valid_outcomes) {
                 obs_times <- x$obs.times[[i]]
-                y <- x$y[[i]][[j]]
+                y <- if (yexp) sapply(x$y[[i]][[j]] , exp) else x$y[[i]][[j]]
                 if (fact_y <- is.factor(y)) {
                     lvy <- levels(y)
                     y <- as.numeric(y == levels(y)[2L])
                     ylim <- c(-0.2, 1.2)
                 }
                 fitted_times <- x$fitted.times[[i]]
-                fitted_y <- families[[j]]$linkinv(x$fitted.y[[i]][[j]])
+                fitted_y <- if(yexp) sapply(families[[j]]$linkinv(x$fitted.y[[i]][[j]]), exp) else families[[j]]$linkinv(x$fitted.y[[i]][[j]])
                 plot(obs_times, y, ylim = ylim, ylab = respVars[i], xlim = xlim, axes = FALSE,
                      type = "n")
                 box()
