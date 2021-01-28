@@ -168,7 +168,8 @@ plot.mvJMbayes <- function (x, which = c("trace", "autocorr", "density", "tv_eff
         attr(Data_surv, "terms") <- NULL
         Time <- Data_surv[[1]][, 1]
         TimeVar <- all.vars(x$model_info$coxph_components$Terms)[1L]
-        Data_surv[[TimeVar]] <- x$model_info$coxph_components$Time
+        #Data_surv[[TimeVar]] <- x$model_info$coxph_components$Time
+        Data_surv[[TimeVar]] <- Time
         xx <- seq(min(Time), max(Time), length.out = 100)
         td_cols <- x$mcmc_info$priors$td_cols
         extract_alphas <- function (td_cols, alphas) alphas[td_cols]
